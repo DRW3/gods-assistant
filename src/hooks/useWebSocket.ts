@@ -46,10 +46,18 @@ export function useWebSocket() {
 
         case 'response':
           setResponse(msg.payload.text as string);
+          // Text arrives instantly — don't wait for audio
+          if (!msg.payload.audio) {
+            setOrbState('speaking');
+          }
+          break;
+
+        case 'audio': {
+          // TTS audio arrives separately after text
           setOrbState('speaking');
-          // Play TTS audio if present
-          if (msg.payload.audio) {
-            const audioBytes = Uint8Array.from(atob(msg.payload.audio as string), c => c.charCodeAt(0));
+          const audioB64 = msg.payload.audio as string;
+          if (audioB64) {
+            const audioBytes = Uint8Array.from(atob(audioB64), c => c.charCodeAt(0));
             const blob = new Blob([audioBytes], { type: 'audio/wav' });
             const url = URL.createObjectURL(blob);
             const audio = new Audio(url);
@@ -58,10 +66,9 @@ export function useWebSocket() {
               setOrbState('idle');
             };
             audio.play().catch(() => setOrbState('idle'));
-          } else {
-            setTimeout(() => setOrbState('idle'), 2000);
           }
           break;
+        }
 
         case 'state':
           setOrbState(msg.payload.state as 'idle' | 'listening' | 'processing' | 'speaking');
