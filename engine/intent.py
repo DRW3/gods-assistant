@@ -125,6 +125,21 @@ async def _handle_terminal(ws, text: str, api_key: str, model: str, config: dict
     if not command:
         return "Couldn't determine what command to run."
 
+    # Use Claude Code for complex AI tasks
+    if cmd_info.get("use_claude", False):
+        await emit_task(ws, "exec", "Claude Code AI", "running", "thinking...")
+        await emit_terminal(ws, f"claude -p \"{command[:60]}...\"", "cmd")
+        from claude_bridge import ask_claude
+        result = await ask_claude(command)
+        if result:
+            await emit_task(ws, "exec", "Claude Code AI", "done", f"{len(result)} chars", "")
+            for line in result.split("\n")[:10]:
+                if line.strip():
+                    await emit_terminal(ws, line, "output", "ok")
+            return result
+        # Fallback if claude not available
+        await emit_terminal(ws, "Claude unavailable, running command directly", "output", "error")
+
     if needs_confirm:
         await emit_terminal(ws, f"⚠ Dangerous: {command}", "output", "error")
         return f"This command needs confirmation: `{command}` — {explanation}"
