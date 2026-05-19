@@ -1,12 +1,27 @@
+import { useMemo } from 'react';
 import { useAssistantStore } from '../stores/assistantStore';
 import { palette, clay, fonts, orbGradient, orbGlow, type OrbState } from '../styles/theme';
+
+const GREETINGS = [
+  "At your service", "Ready when you are", "What's the mission?",
+  "Command me", "Your move", "Awaiting orders",
+  "What shall we conquer?", "The throne is yours",
+  "Speak and it shall be done", "I'm listening",
+  "What needs doing?", "All systems go",
+  "Point me at something", "Say the word",
+  "Standing by", "What's on your mind?",
+  "Let's make something happen", "Fire away",
+  "The world awaits", "Ready to roll",
+];
 
 export default function TopBar() {
   const orbState = useAssistantStore((s) => s.orbState);
   const stats = useAssistantStore((s) => s.systemStats);
 
+  const greeting = useMemo(() => GREETINGS[Math.floor(Math.random() * GREETINGS.length)], []);
+
   const statusLabel: Record<OrbState, string> = {
-    idle: 'READY', listening: 'LISTENING', processing: 'THINKING',
+    idle: greeting, listening: 'LISTENING', processing: 'THINKING',
     speaking: 'SPEAKING', executing: 'EXECUTING', error: 'ERROR',
   };
 
@@ -40,7 +55,7 @@ export default function TopBar() {
         )}
       </div>
       <div style={{ flex: 1 }}>
-        <div style={{ fontSize: 12, fontWeight: 700, color: palette.text, letterSpacing: 0.8 }}>GOD'S ASSISTANT</div>
+        <div style={{ fontSize: 12, fontWeight: 700, color: palette.text, letterSpacing: 0.8 }}>{greeting}</div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 2 }}>
           <div style={{
             width: 5, height: 5, borderRadius: '50%',
