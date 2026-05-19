@@ -15,9 +15,15 @@ button, input, select, a, [data-no-drag] {
   -webkit-app-region: no-drag;
 }
 
-::-webkit-scrollbar { width: 3px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(107,203,155,0.15); border-radius: 2px; }
+/* Hide root-level scrollbar (the silver macOS one) */
+html::-webkit-scrollbar, body::-webkit-scrollbar, #root::-webkit-scrollbar { width: 0; display: none; }
+
+/* Inner scrollable areas: thin invisible-until-hover */
+*::-webkit-scrollbar { width: 4px; background: transparent; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: transparent; border-radius: 2px; }
+*:hover::-webkit-scrollbar-thumb { background: rgba(107,203,155,0.12); }
+*::-webkit-scrollbar-thumb:hover { background: rgba(107,203,155,0.25); }
 
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
