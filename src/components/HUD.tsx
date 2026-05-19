@@ -57,8 +57,9 @@ export default function HUD() {
     setOrbState('processing');
   }, [stopRecording, setOrbState]);
 
-  // Blur input on mount so SPACE works immediately for push-to-talk
+  // Reset to clean state on mount — starts compact
   useEffect(() => {
+    useAssistantStore.getState().reset();
     if (inputRef.current) inputRef.current.blur();
   }, []);
 
@@ -166,7 +167,7 @@ export default function HUD() {
 
   return (
     <div ref={containerRef} style={{
-      width: '100%', minHeight: '100%', borderRadius: radius.overlay, overflow: 'hidden', position: 'relative',
+      width: '100%', borderRadius: radius.overlay, overflow: 'hidden', position: 'relative',
       background: `linear-gradient(145deg, ${palette.bgLight}, ${palette.bg})`,
       boxShadow: `${clay.overlay}, 0 0 80px ${glow}`,
       border: '1px solid rgba(107,203,155,0.06)',
@@ -175,8 +176,8 @@ export default function HUD() {
       <TopBar />
       <WaveformBar />
 
-      {/* Scrollable middle */}
-      <div style={{ flex: 1, overflowY: 'auto', maxHeight: 440 }}>
+      {/* Scrollable middle — only takes space when there's content */}
+      <div style={{ overflowY: 'auto' as const, maxHeight: 440 }}>
         <ActivityStream />
         {/* Response card */}
         {(transcript || response) && (
