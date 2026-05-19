@@ -29,7 +29,7 @@ function createWindow(): BrowserWindow {
     transparent: true,
     alwaysOnTop: true,
     resizable: true,
-    maxHeight: 700,
+    maxHeight: 900,
     minHeight: 120,
     skipTaskbar: true,
     hasShadow: false,

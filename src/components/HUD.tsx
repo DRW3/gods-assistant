@@ -180,7 +180,7 @@ export default function HUD() {
       if (containerRef.current) {
         const h = containerRef.current.scrollHeight;
         const api = (window as any).electronAPI;
-        api?.invoke('resize-window', { height: Math.min(Math.max(h + 2, 140), 700) });
+        api?.invoke('resize-window', { height: Math.min(Math.max(h + 2, 140), 900) });
       }
     };
     measure();
@@ -191,7 +191,7 @@ export default function HUD() {
 
   return (
     <div ref={containerRef} style={{
-      width: '100%', borderRadius: radius.overlay, overflow: 'hidden', position: 'relative',
+      width: '100%', borderRadius: radius.overlay, overflow: 'auto', position: 'relative',
       background: `linear-gradient(145deg, ${palette.bgLight}, ${palette.bg})`,
       boxShadow: `${clay.overlay}, 0 0 80px ${glow}`,
       border: '1px solid rgba(107,203,155,0.06)',
@@ -201,8 +201,8 @@ export default function HUD() {
       <TopBar />
       <WaveformBar />
 
-      {/* Scrollable middle — only takes space when there's content */}
-      <div style={{ overflowY: 'auto' as const, maxHeight: 440 }}>
+      {/* Scrollable middle */}
+      <div data-no-drag style={{ overflowY: 'auto' as const, maxHeight: 600, flex: 1 }}>
         <ActivityStream />
         {/* Response card */}
         {(transcript || response) && (
@@ -215,7 +215,7 @@ export default function HUD() {
               padding: '14px 18px',
             }}>
               {transcript && <div style={{ fontSize: 11, color: palette.text, fontFamily: fonts.mono, lineHeight: 1.5 }}>"{transcript}"</div>}
-              {response && <div style={{ fontSize: 12, color: palette.textDim, marginTop: transcript ? 6 : 0, paddingTop: transcript ? 6 : 0, borderTop: transcript ? `1px solid ${palette.white02}` : 'none', lineHeight: 1.7, maxHeight: 200, overflowY: 'auto' as const }}>{response}</div>}
+              {response && <div style={{ fontSize: 12, color: palette.textDim, marginTop: transcript ? 6 : 0, paddingTop: transcript ? 6 : 0, borderTop: transcript ? `1px solid ${palette.white02}` : 'none', lineHeight: 1.7, whiteSpace: 'pre-wrap' as const }}>{response}</div>}
             </div>
           </div>
         )}
