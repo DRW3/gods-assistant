@@ -121,6 +121,16 @@ export default function HUD() {
     return () => { unsub?.(); };
   }, [beginRecording, endRecording]);
 
+  // Safety timeout — reset to idle if stuck for 60s
+  useEffect(() => {
+    if (orbState === 'idle' || orbState === 'listening') return;
+    const timer = setTimeout(() => {
+      console.log('[HUD] safety timeout — resetting to idle from', orbState);
+      useAssistantStore.getState().setOrbState('idle');
+    }, 60000);
+    return () => clearTimeout(timer);
+  }, [orbState]);
+
   // Mute toggle
   useEffect(() => {
     const api = (window as any).electronAPI;

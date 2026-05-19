@@ -45,8 +45,21 @@ async def route_intent(ws, text: str, config: dict) -> None:
             await emit_task(ws, "claude", "No response", "error", "", "")
             response_text = "No response from Claude."
 
-    # Send text response
+    # Send text response immediately
     await emit(ws, "response", {"text": response_text, "audio": ""})
+
+    # TTS — speak a short summary in background
+    if config.get("voice_response", True) and response_text:
+        tts_text = _truncate_for_tts(response_text)
+        try:
+            loop = asyncio.get_event_loop()
+            voice = config.get("tts_voice", "af_heart")
+            audio_b64 = await loop.run_in_executor(None, synthesize, tts_text, voice)
+            if audio_b64:
+                await emit(ws, "audio", {"audio": audio_b64})
+        except Exception as e:
+            log.error(f"TTS failed: {e}")
+
     await emit(ws, "state", {"state": "idle"})
 
 
