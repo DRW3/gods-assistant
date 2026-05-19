@@ -26,6 +26,14 @@ export default function HUD() {
   }, [send]);
   const switchSession = useCallback((id: string) => {
     send('switch_session', { session_id: id });
+    // If it's a system session, request context summary
+    const sysSessions = useAssistantStore.getState().systemSessions;
+    const sysSession = sysSessions.find((s: any) => s.id === id);
+    if (sysSession) {
+      useAssistantStore.getState().clearStream();
+      useAssistantStore.getState().setResponse('Loading context...');
+      send('get_session_context', { pid: sysSession.pid, session_id: id });
+    }
     const api = (window as any).electronAPI;
     api?.invoke('focus-terminal', { sessionId: id });
   }, [send]);

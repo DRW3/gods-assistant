@@ -106,6 +106,14 @@ export function useWebSocket() {
           useAssistantStore.getState().setSystemSessions((msg.payload as any).sessions || []);
           break;
 
+        case 'session_context':
+          useAssistantStore.getState().setTranscript((msg.payload as any).last_topic || '');
+          useAssistantStore.getState().setResponse(
+            ((msg.payload as any).summary || '') +
+            ((msg.payload as any).suggestion ? '\n\nSuggestion: ' + (msg.payload as any).suggestion : '')
+          );
+          break;
+
         case 'effort_changed':
           useAssistantStore.getState().setEffort(msg.payload.level as any);
           break;

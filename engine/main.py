@@ -125,6 +125,39 @@ async def handle_message(ws: ServerConnection, raw: str) -> None:
                 "payload": {"sessions": system_sessions},
             }))
 
+        elif msg_type == "get_session_context":
+            pid = payload.get("pid", 0)
+            if pid:
+                from system_scanner import read_session_context
+                context_text = await asyncio.get_event_loop().run_in_executor(None, read_session_context, pid, 8)
+
+                # Summarize with Groq
+                summary_result = {"summary": context_text[:200], "last_topic": "", "suggestion": ""}
+                api_key = config.get("groq_api_key", "")
+                if api_key and not context_text.startswith("No ") and not context_text.startswith("Could not"):
+                    try:
+                        from llm import get_client
+                        client = get_client(api_key)
+                        resp = client.chat.completions.create(
+                            model="llama-3.1-8b-instant",
+                            messages=[
+                                {"role": "system", "content": "Summarize this Claude Code terminal session in 2-3 sentences. Then suggest what the user might want to do next. Format as JSON: {\"summary\": \"...\", \"last_topic\": \"...\", \"suggestion\": \"...\"}"},
+                                {"role": "user", "content": context_text},
+                            ],
+                            temperature=0.3,
+                            max_tokens=200,
+                            response_format={"type": "json_object"},
+                        )
+                        import json as json_mod
+                        summary_result = json_mod.loads(resp.choices[0].message.content.strip())
+                    except Exception as e:
+                        log.error(f"Context summarization failed: {e}")
+
+                await ws.send(json.dumps({
+                    "type": "session_context",
+                    "payload": {"pid": pid, "session_id": payload.get("session_id", ""), **summary_result},
+                }))
+
         elif msg_type == "ping":
             await ws.send(json.dumps({"type": "pong"}))
 

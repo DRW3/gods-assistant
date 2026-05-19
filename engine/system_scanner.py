@@ -122,6 +122,78 @@ def scan_claude_sessions() -> List[Dict]:
     return sessions
 
 
+def read_session_context(pid: int, max_messages: int = 10) -> str:
+    """Read recent conversation from a Claude session's JSONL transcript.
+    Returns a text summary of the last N exchanges."""
+    session_file = SESSIONS_DIR / f"{pid}.json"
+    if not session_file.exists():
+        return "No session data available."
+
+    try:
+        with open(session_file) as f:
+            session_data = json.load(f)
+    except Exception:
+        return "Could not read session file."
+
+    session_id = session_data.get("sessionId", "")
+    if not session_id:
+        return "No session ID found."
+
+    # Search for the JSONL transcript across all project directories
+    projects_dir = Path.home() / ".claude" / "projects"
+    transcript_path = None
+    for project_dir in projects_dir.iterdir():
+        if project_dir.is_dir():
+            candidate = project_dir / f"{session_id}.jsonl"
+            if candidate.exists():
+                transcript_path = candidate
+                break
+
+    if not transcript_path:
+        return "No conversation transcript found."
+
+    # Read last N human/assistant exchanges
+    try:
+        with open(transcript_path) as f:
+            lines = f.readlines()
+    except Exception:
+        return "Could not read transcript."
+
+    exchanges = []
+    for line in lines:
+        try:
+            entry = json.loads(line.strip())
+            entry_type = entry.get("type", "")
+            if entry_type == "human":
+                content = entry.get("message", {}).get("content", "")
+                if isinstance(content, list):
+                    text = " ".join(b.get("text", "") for b in content if isinstance(b, dict) and b.get("type") == "text")
+                elif isinstance(content, str):
+                    text = content
+                else:
+                    text = str(content)
+                if text.strip():
+                    exchanges.append(f"User: {text.strip()[:150]}")
+            elif entry_type == "assistant":
+                content = entry.get("message", {}).get("content", "")
+                if isinstance(content, list):
+                    text = " ".join(b.get("text", "") for b in content if isinstance(b, dict) and b.get("type") == "text")
+                elif isinstance(content, str):
+                    text = content
+                else:
+                    text = str(content)
+                if text.strip():
+                    exchanges.append(f"Claude: {text.strip()[:150]}")
+        except Exception:
+            continue
+
+    # Return last N exchanges
+    recent = exchanges[-max_messages:]
+    if not recent:
+        return "Session exists but no conversation yet."
+    return "\n".join(recent)
+
+
 async def get_system_sessions_async():
     """Run scan in executor to avoid blocking."""
     import asyncio
