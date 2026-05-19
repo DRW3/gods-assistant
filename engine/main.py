@@ -71,6 +71,17 @@ async def handle_message(ws: ServerConnection, raw: str) -> None:
                     "payload": {"state": "idle"},
                 }))
 
+        elif msg_type == "text_command":
+            text = payload.get("text", "")
+            if text:
+                from intent import route_intent
+                await route_intent(ws, text, config)
+            else:
+                await ws.send(json.dumps({
+                    "type": "state",
+                    "payload": {"state": "idle"},
+                }))
+
         elif msg_type == "get_processes":
             procs = await get_processes_async()
             await ws.send(json.dumps({
