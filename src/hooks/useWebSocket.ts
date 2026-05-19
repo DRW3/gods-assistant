@@ -12,8 +12,11 @@ export function useWebSocket() {
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
-  const { setOrbState, setTranscript, setResponse, addAction, updateAction } =
-    useAssistantStore();
+  const {
+    setOrbState, setTranscript, setResponse,
+    setTasks, updateTask, addTerminalLine,
+    setProcesses, setSystemStats,
+  } = useAssistantStore();
 
   const connect = useCallback(() => {
     const ws = new WebSocket(WS_URL);
@@ -21,6 +24,7 @@ export function useWebSocket() {
 
     ws.onopen = () => {
       console.log('[ws] connected');
+      ws.send(JSON.stringify({ type: 'get_processes' }));
     };
 
     ws.onmessage = (event) => {
@@ -36,15 +40,7 @@ export function useWebSocket() {
 
         case 'action':
           if (msg.payload.status === 'running') {
-            addAction({
-              id: (msg.payload.id as string) ?? crypto.randomUUID(),
-              label: msg.payload.label as string,
-              status: 'running',
-              timestamp: Date.now(),
-            });
             setOrbState('executing');
-          } else {
-            updateAction(msg.payload.id as string, msg.payload.status as 'done' | 'error');
           }
           break;
 
@@ -71,6 +67,28 @@ export function useWebSocket() {
           setOrbState(msg.payload.state as 'idle' | 'listening' | 'processing' | 'speaking');
           break;
 
+        case 'system_stats':
+          setSystemStats(msg.payload as any);
+          break;
+
+        case 'processes':
+          setProcesses((msg.payload as any).processes || []);
+          break;
+
+        case 'task_update': {
+          const t = msg.payload as any;
+          if (t.tasks) {
+            setTasks(t.tasks);
+          } else if (t.id) {
+            updateTask(t.id, t);
+          }
+          break;
+        }
+
+        case 'terminal_line':
+          addTerminalLine(msg.payload as any);
+          break;
+
         case 'pong':
           break;
 
@@ -88,7 +106,7 @@ export function useWebSocket() {
       console.error('[ws] error:', err);
       ws.close();
     };
-  }, [setOrbState, setTranscript, setResponse, addAction, updateAction]);
+  }, [setOrbState, setTranscript, setResponse, setTasks, updateTask, addTerminalLine, setProcesses, setSystemStats]);
 
   useEffect(() => {
     connect();
