@@ -80,22 +80,35 @@ export function focusSystemTerminal(windowName: string): void {
 
 function focusAndPositionTerminal(searchTerm: string): void {
   const { width: sw, height: sh } = screen.getPrimaryDisplay().workAreaSize;
-  const overlayW = 540;
-  const overlayH = 300;
-  const overlayX = Math.round((sw - overlayW) / 2);
-  const overlayY = Math.round(sh * 0.05);
 
-  // Position terminal just below the overlay, same width, filling remaining space
-  const termX = overlayX - 50;
-  const termY = overlayY + overlayH + 10;
-  const termW = overlayW + 100;
-  const termH = sh - termY - 20;
+  // Overlay sits top-center, terminals fill the rest of the screen below
+  const overlayW = 540;
+  const overlayY = 25; // near top of screen
+  const overlayX = Math.round((sw - overlayW) / 2);
+
+  // Selected terminal: full width below overlay area, large
+  const termX = 10;
+  const termY = Math.round(sh * 0.45); // bottom half of screen
+  const termW = sw - 20;
+  const termH = sh - termY - 10;
 
   const safeName = searchTerm.replace(/"/g, '\\"');
 
   const script = `
 tell application "Terminal"
-  activate
+  -- First, minimize/push back all other terminal windows
+  repeat with w in windows
+    set wName to name of w
+    if wName does not contain "${safeName}" then
+      -- Push non-selected terminals to a small strip on the left
+      try
+        set bounds of w to {0, ${overlayY}, 200, ${Math.round(sh * 0.44)}}
+        set miniaturized of w to false
+      end try
+    end if
+  end repeat
+
+  -- Now bring the selected terminal to front and make it big
   repeat with w in windows
     set wName to name of w
     if wName contains "${safeName}" then
@@ -104,10 +117,11 @@ tell application "Terminal"
       exit repeat
     end if
   end repeat
+  activate
 end tell
 
--- Bring overlay back to front after focusing terminal
-delay 0.2
+-- Bring overlay back on top
+delay 0.3
 tell application "System Events"
   set frontmost of process "Electron" to true
 end tell

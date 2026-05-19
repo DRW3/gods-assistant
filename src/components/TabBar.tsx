@@ -35,9 +35,9 @@ export default function TabBar({ onCreateSession, onSwitchSession, onCloseSessio
                 : `linear-gradient(145deg, rgba(26,46,34,0.5), rgba(20,38,28,0.5))`,
               color: isActive ? palette.text : palette.textDim,
               fontWeight: isActive ? 600 : 400,
-              border: `1px solid ${isActive ? 'rgba(107,203,155,0.12)' : 'rgba(107,203,155,0.05)'}`,
+              border: `2px solid ${isActive ? palette.jade : 'rgba(107,203,155,0.05)'}`,
               borderBottom: 'none',
-              boxShadow: isActive ? '2px -2px 6px rgba(0,0,0,0.2)' : 'none',
+              boxShadow: isActive ? `0 -2px 8px ${palette.jade}30, 2px -2px 6px rgba(0,0,0,0.2)` : 'none',
             }}>
             <div style={{
               width: 6, height: 6, borderRadius: '50%',
