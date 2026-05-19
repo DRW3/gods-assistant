@@ -13,8 +13,8 @@ function createWindow(): BrowserWindow {
   const { width: screenWidth, height: screenHeight } =
     screen.getPrimaryDisplay().workAreaSize;
 
-  const winWidth = 500;
-  const winHeight = 420;
+  const winWidth = 540;
+  const winHeight = 160;
 
   // Center horizontally, 20% from top
   const x = Math.round((screenWidth - winWidth) / 2);
@@ -28,7 +28,9 @@ function createWindow(): BrowserWindow {
     frame: false,
     transparent: true,
     alwaysOnTop: true,
-    resizable: false,
+    resizable: true,
+    maxHeight: 700,
+    minHeight: 120,
     skipTaskbar: true,
     hasShadow: false,
     vibrancy: 'under-window',

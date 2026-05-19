@@ -11,4 +11,12 @@ export function setupIPC(mainWindow: BrowserWindow): void {
   ipcMain.handle('get-audio-devices', async () => {
     return [];
   });
+
+  // Auto-resize window height from renderer
+  ipcMain.handle('resize-window', (_event, { height }: { height: number }) => {
+    if (mainWindow) {
+      const [width] = mainWindow.getSize();
+      mainWindow.setSize(width, Math.round(height));
+    }
+  });
 }

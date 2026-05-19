@@ -15,14 +15,6 @@ export interface TerminalLine {
   status?: 'ok' | 'error';
 }
 
-export interface ProcessInfo {
-  name: string;
-  pid: number;
-  mem_mb: number;
-  port: string;
-  status: 'alive' | 'warning' | 'dead' | 'idle';
-}
-
 export interface SystemStats {
   cpu_percent: number;
   ram_gb: number;
@@ -36,12 +28,11 @@ interface AssistantState {
   response: string;
   tasks: Task[];
   terminalLines: TerminalLine[];
-  processes: ProcessInfo[];
   systemStats: SystemStats;
   inputMode: 'push-to-talk' | 'always-on';
   isMuted: boolean;
   waveformData: Float32Array;
-  expandedSections: { tasks: boolean; terminal: boolean; processes: boolean };
+  expandedSections: { tasks: boolean; terminal: boolean };
 
   setOrbState: (s: OrbState) => void;
   setTranscript: (t: string) => void;
@@ -51,12 +42,11 @@ interface AssistantState {
   updateTask: (id: string, updates: Partial<Task>) => void;
   addTerminalLine: (line: TerminalLine) => void;
   clearTerminal: () => void;
-  setProcesses: (p: ProcessInfo[]) => void;
   setSystemStats: (s: SystemStats) => void;
   setInputMode: (m: 'push-to-talk' | 'always-on') => void;
   toggleMute: () => void;
   setWaveformData: (d: Float32Array) => void;
-  toggleSection: (s: 'tasks' | 'terminal' | 'processes') => void;
+  toggleSection: (s: 'tasks' | 'terminal') => void;
   reset: () => void;
 }
 
@@ -66,12 +56,11 @@ export const useAssistantStore = create<AssistantState>((set) => ({
   response: '',
   tasks: [],
   terminalLines: [],
-  processes: [],
   systemStats: { cpu_percent: 0, ram_gb: 0, battery_percent: -1, network: { in_mb: 0, out_mb: 0 } },
   inputMode: 'push-to-talk',
   isMuted: false,
   waveformData: new Float32Array(128),
-  expandedSections: { tasks: true, terminal: true, processes: false },
+  expandedSections: { tasks: true, terminal: true },
 
   setOrbState: (orbState) => set({ orbState }),
   setTranscript: (transcript) => set({ transcript }),
@@ -83,7 +72,6 @@ export const useAssistantStore = create<AssistantState>((set) => ({
   })),
   addTerminalLine: (line) => set((s) => ({ terminalLines: [...s.terminalLines.slice(-50), line] })),
   clearTerminal: () => set({ terminalLines: [] }),
-  setProcesses: (processes) => set({ processes }),
   setSystemStats: (systemStats) => set({ systemStats }),
   setInputMode: (inputMode) => set({ inputMode }),
   toggleMute: () => set((s) => ({ isMuted: !s.isMuted })),

@@ -7,7 +7,7 @@ import BottomBar from './BottomBar';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useAudio } from '../hooks/useAudio';
 import { useAssistantStore } from '../stores/assistantStore';
-import { orbGlow } from '../styles/theme';
+import { palette, clay, fonts, radius, orbGlow } from '../styles/theme';
 
 export default function HUD() {
   const { send } = useWebSocket();
@@ -15,11 +15,14 @@ export default function HUD() {
   const orbState = useAssistantStore((s) => s.orbState);
   const transcript = useAssistantStore((s) => s.transcript);
   const response = useAssistantStore((s) => s.response);
+  const tasks = useAssistantStore((s) => s.tasks);
+  const lines = useAssistantStore((s) => s.terminalLines);
   const setOrbState = useAssistantStore((s) => s.setOrbState);
   const reset = useAssistantStore((s) => s.reset);
   const glow = orbGlow(orbState);
   const [textInput, setTextInput] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const sendTextCommand = useCallback((text: string) => {
     if (!text.trim()) return;
@@ -122,57 +125,111 @@ export default function HUD() {
     return () => { unsub?.(); };
   }, []);
 
+  // Auto-resize window based on content height
+  useEffect(() => {
+    const measure = () => {
+      if (containerRef.current) {
+        const h = containerRef.current.scrollHeight;
+        const api = (window as any).electronAPI;
+        api?.invoke('resize-window', { height: Math.min(Math.max(h + 2, 140), 700) });
+      }
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    if (containerRef.current) observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, [transcript, response, tasks.length, lines.length]);
+
   return (
-    <div style={{
-      width: '100%', minHeight: '100%', borderRadius: 18, overflow: 'hidden', position: 'relative',
-      background: 'rgba(8, 10, 18, 0.94)', backdropFilter: 'blur(40px)', WebkitBackdropFilter: 'blur(40px)',
-      border: '1px solid rgba(255,255,255,0.05)',
-      boxShadow: `0 4px 40px rgba(0,0,0,0.5), 0 0 80px ${glow}`,
+    <div ref={containerRef} style={{
+      width: '100%', minHeight: '100%', borderRadius: radius.overlay, overflow: 'hidden', position: 'relative',
+      background: `linear-gradient(145deg, ${palette.bgLight}, ${palette.bg})`,
+      boxShadow: `${clay.overlay}, 0 0 80px ${glow}`,
+      border: '1px solid rgba(107,203,155,0.06)',
     }}>
       <TopBar />
       <WaveformBar />
 
       {/* Text input */}
-      <div style={{ padding: '6px 16px', borderBottom: '1px solid rgba(255,255,255,0.03)', display: 'flex', gap: 8 }} data-no-drag>
-        <input
-          ref={inputRef}
-          type="text"
-          value={textInput}
-          onChange={(e) => setTextInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
+      <div style={{ padding: '8px 20px' }} data-no-drag>
+        <div style={{
+          background: 'linear-gradient(145deg, #122418, #0e2014)',
+          borderRadius: radius.pill,
+          boxShadow: clay.sunken,
+          border: `1px solid ${palette.white02}`,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 6,
+          padding: '4px 4px 4px 16px',
+        }}>
+          <input
+            ref={inputRef}
+            type="text"
+            value={textInput}
+            onChange={(e) => setTextInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.stopPropagation();
+                sendTextCommand(textInput);
+              }
               e.stopPropagation();
-              sendTextCommand(textInput);
-            }
-            e.stopPropagation();
-          }}
-          placeholder="Type a command... (or hold SPACE to speak)"
-          style={{
-            flex: 1, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)',
-            borderRadius: 8, padding: '7px 12px', color: '#f1f5f9', fontSize: 12,
-            fontFamily: "'JetBrains Mono', monospace", outline: 'none',
-          }}
-          onFocus={(e) => (e.target.style.borderColor = 'rgba(34,211,238,0.2)')}
-          onBlur={(e) => (e.target.style.borderColor = 'rgba(255,255,255,0.06)')}
-        />
-        <button
-          onClick={() => sendTextCommand(textInput)}
-          style={{
-            background: textInput.trim() ? 'rgba(34,211,238,0.1)' : 'rgba(255,255,255,0.03)',
-            border: `1px solid ${textInput.trim() ? 'rgba(34,211,238,0.2)' : 'rgba(255,255,255,0.05)'}`,
-            borderRadius: 8, padding: '0 14px', color: textInput.trim() ? '#22d3ee' : 'rgba(255,255,255,0.2)',
-            fontSize: 11, fontFamily: "'JetBrains Mono', monospace", cursor: 'pointer',
-          }}
-        >
-          ↵
-        </button>
+            }}
+            placeholder="Type a command... (or hold SPACE to speak)"
+            style={{
+              flex: 1, background: 'transparent', border: 'none',
+              padding: '7px 0', color: palette.text, fontSize: 11,
+              fontFamily: fonts.mono, outline: 'none',
+            }}
+          />
+          <button
+            onClick={() => {
+              if (orbState === 'idle') beginRecording();
+              else if (orbState === 'listening') endRecording();
+            }}
+            style={{
+              background: `linear-gradient(145deg, ${palette.bgLight}, ${palette.bg})`,
+              borderRadius: 12,
+              padding: '7px 10px',
+              fontSize: 13,
+              color: palette.textMuted,
+              boxShadow: clay.raisedSm,
+              border: 'none',
+              cursor: 'pointer',
+              lineHeight: 1,
+            }}
+          >🎤</button>
+          <button
+            onClick={() => sendTextCommand(textInput)}
+            style={{
+              background: `linear-gradient(135deg, ${palette.gold}, ${palette.goldMuted})`,
+              color: palette.bgDark,
+              borderRadius: radius.button,
+              boxShadow: clay.button,
+              fontWeight: 700,
+              fontSize: 10,
+              padding: '7px 14px',
+              border: 'none',
+              cursor: 'pointer',
+              fontFamily: fonts.mono,
+            }}
+          >
+            Send
+          </button>
+        </div>
       </div>
 
-      {/* Transcript */}
+      {/* Transcript / Response */}
       {(transcript || response) && (
-        <div style={{ padding: '10px 16px', borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
-          {transcript && <div style={{ fontSize: 13, color: '#f1f5f9', lineHeight: 1.5 }}>"{transcript}"</div>}
-          {response && <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', marginTop: transcript ? 6 : 0, paddingTop: transcript ? 6 : 0, borderTop: transcript ? '1px solid rgba(255,255,255,0.03)' : 'none', lineHeight: 1.5 }}>{response}</div>}
+        <div style={{
+          background: `linear-gradient(145deg, ${palette.bgLight}ee, ${palette.bg})`,
+          borderRadius: radius.card,
+          boxShadow: clay.raised,
+          border: `1px solid ${palette.white02}`,
+          padding: '14px 18px',
+          margin: '0 20px 10px',
+        }}>
+          {transcript && <div style={{ fontSize: 11, color: palette.text, fontFamily: fonts.mono, lineHeight: 1.5 }}>"{transcript}"</div>}
+          {response && <div style={{ fontSize: 12, color: palette.textDim, marginTop: transcript ? 6 : 0, paddingTop: transcript ? 6 : 0, borderTop: transcript ? `1px solid ${palette.white02}` : 'none', lineHeight: 1.7, maxHeight: 200, overflowY: 'auto' as const }}>{response}</div>}
         </div>
       )}
 

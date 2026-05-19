@@ -15,7 +15,7 @@ export function useWebSocket() {
   const {
     setOrbState, setTranscript, setResponse,
     setTasks, updateTask, addTerminalLine,
-    setProcesses, setSystemStats,
+    setSystemStats,
   } = useAssistantStore();
 
   const connect = useCallback(() => {
@@ -24,7 +24,6 @@ export function useWebSocket() {
 
     ws.onopen = () => {
       console.log('[ws] connected');
-      ws.send(JSON.stringify({ type: 'get_processes' }));
     };
 
     ws.onmessage = (event) => {
@@ -78,10 +77,6 @@ export function useWebSocket() {
           setSystemStats(msg.payload as any);
           break;
 
-        case 'processes':
-          setProcesses((msg.payload as any).processes || []);
-          break;
-
         case 'task_update': {
           const t = msg.payload as any;
           if (t.tasks) {
@@ -121,7 +116,7 @@ export function useWebSocket() {
       console.error('[ws] error:', err);
       ws.close();
     };
-  }, [setOrbState, setTranscript, setResponse, setTasks, updateTask, addTerminalLine, setProcesses, setSystemStats]);
+  }, [setOrbState, setTranscript, setResponse, setTasks, updateTask, addTerminalLine, setSystemStats]);
 
   useEffect(() => {
     connect();
