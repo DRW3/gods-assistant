@@ -1,5 +1,5 @@
 import { ipcMain, BrowserWindow } from 'electron';
-import { spawnTerminal, focusTerminal, closeTerminal } from './terminal-spawner';
+import { spawnTerminal, focusTerminal, focusSystemTerminal, closeTerminal } from './terminal-spawner';
 
 export function setupIPC(mainWindow: BrowserWindow): void {
   // Hide overlay window
@@ -27,8 +27,12 @@ export function setupIPC(mainWindow: BrowserWindow): void {
     return { success: true };
   });
 
-  ipcMain.handle('focus-terminal', async (_event, { sessionId }: { sessionId: string }) => {
-    focusTerminal(sessionId);
+  ipcMain.handle('focus-terminal', async (_event, { sessionId, windowName }: { sessionId: string; windowName?: string }) => {
+    if (windowName) {
+      focusSystemTerminal(windowName);
+    } else {
+      focusTerminal(sessionId);
+    }
     return { success: true };
   });
 

@@ -69,17 +69,47 @@ end tell
 
 export function focusTerminal(sessionId: string): void {
   const term = activeTerminals.get(sessionId);
-  if (!term) return;
+  if (term) {
+    focusAndPositionTerminal(term.name);
+  }
+}
+
+export function focusSystemTerminal(windowName: string): void {
+  focusAndPositionTerminal(windowName);
+}
+
+function focusAndPositionTerminal(searchTerm: string): void {
+  const { width: sw, height: sh } = screen.getPrimaryDisplay().workAreaSize;
+  const overlayW = 540;
+  const overlayH = 300;
+  const overlayX = Math.round((sw - overlayW) / 2);
+  const overlayY = Math.round(sh * 0.05);
+
+  // Position terminal just below the overlay, same width, filling remaining space
+  const termX = overlayX - 50;
+  const termY = overlayY + overlayH + 10;
+  const termW = overlayW + 100;
+  const termH = sh - termY - 20;
+
+  const safeName = searchTerm.replace(/"/g, '\\"');
 
   const script = `
 tell application "Terminal"
   activate
   repeat with w in windows
-    if custom title of front tab of w contains "${term.name}" then
+    set wName to name of w
+    if wName contains "${safeName}" then
+      set bounds of w to {${termX}, ${termY}, ${termX + termW}, ${termY + termH}}
       set index of w to 1
       exit repeat
     end if
   end repeat
+end tell
+
+-- Bring overlay back to front after focusing terminal
+delay 0.2
+tell application "System Events"
+  set frontmost of process "Electron" to true
 end tell
 `;
   runAppleScript(script).catch((err) => {
