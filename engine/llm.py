@@ -45,6 +45,25 @@ Return ONLY valid JSON, no explanation."""
     return json.loads(raw)
 
 
+def classify_needs_tools(text: str, api_key: str) -> bool:
+    """Fast classification: does this command need tools (file/terminal/browser) or is it just chat?
+    Returns True if tools needed, False for simple chat."""
+    client = get_client(api_key)
+    resp = client.chat.completions.create(
+        model="llama-3.1-8b-instant",
+        messages=[
+            {"role": "system", "content": "Given a user command to an AI assistant, classify if it needs FILE ACCESS, TERMINAL COMMANDS, CODE CHANGES, BROWSER CONTROL, or SYSTEM INTERACTION. Return ONLY the word 'tools' or 'chat'. Examples: 'open Safari'→tools, 'what is React'→chat, 'fix the bug in login.ts'→tools, 'explain quantum physics'→chat, 'check my skills directory'→tools, 'how are you'→chat, 'deploy to production'→tools, 'what time is it'→chat, 'list files in home'→tools"},
+            {"role": "user", "content": text},
+        ],
+        temperature=0,
+        max_tokens=5,
+    )
+    result = resp.choices[0].message.content.strip().lower()
+    needs_tools = "tool" in result
+    log.info(f"Classify '{text[:40]}' → {'tools' if needs_tools else 'chat'} (raw: {result})")
+    return needs_tools
+
+
 def ask_brain(text: str, api_key: str, model: str = "llama-3.3-70b-versatile", history: Optional[list] = None) -> str:
     client = get_client(api_key)
 

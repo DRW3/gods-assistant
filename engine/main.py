@@ -64,7 +64,7 @@ async def handle_message(ws: ServerConnection, raw: str) -> None:
 
             if text:
                 from intent import route_intent
-                await route_intent(ws, text, config, voice_input=True)
+                await route_intent(ws, text, config, voice_input=True, effort=config.get("effort", "auto"))
             else:
                 await ws.send(json.dumps({
                     "type": "state",
@@ -75,7 +75,8 @@ async def handle_message(ws: ServerConnection, raw: str) -> None:
             text = payload.get("text", "")
             if text:
                 from intent import route_intent
-                await route_intent(ws, text, config, voice_input=False)
+                effort = payload.get("effort", config.get("effort", "auto"))
+                await route_intent(ws, text, config, voice_input=False, effort=effort)
             else:
                 await ws.send(json.dumps({
                     "type": "state",
@@ -88,6 +89,10 @@ async def handle_message(ws: ServerConnection, raw: str) -> None:
                 "type": "processes",
                 "payload": {"processes": procs},
             }))
+
+        elif msg_type == "set_effort":
+            config["effort"] = payload.get("level", "auto")
+            await ws.send(json.dumps({"type": "effort_changed", "payload": {"level": config["effort"]}}))
 
         elif msg_type == "ping":
             await ws.send(json.dumps({"type": "pong"}))

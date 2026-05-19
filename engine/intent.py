@@ -28,14 +28,34 @@ AFFIRMATIONS = ["On it.", "Got it.", "Working on that.", "Right away.", "Let me 
 _affirm_index = 0
 
 
-async def route_intent(ws, text: str, config: dict, voice_input: bool = False) -> None:
-    """Pipe to Claude Code with stream-json, emit structured events.
+async def route_intent(ws, text: str, config: dict, voice_input: bool = False, effort: str = "auto") -> None:
+    """Route command to Groq (fast chat) or Claude Code (tools needed).
+    effort: "auto"|"balanced" → classify first, "fast" → always Groq, "max" → always Claude.
     voice_input: True if user spoke, False if user typed. Controls TTS behavior."""
     global _affirm_index
     t0 = time.time()
 
+    # Determine routing based on effort level
+    use_claude = False
+
+    if effort == "max":
+        use_claude = True
+    elif effort == "fast":
+        use_claude = False
+    else:
+        # Auto/balanced: classify with Groq 8B
+        try:
+            from llm import classify_needs_tools
+            api_key = config.get("groq_api_key", "")
+            use_claude = classify_needs_tools(text, api_key)
+        except Exception as e:
+            log.error(f"Classification failed, falling back to Claude: {e}")
+            use_claude = True  # fallback to claude if classification fails
+
+    # Emit which mode we're using
+    mode_label = "Claude Code" if use_claude else "Groq (fast)"
     await emit(ws, "stream_item", {
-        "id": "stream_0", "event": "thinking", "title": "Thinking...",
+        "id": "stream_0", "event": "thinking", "title": f"{mode_label}...",
         "detail": text[:80], "status": "running",
     })
 
@@ -52,9 +72,7 @@ async def route_intent(ws, text: str, config: dict, voice_input: bool = False) -
         except Exception as e:
             log.error(f"Affirmation TTS failed: {e}")
 
-    if not is_claude_available():
-        response_text = await _groq_fallback(ws, text, config)
-    else:
+    if use_claude and is_claude_available():
         async def on_event(item):
             await emit(ws, "stream_item", item)
 
@@ -68,6 +86,20 @@ async def route_intent(ws, text: str, config: dict, voice_input: bool = False) -
                 "status": "error",
             })
             response_text = "No response from Claude."
+    else:
+        # Fast Groq response
+        from llm import ask_brain
+        api_key = config.get("groq_api_key", "")
+        model = config.get("groq_brain_model", "llama-3.3-70b-versatile")
+
+        loop = asyncio.get_event_loop()
+        response_text = await loop.run_in_executor(None, ask_brain, text, api_key, model)
+
+        elapsed = f"{time.time() - t0:.1f}s"
+        await emit(ws, "stream_item", {
+            "id": "stream_done", "event": "done", "title": "Done",
+            "detail": f"{elapsed} · Groq", "status": "done", "elapsed": elapsed,
+        })
 
     # Send text response immediately
     await emit(ws, "response", {"text": response_text, "audio": ""})
