@@ -197,3 +197,47 @@ end tell
 export function getActiveTerminalCount(): number {
   return activeTerminals.size;
 }
+
+export function layoutAllTerminals(): void {
+  /**
+   * When God's Assistant is invoked, organize ALL open Terminal windows:
+   * - Overlay: right half of screen
+   * - Terminals: stacked on the left half, evenly divided vertically
+   */
+  const { width: sw, height: sh } = screen.getPrimaryDisplay().workAreaSize;
+
+  const termX = 0;
+  const termW = Math.round(sw / 2) - 10;
+  const topY = 25;
+  const totalH = sh - 35;
+
+  const script = `
+tell application "Terminal"
+  set winCount to count of windows
+  if winCount is 0 then return
+
+  -- Calculate height per terminal
+  set termHeight to ${totalH}
+  if winCount > 1 then
+    set termHeight to (${totalH} / winCount) as integer
+  end if
+  if termHeight < 150 then
+    set termHeight to 150
+  end if
+
+  set yPos to ${topY}
+  repeat with i from 1 to winCount
+    try
+      set bounds of window i to {${termX}, yPos, ${termX + termW}, yPos + termHeight}
+      set yPos to yPos + termHeight + 2
+    end try
+  end repeat
+end tell
+`;
+
+  runAppleScript(script).then(() => {
+    console.log('[terminal-spawner] Laid out all terminals on left half');
+  }).catch((err) => {
+    console.error(`[terminal-spawner] Layout failed: ${err.message}`);
+  });
+}
