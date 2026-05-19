@@ -35,8 +35,16 @@ export default function TabBar({ onCreateSession, onSwitchSession, onCloseSessio
               width: 5, height: 5, borderRadius: '50%',
               background: s.status === 'running' ? palette.jade : s.status === 'error' ? '#f07060' : 'rgba(200,240,216,0.15)',
               boxShadow: s.status === 'running' ? `0 0 4px ${palette.jade}` : 'none',
+              animation: s.status === 'running' ? 'pulse 2s ease-in-out infinite' : 'none',
             }} />
-            <span>{s.name.length > 18 ? s.name.slice(0, 18) + '...' : s.name}</span>
+            <div style={{ display: 'flex', flexDirection: 'column' as const }}>
+              <span>{s.name.length > 18 ? s.name.slice(0, 18) + '...' : s.name}</span>
+              {s.context_summary && (
+                <span style={{ fontSize: 6, color: palette.textMuted, opacity: 0.6, maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {s.context_summary.length > 30 ? s.context_summary.slice(0, 30) + '...' : s.context_summary}
+                </span>
+              )}
+            </div>
             {sessions.length > 1 && (
               <span onClick={(e) => { e.stopPropagation(); onCloseSession(s.id); }}
                 style={{ fontSize: 9, color: palette.textMuted, cursor: 'pointer', marginLeft: 2 }}
