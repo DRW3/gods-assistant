@@ -137,19 +137,29 @@ def _parse_event(line_data):
     return None
 
 
+_has_session = False  # Track if we've had at least one call (for --continue)
+
+
 async def stream_claude(prompt, on_event=None, timeout=120):
     """Run claude -p with stream-json and emit parsed events.
+    Uses --continue after first call to maintain conversation context.
     on_event(item_dict) is called for each parsed event.
     Returns the final result text."""
+    global _has_session
     if not is_claude_available():
         log.error("Claude CLI not found")
         return ""
 
-    log.info(f"Claude stream: {prompt[:80]}...")
+    log.info(f"Claude stream (continue={_has_session}): {prompt[:80]}...")
+
+    cmd = ["claude", "-p", "--output-format", "stream-json", "--verbose"]
+    if _has_session:
+        cmd.append("--continue")
+    cmd.append(prompt)
 
     try:
         proc = await asyncio.create_subprocess_exec(
-            "claude", "-p", "--output-format", "stream-json", "--verbose", prompt,
+            *cmd,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
         )
@@ -206,6 +216,8 @@ async def stream_claude(prompt, on_event=None, timeout=120):
                     "status": "error",
                 })
 
+        if result_text:
+            _has_session = True  # Next call will use --continue
         log.info(f"Claude stream done: {len(result_text)} chars")
         return result_text
 
