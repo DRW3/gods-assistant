@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scrollbar Options</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#080a08;color:#c8f0d8;font-family:'Bricolage Grotesque',sans-serif;padding:30px;min-height:100vh;display:flex;flex-direction:column;align-items:center}
+h1{font-size:13px;font-weight:600;color:rgba(255,255,255,0.18);letter-spacing:5px;text-transform:uppercase;margin-bottom:6px}
+.sub{font-size:11px;color:rgba(255,255,255,0.22);margin-bottom:28px}
+
+.grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;max-width:900px;margin-bottom:40px}
+
+.option{display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer}
+.option-label{font-family:'Geist Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;display:flex;align-items:center;gap:6px}
+.option-num{border-radius:8px;padding:3px 8px;font-weight:700;font-size:10px;background:rgba(107,203,155,0.12);color:#6bcb9b}
+.option-name{color:rgba(255,255,255,0.35)}
+.option-desc{font-size:9px;color:rgba(255,255,255,0.2);text-align:center;max-width:260px;line-height:1.5}
+
+/* Shared box */
+.box{
+  width:280px;height:220px;overflow-y:scroll;
+  background:linear-gradient(145deg,#1a2e22,#14261c);
+  border-radius:18px;padding:14px;
+  box-shadow:12px 12px 28px rgba(0,0,0,0.5),inset -6px -6px 14px rgba(0,0,0,0.3),inset 6px 6px 14px rgba(255,255,255,0.05);
+  border:1px solid rgba(107,203,155,0.06);
+  font-family:'Geist Mono',monospace;font-size:9px;line-height:2;color:rgba(200,240,216,0.5);
+}
+
+/* A: Invisible (macOS native — appears on hover only) */
+.box-a::-webkit-scrollbar{width:0px;background:transparent}
+.box-a{scrollbar-width:none}
+.box-a:hover::-webkit-scrollbar{width:6px}
+.box-a:hover::-webkit-scrollbar-thumb{background:rgba(107,203,155,0.15);border-radius:3px}
+
+/* B: Thin jade line — always visible */
+.box-b::-webkit-scrollbar{width:3px}
+.box-b::-webkit-scrollbar-track{background:transparent}
+.box-b::-webkit-scrollbar-thumb{background:rgba(107,203,155,0.2);border-radius:2px}
+.box-b::-webkit-scrollbar-thumb:hover{background:rgba(107,203,155,0.35)}
+
+/* C: Gold accent thin */
+.box-c::-webkit-scrollbar{width:3px}
+.box-c::-webkit-scrollbar-track{background:transparent}
+.box-c::-webkit-scrollbar-thumb{background:rgba(240,192,96,0.2);border-radius:2px}
+.box-c::-webkit-scrollbar-thumb:hover{background:rgba(240,192,96,0.35)}
+
+/* D: Invisible until hover, then soft white */
+.box-d::-webkit-scrollbar{width:4px;background:transparent}
+.box-d::-webkit-scrollbar-thumb{background:transparent;border-radius:2px;transition:background 0.3s}
+.box-d:hover::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08)}
+.box-d:hover::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,0.15)}
+
+/* E: Pill-shaped jade with track */
+.box-e::-webkit-scrollbar{width:6px}
+.box-e::-webkit-scrollbar-track{background:rgba(10,24,16,0.5);border-radius:3px;margin:8px 0}
+.box-e::-webkit-scrollbar-thumb{background:rgba(107,203,155,0.18);border-radius:3px;border:1px solid rgba(107,203,155,0.06)}
+.box-e::-webkit-scrollbar-thumb:hover{background:rgba(107,203,155,0.3)}
+
+/* F: No scrollbar — custom fade overlay hint */
+.box-f{position:relative;overflow:hidden}
+.box-f-inner{height:100%;overflow-y:scroll;scrollbar-width:none}
+.box-f-inner::-webkit-scrollbar{width:0}
+.box-f::after{content:'';position:absolute;bottom:0;left:0;right:0;height:40px;background:linear-gradient(transparent,#14261c);pointer-events:none;border-radius:0 0 18px 18px}
+
+.content{padding-right:4px}
+</style>
+</head>
+<body>
+
+<h1>Scrollbar Options</h1>
+<p class="sub">Pick the one that feels right for the Midnight Emerald overlay</p>
+
+<div class="grid">
+
+  <!-- A: Invisible -->
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="option-label"><span class="option-num">A</span><span class="option-name">Invisible</span></div>
+    <div class="box box-a">
+      <div class="content">🧠 Thinking — checking skills...<br>📖 Read ~/.claude/skills/iphone-mirroring/SKILL.md<br>$_ ls ~/.claude/skills/<br>→ SKILL.md<br>📖 Read SKILL.md — 42 lines<br>$_ curl localhost:3845/health<br>→ {"status":"ok"}<br>🔍 Search mirroir-mcp capabilities<br>🧠 Thinking — composing response...<br>✓ Done — 3.2s<br>📖 Read another file...<br>$_ Another bash command<br>→ More output here<br>🧠 More thinking blocks<br>✍️ Writing new file...</div>
+    </div>
+    <div class="option-desc">macOS native behavior. No scrollbar visible. Appears only when scrolling.</div>
+  </div>
+
+  <!-- B: Thin jade -->
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="option-label"><span class="option-num">B</span><span class="option-name">Thin Jade</span></div>
+    <div class="box box-b">
+      <div class="content">🧠 Thinking — checking skills...<br>📖 Read ~/.claude/skills/iphone-mirroring/SKILL.md<br>$_ ls ~/.claude/skills/<br>→ SKILL.md<br>📖 Read SKILL.md — 42 lines<br>$_ curl localhost:3845/health<br>→ {"status":"ok"}<br>🔍 Search mirroir-mcp capabilities<br>🧠 Thinking — composing response...<br>✓ Done — 3.2s<br>📖 Read another file...<br>$_ Another bash command<br>→ More output here<br>🧠 More thinking blocks<br>✍️ Writing new file...</div>
+    </div>
+    <div class="option-desc">3px jade line. Always visible. Matches the emerald theme.</div>
+  </div>
+
+  <!-- C: Gold accent -->
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="option-label"><span class="option-num">C</span><span class="option-name">Gold Accent</span></div>
+    <div class="box box-c">
+      <div class="content">🧠 Thinking — checking skills...<br>📖 Read ~/.claude/skills/iphone-mirroring/SKILL.md<br>$_ ls ~/.claude/skills/<br>→ SKILL.md<br>📖 Read SKILL.md — 42 lines<br>$_ curl localhost:3845/health<br>→ {"status":"ok"}<br>🔍 Search mirroir-mcp capabilities<br>🧠 Thinking — composing response...<br>✓ Done — 3.2s<br>📖 Read another file...<br>$_ Another bash command<br>→ More output here<br>🧠 More thinking blocks<br>✍️ Writing new file...</div>
+    </div>
+    <div class="option-desc">3px gold line. Pops as a warm contrast against the green.</div>
+  </div>
+
+  <!-- D: Hover reveal white -->
+  <div class="option" data-choice="d" onclick="toggleSelect(this)">
+    <div class="option-label"><span class="option-num">D</span><span class="option-name">Ghost</span></div>
+    <div class="box box-d">
+      <div class="content">🧠 Thinking — checking skills...<br>📖 Read ~/.claude/skills/iphone-mirroring/SKILL.md<br>$_ ls ~/.claude/skills/<br>→ SKILL.md<br>📖 Read SKILL.md — 42 lines<br>$_ curl localhost:3845/health<br>→ {"status":"ok"}<br>🔍 Search mirroir-mcp capabilities<br>🧠 Thinking — composing response...<br>✓ Done — 3.2s<br>📖 Read another file...<br>$_ Another bash command<br>→ More output here<br>🧠 More thinking blocks<br>✍️ Writing new file...</div>
+    </div>
+    <div class="option-desc">Invisible by default. Soft white appears on hover. Minimal.</div>
+  </div>
+
+  <!-- E: Pill with track -->
+  <div class="option" data-choice="e" onclick="toggleSelect(this)">
+    <div class="option-label"><span class="option-num">E</span><span class="option-name">Jade Pill</span></div>
+    <div class="box box-e">
+      <div class="content">🧠 Thinking — checking skills...<br>📖 Read ~/.claude/skills/iphone-mirroring/SKILL.md<br>$_ ls ~/.claude/skills/<br>→ SKILL.md<br>📖 Read SKILL.md — 42 lines<br>$_ curl localhost:3845/health<br>→ {"status":"ok"}<br>🔍 Search mirroir-mcp capabilities<br>🧠 Thinking — composing response...<br>✓ Done — 3.2s<br>📖 Read another file...<br>$_ Another bash command<br>→ More output here<br>🧠 More thinking blocks<br>✍️ Writing new file...</div>
+    </div>
+    <div class="option-desc">6px pill with dark track. Rounded, puffy feel matches claymorphism.</div>
+  </div>
+
+  <!-- F: No scrollbar, fade -->
+  <div class="option" data-choice="f" onclick="toggleSelect(this)">
+    <div class="option-label"><span class="option-num">F</span><span class="option-name">Fade Hint</span></div>
+    <div class="box box-f">
+      <div class="box-f-inner">
+        <div class="content">🧠 Thinking — checking skills...<br>📖 Read ~/.claude/skills/iphone-mirroring/SKILL.md<br>$_ ls ~/.claude/skills/<br>→ SKILL.md<br>📖 Read SKILL.md — 42 lines<br>$_ curl localhost:3845/health<br>→ {"status":"ok"}<br>🔍 Search mirroir-mcp capabilities<br>🧠 Thinking — composing response...<br>✓ Done — 3.2s<br>📖 Read another file...<br>$_ Another bash command<br>→ More output here<br>🧠 More thinking blocks<br>✍️ Writing new file...</div>
+      </div>
+    </div>
+    <div class="option-desc">No scrollbar at all. Bottom fade gradient hints there's more content below.</div>
+  </div>
+
+</div>
+
+</body>
+</html>

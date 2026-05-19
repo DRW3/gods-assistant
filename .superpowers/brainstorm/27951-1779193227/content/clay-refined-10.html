@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>God's Assistant — 10 Refined Claymorphic Variations</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Outfit:wght@400;500;600;700&family=Sora:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Satoshi:wght@400;500;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0c0b10;color:#e4e2ec;font-family:'Plus Jakarta Sans',sans-serif;padding:28px 16px;min-height:100vh}
+h1{text-align:center;font-size:13px;font-weight:600;color:rgba(255,255,255,0.2);letter-spacing:5px;text-transform:uppercase;margin-bottom:4px}
+.sub{text-align:center;font-size:11px;color:rgba(255,255,255,0.25);margin-bottom:6px}
+.note{text-align:center;font-size:9px;color:rgba(255,255,255,0.12);margin-bottom:32px;max-width:640px;margin-left:auto;margin-right:auto;line-height:1.7}
+
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:32px;max-width:1100px;margin:0 auto}
+
+.var{display:flex;flex-direction:column;align-items:center;gap:10px}
+.var-label{font-family:'Geist Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;display:flex;align-items:center;gap:8px}
+.var-num{border-radius:10px;padding:4px 10px;font-weight:600;font-size:10px}
+.var-name{color:rgba(255,255,255,0.35)}
+.var-desc{font-size:8px;color:rgba(255,255,255,0.18);text-align:center;max-width:420px;line-height:1.5;margin-top:-4px}
+
+/* ============ CLAY RECIPE (on every element):
+   box-shadow:
+     Xpx Xpx Xpx rgba(0,0,0, lift)        — outer: depth/lift
+     inset -Xpx -Xpx Xpx rgba(0,0,0, dim)  — inner dark: bottom-right
+     inset Xpx Xpx Xpx rgba(255,255,255, hl) — inner light: top-left
+   border-radius: 28-40px (puffy)
+   background: MUTED SOPHISTICATED color (not candy)
+   ============ */
+
+.ov{width:500px;border-radius:32px;overflow:hidden}
+.ov .top{display:flex;align-items:center;padding:14px 20px;gap:10px}
+.ov .orb{width:30px;height:30px;border-radius:50%;flex-shrink:0}
+.ov .title{font-size:11px;font-weight:700;flex:1;letter-spacing:0.8px}
+.ov .badge{font-family:'Geist Mono',monospace;font-size:7px;letter-spacing:0.5px;padding:3px 8px;border-radius:8px}
+.ov .stats{font-family:'Geist Mono',monospace;font-size:7px;opacity:0.4}
+
+.ov .inp-wrap{padding:0 16px 10px}
+.ov .inp{display:flex;align-items:center;gap:6px;border-radius:20px;padding:4px 4px 4px 16px}
+.ov .inp input{flex:1;background:transparent;border:none;outline:none;font-family:'Geist Mono',monospace;font-size:10px;padding:7px 0}
+.ov .send{border:none;border-radius:14px;padding:7px 14px;font-size:9px;font-weight:700;cursor:pointer;letter-spacing:0.3px}
+.ov .mic{border:none;border-radius:12px;padding:7px 10px;cursor:pointer;font-size:12px}
+
+.ov .resp-wrap{padding:0 16px 10px}
+.ov .resp{border-radius:22px;padding:14px 18px}
+.ov .resp .q{font-size:10px;opacity:0.5;margin-bottom:6px;font-style:italic;font-family:'Geist Mono',monospace}
+.ov .resp .a{font-size:11px;line-height:1.7;opacity:0.85}
+
+.ov .term-wrap{padding:0 16px 10px}
+.ov .th{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;padding:0 6px}
+.ov .tl{font-family:'Geist Mono',monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;opacity:0.3}
+.ov .dots{display:flex;gap:4px}.ov .dots span{width:6px;height:6px;border-radius:50%}
+.ov .term{border-radius:18px;padding:12px 14px;font-family:'Geist Mono',monospace;font-size:9px;line-height:1.8;max-height:90px;overflow:auto}
+.ov .cmd::before{content:'❯ ';opacity:0.35}
+.ov .out{opacity:0.45;padding-left:14px}
+
+.ov .ag-wrap{padding:0 16px 10px}
+.ov .ag-label{font-family:'Geist Mono',monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;opacity:0.3;margin-bottom:6px;padding-left:6px}
+.ov .agents{display:flex;gap:6px}
+.ov .ag{flex:1;border-radius:14px;padding:8px 10px;font-family:'Geist Mono',monospace;font-size:8px;display:flex;align-items:center;gap:6px}
+.ov .ag-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.ov .ag-n{flex:1;opacity:0.7}
+.ov .ag-t{opacity:0.35;font-size:7px}
+
+.ov .bot{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;font-family:'Geist Mono',monospace;font-size:7px;opacity:0.2}
+
+/* ============================================
+   V1: Obsidian Slate
+   Deep charcoal clay. Sophisticated, executive.
+   Muted blue-grey tones. Platinum accents.
+   ============================================ */
+.c1{
+  background: linear-gradient(145deg, #2a2a35, #222230);
+  box-shadow: 12px 12px 28px rgba(0,0,0,0.55), inset -6px -6px 14px rgba(0,0,0,0.3), inset 6px 6px 14px rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.04);
+}
+.c1 .orb{background:linear-gradient(135deg,#9ca3af,#6b7280);box-shadow:4px 4px 10px rgba(0,0,0,0.4),inset -3px -3px 6px rgba(0,0,0,0.25),inset 3px 3px 6px rgba(255,255,255,0.2)}
+.c1 .title{color:#d1d5db}
+.c1 .badge{background:rgba(156,163,175,0.12);color:#9ca3af}
+.c1 .inp{background:linear-gradient(145deg,#1e1e28,#1a1a24);box-shadow:inset 3px 3px 8px rgba(0,0,0,0.35),inset -2px -2px 5px rgba(255,255,255,0.02)}
+.c1 .inp input{color:#d1d5db}.c1 .inp input::placeholder{color:rgba(255,255,255,0.12)}
+.c1 .send{background:linear-gradient(135deg,#9ca3af,#6b7280);color:#1a1a24;box-shadow:3px 3px 8px rgba(0,0,0,0.35),inset -2px -2px 4px rgba(0,0,0,0.2),inset 2px 2px 4px rgba(255,255,255,0.15)}
+.c1 .mic{background:linear-gradient(145deg,#252530,#20202a);color:rgba(255,255,255,0.25);box-shadow:2px 2px 5px rgba(0,0,0,0.3),inset -2px -2px 3px rgba(0,0,0,0.2),inset 2px 2px 3px rgba(255,255,255,0.03)}
+.c1 .resp{background:linear-gradient(145deg,#2e2e3a,#262632);color:#d1d5db;box-shadow:6px 6px 16px rgba(0,0,0,0.3),inset -4px -4px 10px rgba(0,0,0,0.2),inset 4px 4px 10px rgba(255,255,255,0.03)}
+.c1 .term{background:linear-gradient(145deg,#16161e,#121218);box-shadow:inset 4px 4px 10px rgba(0,0,0,0.45),inset -2px -2px 5px rgba(255,255,255,0.01)}.c1 .cmd{color:#9ca3af}
+.c1 .ag{background:linear-gradient(145deg,#2a2a35,#242430);box-shadow:3px 3px 7px rgba(0,0,0,0.3),inset -2px -2px 5px rgba(0,0,0,0.2),inset 2px 2px 5px rgba(255,255,255,0.02);color:#9ca3af}
+.c1 .ag-dot.ok{background:#6ee7b7}.c1 .ag-dot.run{background:#93c5fd}
+.c1 .dots span:nth-child(1){background:#6b7280}.c1 .dots span:nth-child(2){background:#6b7280}.c1 .dots span:nth-child(3){background:#6b7280}
+.c1n{background:rgba(42,42,53,0.4);color:#9ca3af}
+
+/* ============================================
+   V2: Matte Burgundy
+   Deep wine. Warm, luxurious, leather-like.
+   Gold accents.
+   ============================================ */
+.c2{
+  background: linear-gradient(145deg, #3a2028, #301a22);
+  box-shadow: 12px 12px 28px rgba(0,0,0,0.55), inset -6px -6px 14px rgba(0,0,0,0.3), inset 6px 6px 14px rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.04);
+}
+.c2 .orb{background:linear-gradient(135deg,#c2798f,#8b3a55);box-shadow:4px 4px 10px rgba(0,0,0,0.4),inset -3px -3px 6px rgba(0,0,0,0.25),inset 3px 3px 6px rgba(255,255,255,0.15)}
+.c2 .title{color:#e8c8d4;font-family:'Sora',sans-serif}
+.c2 .badge{background:rgba(194,121,143,0.12);color:#c2798f}
+.c2 .inp{background:linear-gradient(145deg,#2a161c,#241218);box-shadow:inset 3px 3px 8px rgba(0,0,0,0.35),inset -2px -2px 5px rgba(255,255,255,0.02)}
+.c2 .inp input{color:#e0b8c8}.c2 .inp input::placeholder{color:rgba(255,255,255,0.12)}
+.c2 .send{background:linear-gradient(135deg,#d4a574,#b8884e);color:#2a161c;box-shadow:3px 3px 8px rgba(0,0,0,0.35),inset -2px -2px 4px rgba(0,0,0,0.2),inset 2px 2px 4px rgba(255,255,255,0.2)}
+.c2 .mic{background:linear-gradient(145deg,#301a22,#2a161e);color:rgba(255,255,255,0.25);box-shadow:2px 2px 5px rgba(0,0,0,0.3),inset -2px -2px 3px rgba(0,0,0,0.2),inset 2px 2px 3px rgba(255,255,255,0.03)}
+.c2 .resp{background:linear-gradient(145deg,#3e2430,#36202a);color:#e0c0d0;box-shadow:6px 6px 16px rgba(0,0,0,0.3),inset -4px -4px 10px rgba(0,0,0,0.2),inset 4px 4px 10px rgba(255,255,255,0.03)}
+.c2 .term{background:linear-gradient(145deg,#1e0e14,#180a10);box-shadow:inset 4px 4px 10px rgba(0,0,0,0.45)}.c2 .cmd{color:#c2798f}
+.c2 .ag{background:linear-gradient(145deg,#3a2028,#321c24);box-shadow:3px 3px 7px rgba(0,0,0,0.3),inset -2px -2px 5px rgba(0,0,0,0.2),inset 2px 2px 5px rgba(255,255,255,0.02);color:#c2798f}
+.c2 .ag-dot.ok{background:#86efac}.c2 .ag-dot.run{background:#d4a574}
+.c2 .dots span:nth-child(1){background:#ef4444}.c2 .dots span:nth-child(2){background:#d4a574}.c2 .dots span:nth-child(3){background:#86efac}
+.c2n{background:rgba(58,32,40,0.4);color:#c2798f}
+
+/* ============================================
+   V3: Deep Navy
+   Military precision. Steel blue accents.
+   Sharp, authoritative, commanding.
+   ============================================ */
+.c3{
+  background: linear-gradient(145deg, #1a2540, #142038);
+  box-shadow: 12px 12px 28px rgba(0,0,0,0.55), inset -6px -6px 14px rgba(0,0,0,0.3), inset 6px 6px 14px rgba(255,255,255,0.05);
+  border: 1px solid rgba(100,150,220,0.06);
+}
+.c3 .orb{background:linear-gradient(135deg,#7da2c9,#4a7aab);box-shadow:4px 4px 10px rgba(0,0,0,0.4),inset -3px -3px 6px rgba(0,0,0,0.25),inset 3px 3px 6px rgba(255,255,255,0.18)}
+.c3 .title{color:#c0d8f0;font-family:'Outfit',sans-serif;font-weight:700}
+.c3 .badge{background:rgba(125,162,201,0.12);color:#7da2c9}
+.c3 .inp{background:linear-gradient(145deg,#121c32,#0e182c);box-shadow:inset 3px 3px 8px rgba(0,0,0,0.35),inset -2px -2px 5px rgba(255,255,255,0.02)}
+.c3 .inp input{color:#b0cce8}.c3 .inp input::placeholder{color:rgba(255,255,255,0.12)}
+.c3 .send{background:linear-gradient(135deg,#7da2c9,#4a7aab);color:#0e182c;box-shadow:3px 3px 8px rgba(0,0,0,0.35),inset -2px -2px 4px rgba(0,0,0,0.2),inset 2px 2px 4px rgba(255,255,255,0.15)}
+.c3 .mic{background:linear-gradient(145deg,#162038,#121c30);color:rgba(255,255,255,0.25);box-shadow:2px 2px 5px rgba(0,0,0,0.3),inset -2px -2px 3px rgba(0,0,0,0.2),inset 2px 2px 3px rgba(255,255,255,0.03)}
+.c3 .resp{background:linear-gradient(145deg,#1e2a46,#1a2640);color:#c0d4e8;box-shadow:6px 6px 16px rgba(0,0,0,0.3),inset -4px -4px 10px rgba(0,0,0,0.2),inset 4px 4px 10px rgba(255,255,255,0.03)}
+.c3 .term{background:linear-gradient(145deg,#0a1422,#08101c);box-shadow:inset 4px 4px 10px rgba(0,0,0,0.45)}.c3 .cmd{color:#7da2c9}
+.c3 .ag{background:linear-gradient(145deg,#1a2540,#162038);box-shadow:3px 3px 7px rgba(0,0,0,0.3),inset -2px -2px 5px rgba(0,0,0,0.2),inset 2px 2px 5px rgba(255,255,255,0.02);color:#7da2c9}
+.c3 .ag-dot.ok{background:#6ee7b7}.c3 .ag-dot.run{background:#7da2c9}
+.c3 .dots span:nth-child(1){background:#ef4444}.c3 .dots span:nth-child(2){background:#fbbf24}.c3 .dots span:nth-child(3){background:#6ee7b7}
+.c3n{background:rgba(26,37,64,0.4);color:#7da2c9}
+
+/* ============================================
+   V4: Smoked Violet
+   Deep plum. Moody, refined. Silver highlights.
+   The "premium dark mode."
+   ============================================ */
+.c4{
+  background: linear-gradient(145deg, #2a2040, #221a36);
+  box-shadow: 12px 12px 28px rgba(0,0,0,0.55), inset -6px -6px 14px rgba(0,0,0,0.3), inset 6px 6px 14px rgba(255,255,255,0.05);
+  border: 1px solid rgba(160,120,220,0.06);
+}
+.c4 .orb{background:linear-gradient(135deg,#b49cdb,#7e5fad);box-shadow:4px 4px 10px rgba(0,0,0,0.4),inset -3px -3px 6px rgba(0,0,0,0.25),inset 3px 3px 6px rgba(255,255,255,0.15)}
+.c4 .title{color:#d8c8f0;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700}
+.c4 .badge{background:rgba(180,156,219,0.12);color:#b49cdb}
+.c4 .inp{background:linear-gradient(145deg,#1e1632,#1a122c);box-shadow:inset 3px 3px 8px rgba(0,0,0,0.35),inset -2px -2px 5px rgba(255,255,255,0.02)}
+.c4 .inp input{color:#c8b8e0}.c4 .inp input::placeholder{color:rgba(255,255,255,0.12)}
+.c4 .send{background:linear-gradient(135deg,#b49cdb,#7e5fad);color:#1a122c;box-shadow:3px 3px 8px rgba(0,0,0,0.35),inset -2px -2px 4px rgba(0,0,0,0.2),inset 2px 2px 4px rgba(255,255,255,0.15)}
+.c4 .mic{background:linear-gradient(145deg,#221a36,#1e1630);color:rgba(255,255,255,0.25);box-shadow:2px 2px 5px rgba(0,0,0,0.3),inset -2px -2px 3px rgba(0,0,0,0.2),inset 2px 2px 3px rgba(255,255,255,0.03)}
+.c4 .resp{background:linear-gradient(145deg,#2e2446,#28203e);color:#d0c0e4;box-shadow:6px 6px 16px rgba(0,0,0,0.3),inset -4px -4px 10px rgba(0,0,0,0.2),inset 4px 4px 10px rgba(255,255,255,0.03)}
+.c4 .term{background:linear-gradient(145deg,#140e24,#100a1e);box-shadow:inset 4px 4px 10px rgba(0,0,0,0.45)}.c4 .cmd{color:#b49cdb}
+.c4 .ag{background:linear-gradient(145deg,#2a2040,#241c38);box-shadow:3px 3px 7px rgba(0,0,0,0.3),inset -2px -2px 5px rgba(0,0,0,0.2),inset 2px 2px 5px rgba(255,255,255,0.02);color:#b49cdb}
+.c4 .ag-dot.ok{background:#86efac}.c4 .ag-dot.run{background:#c4b5fd}
+.c4 .dots span:nth-child(1){background:#ef4444}.c4 .dots span:nth-child(2){background:#fbbf24}.c4 .dots span:nth-child(3){background:#86efac}
+.c4n{background:rgba(42,32,64,0.4);color:#b49cdb}
+
+/* ============================================
+   V5: Carbon Teal
+   Dark carbon fiber feel. Teal accents.
+   Technical, engineering-grade.
+   ============================================ */
+.c5{
+  background: linear-gradient(145deg, #1a2a2e, #142428);
+  box-shadow: 12px 12px 28px rgba(0,0,0,0.55), inset -6px -6px 14px rgba(0,0,0,0.3), inset 6px 6px 14px rgba(255,255,255,0.05);
+  border: 1px solid rgba(80,200,190,0.06);
+}
+.c5 .orb{background:linear-gradient(135deg,#5eead4,#14b8a6);box-shadow:4px 4px 10px rgba(0,0,0,0.4),inset -3px -3px 6px rgba(0,0,0,0.25),inset 3px 3px 6px rgba(255,255,255,0.2)}
+.c5 .title{color:#c0f0e8}
+.c5 .badge{background:rgba(94,234,212,0.1);color:#5eead4}
+.c5 .inp{background:linear-gradient(145deg,#122024,#0e1c20);box-shadow:inset 3px 3px 8px rgba(0,0,0,0.35),inset -2px -2px 5px rgba(255,255,255,0.02)}
+.c5 .inp input{color:#a8e8dc}.c5 .inp input::placeholder{color:rgba(255,255,255,0.12)}
+.c5 .send{background:linear-gradient(135deg,#5eead4,#14b8a6);color:#0e1c20;box-shadow:3px 3px 8px rgba(0,0,0,0.35),inset -2px -2px 4px rgba(0,0,0,0.2),inset 2px 2px 4px rgba(255,255,255,0.2)}
+.c5 .mic{background:linear-gradient(145deg,#162428,#122024);color:rgba(255,255,255,0.25);box-shadow:2px 2px 5px rgba(0,0,0,0.3),inset -2px -2px 3px rgba(0,0,0,0.2),inset 2px 2px 3px rgba(255,255,255,0.03)}
+.c5 .resp{background:linear-gradient(145deg,#1e2e34,#1a2a2e);color:#b8e4d8;box-shadow:6px 6px 16px rgba(0,0,0,0.3),inset -4px -4px 10px rgba(0,0,0,0.2),inset 4px 4px 10px rgba(255,255,255,0.03)}
+.c5 .term{background:linear-gradient(145deg,#0a1618,#081214);box-shadow:inset 4px 4px 10px rgba(0,0,0,0.45)}.c5 .cmd{color:#5eead4}
+.c5 .ag{background:linear-gradient(145deg,#1a2a2e,#162428);box-shadow:3px 3px 7px rgba(0,0,0,0.3),inset -2px -2px 5px rgba(0,0,0,0.2),inset 2px 2px 5px rgba(255,255,255,0.02);color:#5eead4}
+.c5 .ag-dot.ok{background:#86efac}.c5 .ag-dot.run{background:#5eead4}
+.c5 .dots span:nth-child(1){background:#ef4444}.c5 .dots span:nth-child(2){background:#fbbf24}.c5 .dots span:nth-child(3){background:#6ee7b7}
+.c5n{background:rgba(26,42,46,0.4);color:#5eead4}
+
+/* ============================================
+   V6: Graphite Bronze
+   Near-black with warm bronze/copper accents.
+   Watches, luxury tech, premium hardware.
+   ============================================ */
+.c6{
+  background: linear-gradient(145deg, #28241e, #221e18);
+  box-shadow: 12px 12px 28px rgba(0,0,0,0.55), inset -6px -6px 14px rgba(0,0,0,0.3), inset 6px 6px 14px rgba(255,255,255,0.05);
+  border: 1px solid rgba(200,160,100,0.06);
+}
+.c6 .orb{background:linear-gradient(135deg,#d4a97a,#a67c52);box-shadow:4px 4px 10px rgba(0,0,0,0.4),inset -3px -3px 6px rgba(0,0,0,0.25),inset 3px 3px 6px rgba(255,255,255,0.2)}
+.c6 .title{color:#e8d8c0;font-family:'Sora',sans-serif;font-weight:600}
+.c6 .badge{background:rgba(212,169,122,0.12);color:#d4a97a}
+.c6 .inp{background:linear-gradient(145deg,#1e1a14,#1a1610);box-shadow:inset 3px 3px 8px rgba(0,0,0,0.35),inset -2px -2px 5px rgba(255,255,255,0.02)}
+.c6 .inp input{color:#d8c8a8}.c6 .inp input::placeholder{color:rgba(255,255,255,0.12)}
+.c6 .send{background:linear-gradient(135deg,#d4a97a,#a67c52);color:#1a1610;box-shadow:3px 3px 8px rgba(0,0,0,0.35),inset -2px -2px 4px rgba(0,0,0,0.2),inset 2px 2px 4px rgba(255,255,255,0.2)}
+.c6 .mic{background:linear-gradient(145deg,#221e18,#1e1a14);color:rgba(255,255,255,0.25);box-shadow:2px 2px 5px rgba(0,0,0,0.3),inset -2px -2px 3px rgba(0,0,0,0.2),inset 2px 2px 3px rgba(255,255,255,0.03)}
+.c6 .resp{background:linear-gradient(145deg,#2c2820,#28241c);color:#d8c8b0;box-shadow:6px 6px 16px rgba(0,0,0,0.3),inset -4px -4px 10px rgba(0,0,0,0.2),inset 4px 4px 10px rgba(255,255,255,0.03)}
+.c6 .term{background:linear-gradient(145deg,#12100c,#0e0c08);box-shadow:inset 4px 4px 10px rgba(0,0,0,0.45)}.c6 .cmd{color:#d4a97a}
+.c6 .ag{background:linear-gradient(145deg,#28241e,#221e18);box-shadow:3px 3px 7px rgba(0,0,0,0.3),inset -2px -2px 5px rgba(0,0,0,0.2),inset 2px 2px 5px rgba(255,255,255,0.02);color:#d4a97a}
+.c6 .ag-dot.ok{background:#86efac}.c6 .ag-dot.run{background:#d4a97a}
+.c6 .dots span:nth-child(1){background:#a67c52}.c6 .dots span:nth-child(2){background:#a67c52}.c6 .dots span:nth-child(3){background:#a67c52}
+.c6n{background:rgba(40,36,30,0.4);color:#d4a97a}
+
+/* ============================================
+   V7: Midnight Emerald
+   Forest at night. Deep green, gold firefly accents.
+   Nature meets technology.
+   ============================================ */
+.c7{
+  background: linear-gradient(145deg, #1a2e22, #14261c);
+  box-shadow: 12px 12px 28px rgba(0,0,0,0.55), inset -6px -6px 14px rgba(0,0,0,0.3), inset 6px 6px 14px rgba(255,255,255,0.05);
+  border: 1px solid rgba(100,200,140,0.06);
+}
+.c7 .orb{background:linear-gradient(135deg,#6bcb9b,#2d9b6a);box-shadow:4px 4px 10px rgba(0,0,0,0.4),inset -3px -3px 6px rgba(0,0,0,0.25),inset 3px 3px 6px rgba(255,255,255,0.18)}
+.c7 .title{color:#c8f0d8;font-family:'Outfit',sans-serif}
+.c7 .badge{background:rgba(107,203,155,0.1);color:#6bcb9b}
+.c7 .inp{background:linear-gradient(145deg,#122418,#0e2014);box-shadow:inset 3px 3px 8px rgba(0,0,0,0.35),inset -2px -2px 5px rgba(255,255,255,0.02)}
+.c7 .inp input{color:#b0e0c8}.c7 .inp input::placeholder{color:rgba(255,255,255,0.12)}
+.c7 .send{background:linear-gradient(135deg,#f0c060,#d4a030);color:#14261c;box-shadow:3px 3px 8px rgba(0,0,0,0.35),inset -2px -2px 4px rgba(0,0,0,0.2),inset 2px 2px 4px rgba(255,255,255,0.2)}
+.c7 .mic{background:linear-gradient(145deg,#16281c,#122418);color:rgba(255,255,255,0.25);box-shadow:2px 2px 5px rgba(0,0,0,0.3),inset -2px -2px 3px rgba(0,0,0,0.2),inset 2px 2px 3px rgba(255,255,255,0.03)}
+.c7 .resp{background:linear-gradient(145deg,#1e3228,#1a2e22);color:#c0e0d0;box-shadow:6px 6px 16px rgba(0,0,0,0.3),inset -4px -4px 10px rgba(0,0,0,0.2),inset 4px 4px 10px rgba(255,255,255,0.03)}
+.c7 .term{background:linear-gradient(145deg,#0a1810,#08140c);box-shadow:inset 4px 4px 10px rgba(0,0,0,0.45)}.c7 .cmd{color:#6bcb9b}
+.c7 .ag{background:linear-gradient(145deg,#1a2e22,#16281e);box-shadow:3px 3px 7px rgba(0,0,0,0.3),inset -2px -2px 5px rgba(0,0,0,0.2),inset 2px 2px 5px rgba(255,255,255,0.02);color:#6bcb9b}
+.c7 .ag-dot.ok{background:#f0c060}.c7 .ag-dot.run{background:#6bcb9b}
+.c7 .dots span:nth-child(1){background:#ef4444}.c7 .dots span:nth-child(2){background:#f0c060}.c7 .dots span:nth-child(3){background:#6bcb9b}
+.c7n{background:rgba(26,46,34,0.4);color:#6bcb9b}
+
+/* ============================================
+   V8: Storm Grey
+   Thundercloud dark. Electric white flashes.
+   Raw power, minimal color.
+   ============================================ */
+.c8{
+  background: linear-gradient(145deg, #262630, #1e1e28);
+  box-shadow: 12px 12px 28px rgba(0,0,0,0.55), inset -6px -6px 14px rgba(0,0,0,0.3), inset 6px 6px 14px rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.05);
+}
+.c8 .orb{background:linear-gradient(135deg,#e2e8f0,#94a3b8);box-shadow:4px 4px 10px rgba(0,0,0,0.4),inset -3px -3px 6px rgba(0,0,0,0.2),inset 3px 3px 6px rgba(255,255,255,0.35)}
+.c8 .title{color:#f1f5f9;font-family:'Outfit',sans-serif;font-weight:700}
+.c8 .badge{background:rgba(226,232,240,0.08);color:#cbd5e1}
+.c8 .inp{background:linear-gradient(145deg,#1a1a24,#161620);box-shadow:inset 3px 3px 8px rgba(0,0,0,0.35),inset -2px -2px 5px rgba(255,255,255,0.02)}
+.c8 .inp input{color:#e2e8f0}.c8 .inp input::placeholder{color:rgba(255,255,255,0.12)}
+.c8 .send{background:linear-gradient(135deg,#e2e8f0,#cbd5e1);color:#1a1a24;font-weight:700;box-shadow:3px 3px 8px rgba(0,0,0,0.35),inset -2px -2px 4px rgba(0,0,0,0.15),inset 2px 2px 4px rgba(255,255,255,0.3)}
+.c8 .mic{background:linear-gradient(145deg,#1e1e28,#1a1a24);color:rgba(255,255,255,0.3);box-shadow:2px 2px 5px rgba(0,0,0,0.3),inset -2px -2px 3px rgba(0,0,0,0.2),inset 2px 2px 3px rgba(255,255,255,0.03)}
+.c8 .resp{background:linear-gradient(145deg,#2a2a36,#24242e);color:#e2e8f0;box-shadow:6px 6px 16px rgba(0,0,0,0.3),inset -4px -4px 10px rgba(0,0,0,0.2),inset 4px 4px 10px rgba(255,255,255,0.03)}
+.c8 .term{background:linear-gradient(145deg,#12121a,#0e0e16);box-shadow:inset 4px 4px 10px rgba(0,0,0,0.45)}.c8 .cmd{color:#cbd5e1}
+.c8 .ag{background:linear-gradient(145deg,#262630,#20202a);box-shadow:3px 3px 7px rgba(0,0,0,0.3),inset -2px -2px 5px rgba(0,0,0,0.2),inset 2px 2px 5px rgba(255,255,255,0.02);color:#cbd5e1}
+.c8 .ag-dot.ok{background:#86efac}.c8 .ag-dot.run{background:#e2e8f0}
+.c8 .dots span:nth-child(1){background:#64748b}.c8 .dots span:nth-child(2){background:#94a3b8}.c8 .dots span:nth-child(3){background:#cbd5e1}
+.c8n{background:rgba(38,38,48,0.4);color:#cbd5e1}
+
+/* ============================================
+   V9: Volcanic Red
+   Deep magma. Subtle ember glow.
+   Dangerous, powerful.
+   ============================================ */
+.c9{
+  background: linear-gradient(145deg, #301818, #281212);
+  box-shadow: 12px 12px 28px rgba(0,0,0,0.55), inset -6px -6px 14px rgba(0,0,0,0.3), inset 6px 6px 14px rgba(255,255,255,0.05);
+  border: 1px solid rgba(220,80,60,0.06);
+}
+.c9 .orb{background:linear-gradient(135deg,#f07060,#c44030);box-shadow:4px 4px 10px rgba(0,0,0,0.4),inset -3px -3px 6px rgba(0,0,0,0.25),inset 3px 3px 6px rgba(255,255,255,0.15)}
+.c9 .title{color:#f0d0c8;font-family:'Sora',sans-serif;font-weight:700}
+.c9 .badge{background:rgba(240,112,96,0.1);color:#f07060}
+.c9 .inp{background:linear-gradient(145deg,#241010,#200c0c);box-shadow:inset 3px 3px 8px rgba(0,0,0,0.35),inset -2px -2px 5px rgba(255,255,255,0.02)}
+.c9 .inp input{color:#e8c0b8}.c9 .inp input::placeholder{color:rgba(255,255,255,0.12)}
+.c9 .send{background:linear-gradient(135deg,#f07060,#c44030);color:white;box-shadow:3px 3px 8px rgba(0,0,0,0.35),inset -2px -2px 4px rgba(0,0,0,0.2),inset 2px 2px 4px rgba(255,255,255,0.15)}
+.c9 .mic{background:linear-gradient(145deg,#281212,#24100e);color:rgba(255,255,255,0.25);box-shadow:2px 2px 5px rgba(0,0,0,0.3),inset -2px -2px 3px rgba(0,0,0,0.2),inset 2px 2px 3px rgba(255,255,255,0.03)}
+.c9 .resp{background:linear-gradient(145deg,#341c1c,#2e1616);color:#e0c0b8;box-shadow:6px 6px 16px rgba(0,0,0,0.3),inset -4px -4px 10px rgba(0,0,0,0.2),inset 4px 4px 10px rgba(255,255,255,0.03)}
+.c9 .term{background:linear-gradient(145deg,#180a08,#140806);box-shadow:inset 4px 4px 10px rgba(0,0,0,0.45)}.c9 .cmd{color:#f07060}
+.c9 .ag{background:linear-gradient(145deg,#301818,#2a1414);box-shadow:3px 3px 7px rgba(0,0,0,0.3),inset -2px -2px 5px rgba(0,0,0,0.2),inset 2px 2px 5px rgba(255,255,255,0.02);color:#f07060}
+.c9 .ag-dot.ok{background:#86efac}.c9 .ag-dot.run{background:#f07060}
+.c9 .dots span:nth-child(1){background:#f07060}.c9 .dots span:nth-child(2){background:#f0a060}.c9 .dots span:nth-child(3){background:#86efac}
+.c9n{background:rgba(48,24,24,0.4);color:#f07060}
+
+/* ============================================
+   V10: Cosmic Black
+   Near-black + single accent: electric violet.
+   Maximum contrast. The "godmode" theme.
+   ============================================ */
+.c10{
+  background: linear-gradient(145deg, #1c1628, #161020);
+  box-shadow: 14px 14px 32px rgba(0,0,0,0.6), inset -7px -7px 16px rgba(0,0,0,0.35), inset 7px 7px 16px rgba(255,255,255,0.05);
+  border: 1px solid rgba(120,80,240,0.08);
+}
+.c10 .orb{background:linear-gradient(135deg,#a78bfa,#7c3aed);box-shadow:5px 5px 12px rgba(0,0,0,0.5),0 0 15px rgba(124,58,237,0.15),inset -3px -3px 7px rgba(0,0,0,0.3),inset 3px 3px 7px rgba(255,255,255,0.15)}
+.c10 .title{color:#e0d4f8;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;letter-spacing:1px}
+.c10 .badge{background:rgba(167,139,250,0.1);color:#a78bfa}
+.c10 .inp{background:linear-gradient(145deg,#140e1e,#100a18);box-shadow:inset 4px 4px 10px rgba(0,0,0,0.4),inset -2px -2px 6px rgba(124,58,237,0.02)}
+.c10 .inp input{color:#d0c0f0}.c10 .inp input::placeholder{color:rgba(255,255,255,0.1)}
+.c10 .send{background:linear-gradient(135deg,#a78bfa,#7c3aed);color:white;box-shadow:4px 4px 10px rgba(0,0,0,0.4),0 0 8px rgba(124,58,237,0.1),inset -2px -2px 5px rgba(0,0,0,0.2),inset 2px 2px 5px rgba(255,255,255,0.12)}
+.c10 .mic{background:linear-gradient(145deg,#181020,#14101c);color:rgba(167,139,250,0.3);box-shadow:2px 2px 5px rgba(0,0,0,0.4),inset -2px -2px 3px rgba(0,0,0,0.25),inset 2px 2px 3px rgba(255,255,255,0.03)}
+.c10 .resp{background:linear-gradient(145deg,#201830,#1c142a);color:#d0c0e8;box-shadow:7px 7px 18px rgba(0,0,0,0.35),inset -5px -5px 12px rgba(0,0,0,0.25),inset 5px 5px 12px rgba(255,255,255,0.03)}
+.c10 .term{background:linear-gradient(145deg,#0c0814,#080610);box-shadow:inset 5px 5px 12px rgba(0,0,0,0.5),inset -2px -2px 5px rgba(124,58,237,0.01)}.c10 .cmd{color:#a78bfa}
+.c10 .ag{background:linear-gradient(145deg,#1c1628,#181222);box-shadow:4px 4px 8px rgba(0,0,0,0.35),inset -3px -3px 6px rgba(0,0,0,0.25),inset 3px 3px 6px rgba(255,255,255,0.02);color:#a78bfa}
+.c10 .ag-dot.ok{background:#6ee7b7}.c10 .ag-dot.run{background:#a78bfa;box-shadow:0 0 8px rgba(124,58,237,0.3)}
+.c10 .dots span:nth-child(1){background:#7c3aed}.c10 .dots span:nth-child(2){background:#7c3aed}.c10 .dots span:nth-child(3){background:#7c3aed}
+.c10n{background:rgba(28,22,40,0.5);color:#a78bfa}
+.c10 .bot{color:rgba(124,58,237,0.2)}
+</style>
+</head>
+<body>
+
+<h1>God's Assistant</h1>
+<p class="sub">10 Refined Claymorphic Themes — Sophisticated, not kiddie</p>
+<p class="note">Every element uses the 3-shadow clay recipe: outer lift + inset dark (depth) + inset light (highlight). Muted, sophisticated color palettes. Terminal is always sunken (inset-only). Agents panel replaces system processes.</p>
+
+<div class="grid">
+
+<!-- Helper: each variation gets the same content structure -->
+<script>
+function makeContent(cls, num, name, desc) {
+  return `
+  <div class="var" data-choice="${num}" onclick="toggleSelect(this)">
+    <div class="var-label"><span class="var-num ${cls}n">${num}</span><span class="var-name">${name}</span></div>
+    <div class="var-desc">${desc}</div>
+    <div class="ov ${cls}">
+      <div class="top">
+        <div class="orb"></div>
+        <div class="title">GOD'S ASSISTANT</div>
+        <div class="badge">READY</div>
+        <div class="stats">CPU 18% · BAT 87%</div>
+      </div>
+      <div class="inp-wrap"><div class="inp">
+        <input value="check iPhone mirroring skill" />
+        <div class="mic">🎤</div>
+        <div class="send">Send</div>
+      </div></div>
+      <div class="resp-wrap"><div class="resp">
+        <div class="q">"check iPhone mirroring skill"</div>
+        <div class="a">iPhone mirroring skill is loaded. The mirroir-mcp server is reachable and the iPhone Mirroring window is currently active. Skill located at ~/.claude/skills/iphone-mirroring/SKILL.md</div>
+      </div></div>
+      <div class="term-wrap">
+        <div class="th"><span class="tl">Terminal</span><div class="dots"><span></span><span></span><span></span></div></div>
+        <div class="term">
+          <div class="cmd">claude -p "check iPhone mirroring skill"</div>
+          <div class="out">→ Skill loaded at ~/.claude/skills/iphone-mirroring/</div>
+          <div class="out">→ mirroir-mcp server: reachable</div>
+          <div class="out">→ iPhone Mirroring window: active</div>
+        </div>
+      </div>
+      <div class="ag-wrap">
+        <div class="ag-label">Agents</div>
+        <div class="agents">
+          <div class="ag"><div class="ag-dot ok"></div><span class="ag-n">Claude Code</span><span class="ag-t">✓ 3.2s</span></div>
+          <div class="ag"><div class="ag-dot run"></div><span class="ag-n">Fix auth bug</span><span class="ag-t">running</span></div>
+        </div>
+      </div>
+      <div class="bot"><span>⌘⇧G · SPACE · ESC</span><span>PUSH-TO-TALK</span></div>
+    </div>
+  </div>`;
+}
+document.querySelector('.grid').innerHTML =
+  makeContent('c1','1','Obsidian Slate','Deep charcoal. Executive boardroom. Platinum grey accents.') +
+  makeContent('c2','2','Matte Burgundy','Wine leather. Warm luxury. Gold accents on deep red.') +
+  makeContent('c3','3','Deep Navy','Military precision. Steel blue on midnight. Authoritative.') +
+  makeContent('c4','4','Smoked Violet','Plum twilight. Moody, refined. Lavender silver highlights.') +
+  makeContent('c5','5','Carbon Teal','Engineering grade. Teal circuitry on carbon black.') +
+  makeContent('c6','6','Graphite Bronze','Luxury watch face. Copper on near-black. Premium hardware.') +
+  makeContent('c7','7','Midnight Emerald','Forest at night. Jade green, gold firefly accents.') +
+  makeContent('c8','8','Storm Grey','Thundercloud. Electric white on dark iron. Raw power.') +
+  makeContent('c9','9','Volcanic Red','Deep magma. Ember glow. Dangerous, powerful.') +
+  makeContent('c10','10','Cosmic Black','Near-black + electric violet. Maximum contrast. Godmode.');
+</script>
+
+</div>
+</body>
+</html>

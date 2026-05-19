@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>God's Assistant v2 — Tabs + Desktop Terminals</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+html::-webkit-scrollbar,body::-webkit-scrollbar{width:0;display:none}
+*::-webkit-scrollbar{width:4px;background:transparent}*::-webkit-scrollbar-thumb{background:transparent;border-radius:2px}*:hover::-webkit-scrollbar-thumb{background:rgba(107,203,155,0.12)}
+html{scrollbar-width:none}
+body{background:#050806;color:#c8f0d8;font-family:'Bricolage Grotesque',sans-serif;padding:20px;min-height:100vh;display:flex;flex-direction:column;align-items:center}
+h1{font-size:13px;font-weight:600;color:rgba(255,255,255,0.18);letter-spacing:5px;text-transform:uppercase;margin-bottom:4px}
+.sub{font-size:11px;color:rgba(255,255,255,0.22);margin-bottom:24px}
+.section-title{font-size:10px;font-weight:700;color:rgba(107,203,155,0.35);letter-spacing:3px;text-transform:uppercase;margin:20px 0 12px;text-align:center}
+
+:root{
+  --bg:#14261c;--bg-l:#1a2e22;--bg-d:#0a1810;
+  --jade:#6bcb9b;--jade-m:#2d9b6a;--jade-dim:rgba(107,203,155,0.12);
+  --gold:#f0c060;--gold-m:#d4a030;
+  --violet:#b49cdb;--pink:#ed64a6;
+  --txt:#c8f0d8;--txt-d:rgba(200,240,216,0.5);--txt-m:rgba(200,240,216,0.22);
+  --ok:#6ee7b7;--err:#f07060;
+  --w04:rgba(255,255,255,0.04);--w02:rgba(255,255,255,0.02);
+  --co:12px 12px 28px rgba(0,0,0,0.55),inset -6px -6px 14px rgba(0,0,0,0.3),inset 6px 6px 14px rgba(255,255,255,0.05);
+  --cr:4px 4px 10px rgba(0,0,0,0.4),inset -3px -3px 6px rgba(0,0,0,0.2),inset 3px 3px 6px rgba(255,255,255,0.06);
+  --cs:inset 4px 4px 10px rgba(0,0,0,0.45),inset -2px -2px 5px rgba(255,255,255,0.02);
+  --cb:3px 3px 8px rgba(0,0,0,0.35),inset -2px -2px 4px rgba(0,0,0,0.2),inset 2px 2px 4px rgba(255,255,255,0.15);
+}
+
+/* ============ DESKTOP MOCKUP ============ */
+.desktop{
+  width:900px;height:560px;position:relative;
+  background:linear-gradient(145deg,#0a0e0c,#060a08);
+  border-radius:20px;border:1px solid rgba(255,255,255,0.03);
+  box-shadow:0 20px 60px rgba(0,0,0,0.5);
+  overflow:hidden;margin-bottom:24px;
+}
+.desktop-label{position:absolute;top:8px;left:50%;transform:translateX(-50%);font-family:'Geist Mono',monospace;font-size:7px;color:rgba(255,255,255,0.1);letter-spacing:2px;text-transform:uppercase}
+
+/* Real terminal windows */
+.term-win{
+  position:absolute;border-radius:10px;overflow:hidden;
+  box-shadow:0 8px 30px rgba(0,0,0,0.5);
+  border:1px solid rgba(255,255,255,0.04);
+}
+.term-titlebar{
+  display:flex;align-items:center;padding:6px 10px;gap:6px;
+  background:linear-gradient(180deg,#2a2a30,#222228);
+  border-bottom:1px solid rgba(255,255,255,0.05);
+}
+.term-dots{display:flex;gap:4px}
+.term-dots span{width:8px;height:8px;border-radius:50%}
+.td-r{background:#ff5f57}.td-y{background:#ffbd2e}.td-g{background:#28c840}
+.term-name{flex:1;text-align:center;font-family:'Geist Mono',monospace;font-size:8px;color:rgba(255,255,255,0.35)}
+.term-body{
+  padding:8px 10px;font-family:'Geist Mono',monospace;font-size:8px;line-height:1.6;
+  background:#1a1a20;color:rgba(255,255,255,0.5);
+  height:100%;
+}
+.term-body .prompt{color:var(--jade)}
+.term-body .cmd{color:#93c5fd}
+.term-body .out{color:rgba(255,255,255,0.35)}
+.term-body .thinking{color:var(--violet);font-style:italic}
+.term-body .ok{color:var(--ok)}
+.term-body .active-line{color:var(--jade);animation:blink 1s step-end infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* Terminal 1: left */
+.tw1{left:16px;top:40px;width:250px;height:200px}
+/* Terminal 2: right */
+.tw2{right:16px;top:40px;width:250px;height:200px}
+/* Terminal 3: bottom left */
+.tw3{left:16px;bottom:16px;width:250px;height:180px}
+/* Terminal 4: bottom right */
+.tw4{right:16px;bottom:16px;width:250px;height:180px}
+
+/* Connection lines from overlay to terminals */
+.conn{position:absolute;border:1px dashed rgba(107,203,155,0.1);pointer-events:none}
+
+/* ============ GOD'S ASSISTANT OVERLAY (center) ============ */
+.overlay{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:340px;
+  background:linear-gradient(145deg,var(--bg-l),var(--bg));
+  border-radius:24px;box-shadow:var(--co),0 0 40px rgba(107,203,155,0.05);
+  border:1px solid rgba(107,203,155,0.08);
+  z-index:10;display:flex;flex-direction:column;
+}
+
+/* Tab bar */
+.tab-bar{
+  display:flex;align-items:center;padding:6px 10px 0;gap:3px;
+  border-bottom:1px solid var(--w04);
+  overflow-x:auto;
+}
+.tab{
+  display:flex;align-items:center;gap:5px;
+  padding:5px 10px;border-radius:10px 10px 0 0;
+  font-family:'Geist Mono',monospace;font-size:8px;
+  cursor:pointer;white-space:nowrap;flex-shrink:0;
+  border:1px solid transparent;border-bottom:none;
+  transition:all 0.2s;
+}
+.tab.active{
+  background:linear-gradient(145deg,var(--bg-l),var(--bg));
+  color:var(--txt);font-weight:600;
+  border-color:rgba(107,203,155,0.08);
+  box-shadow:2px -2px 6px rgba(0,0,0,0.2);
+}
+.tab.inactive{
+  background:transparent;color:var(--txt-m);
+}
+.tab .tab-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.tab .tab-dot.running{background:var(--jade);box-shadow:0 0 4px var(--jade);animation:pulse 2s ease-in-out infinite}
+.tab .tab-dot.idle{background:rgba(200,240,216,0.15)}
+.tab .tab-dot.error{background:var(--err);box-shadow:0 0 4px var(--err)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.tab-close{font-size:9px;color:var(--txt-m);opacity:0;transition:opacity 0.2s;margin-left:2px}
+.tab:hover .tab-close{opacity:0.6}
+.tab-new{
+  width:20px;height:20px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  font-size:12px;color:var(--txt-m);cursor:pointer;
+  background:linear-gradient(145deg,var(--bg-l),var(--bg));
+  box-shadow:var(--cr);border:1px solid var(--w02);
+  flex-shrink:0;margin-left:2px;
+}
+
+/* Top strip */
+.top{display:flex;align-items:center;padding:8px 14px;gap:8px}
+.orb{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--jade),var(--jade-m));box-shadow:2px 2px 6px rgba(0,0,0,0.3),inset -2px -2px 4px rgba(0,0,0,0.2),inset 2px 2px 4px rgba(255,255,255,0.15),0 0 8px rgba(107,203,155,0.15);flex-shrink:0}
+.top-title{font-size:9px;font-weight:700;letter-spacing:0.8px;flex:1}
+.top-st{font-family:'Geist Mono',monospace;font-size:7px;color:rgba(107,203,155,0.4)}
+
+/* Activity stream (compact) */
+.stream{padding:6px 10px;max-height:120px;overflow-y:auto}
+.sit{display:flex;gap:6px;padding:4px 8px;background:linear-gradient(145deg,var(--bg-l),var(--bg));border-radius:10px;box-shadow:var(--cr);border:1px solid var(--w02);font-family:'Geist Mono',monospace;font-size:7px;margin-bottom:2px}
+.sic{width:16px;height:16px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:8px;flex-shrink:0;box-shadow:1px 1px 3px rgba(0,0,0,0.3),inset 0 1px 1px rgba(255,255,255,0.1)}
+.sic-bash{background:linear-gradient(135deg,#2a3a30,#1a2a20);color:var(--jade)}
+.sic-read{background:linear-gradient(135deg,var(--jade),var(--jade-m));color:white}
+.sic-think{background:linear-gradient(135deg,var(--violet),#7e5fad);color:white}
+.sic-done{background:linear-gradient(135deg,var(--jade),var(--jade-m));color:white}
+.sib{flex:1;min-width:0}.sin{color:var(--txt);font-weight:500;font-size:7px}.sid{color:var(--txt-d);font-size:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* Response */
+.resp{padding:4px 10px 8px}
+.rc{background:linear-gradient(145deg,var(--bg-l),var(--bg));border-radius:14px;padding:8px 12px;box-shadow:4px 4px 10px rgba(0,0,0,0.3),inset -3px -3px 6px rgba(0,0,0,0.2),inset 3px 3px 6px rgba(255,255,255,0.03);border:1px solid var(--w02);font-size:9px;color:var(--txt-d);line-height:1.6;max-height:80px;overflow-y:auto}
+
+/* Dock */
+.dock{border-top:1px solid var(--w04);padding:8px 10px}
+.inp{display:flex;align-items:center;gap:4px;border-radius:16px;padding:3px 3px 3px 12px;background:linear-gradient(145deg,#122418,#0e2014);box-shadow:var(--cs);border:1px solid var(--w02);margin-bottom:4px}
+.inp input{flex:1;background:transparent;border:none;outline:none;color:var(--txt);font-family:'Geist Mono',monospace;font-size:9px;padding:5px 0}
+.inp input::placeholder{color:rgba(200,240,216,0.1)}
+.snd{border:none;border-radius:10px;padding:5px 10px;background:linear-gradient(135deg,var(--gold),var(--gold-m));color:var(--bg-d);font-weight:700;font-size:8px;cursor:pointer;box-shadow:var(--cb)}
+.effort{display:flex;gap:2px;padding:2px 0}
+.ef{font-family:'Geist Mono',monospace;font-size:6px;border-radius:6px;padding:2px 6px;border:none;cursor:pointer}
+.ef.on{background:linear-gradient(135deg,var(--gold),var(--gold-m));color:var(--bg-d);font-weight:700;box-shadow:var(--cb)}
+.ef.off{background:linear-gradient(145deg,var(--bg-l),var(--bg));color:var(--txt-m);border:1px solid var(--w04)}
+
+/* ============ NOTES ============ */
+.notes{width:900px;display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:30px}
+.note{background:linear-gradient(145deg,var(--bg-l),var(--bg));border-radius:14px;padding:12px 16px;box-shadow:var(--cr);border:1px solid var(--w02)}
+.note h3{font-size:11px;font-weight:700;color:var(--txt);margin-bottom:4px}
+.note p{font-size:9px;color:var(--txt-d);line-height:1.6}
+.note .hl{color:var(--jade)}.note .gold{color:var(--gold)}.note .vi{color:var(--violet)}.note .pk{color:var(--pink)}
+</style>
+</head>
+<body>
+
+<h1>God's Assistant v2</h1>
+<p class="sub">Tabs + Desktop Terminal Orchestration</p>
+
+<!-- ===== DESKTOP MOCKUP ===== -->
+<div class="section-title">Desktop Layout — Overlay Center, Terminals Around</div>
+
+<div class="desktop">
+  <div class="desktop-label">macOS Desktop</div>
+
+  <!-- Terminal 1: Top Left — running a task -->
+  <div class="term-win tw1">
+    <div class="term-titlebar">
+      <div class="term-dots"><span class="td-r"></span><span class="td-y"></span><span class="td-g"></span></div>
+      <span class="term-name">Tab 1: Fix auth bug</span>
+    </div>
+    <div class="term-body">
+      <div class="prompt">~/projects/myapp $</div>
+      <div class="cmd">claude -p --continue "fix the auth bug in login.ts"</div>
+      <div class="thinking">Thinking... reading login.ts</div>
+      <div class="out">Reading src/auth/login.ts (142 lines)</div>
+      <div class="out">Found issue: missing null check on line 87</div>
+      <div class="cmd">Editing src/auth/login.ts:87</div>
+      <div class="ok">Fix applied. Running tests...</div>
+      <div class="active-line">$ npx vitest run auth ▌</div>
+    </div>
+  </div>
+
+  <!-- Terminal 2: Top Right — idle -->
+  <div class="term-win tw2">
+    <div class="term-titlebar">
+      <div class="term-dots"><span class="td-r"></span><span class="td-y"></span><span class="td-g"></span></div>
+      <span class="term-name">Tab 2: Research</span>
+    </div>
+    <div class="term-body">
+      <div class="prompt">~ $</div>
+      <div class="cmd">claude -p "explain React server components"</div>
+      <div class="out">React Server Components (RSC) are...</div>
+      <div class="out">a new paradigm where components run</div>
+      <div class="out">on the server during rendering...</div>
+      <div class="out" style="color:var(--jade)">Done (2.1s)</div>
+      <div class="prompt">~ $ <span class="active-line">▌</span></div>
+    </div>
+  </div>
+
+  <!-- Terminal 3: Bottom Left — running tests -->
+  <div class="term-win tw3">
+    <div class="term-titlebar">
+      <div class="term-dots"><span class="td-r"></span><span class="td-y"></span><span class="td-g"></span></div>
+      <span class="term-name">Tab 3: Deploy</span>
+    </div>
+    <div class="term-body">
+      <div class="prompt">~/projects/myapp $</div>
+      <div class="cmd">claude -p --continue "deploy to vercel"</div>
+      <div class="out">Running npm run build...</div>
+      <div class="ok">Build succeeded</div>
+      <div class="out">Deploying to Vercel...</div>
+      <div class="active-line">Uploading (67%)... ▌</div>
+    </div>
+  </div>
+
+  <!-- Terminal 4: Bottom Right — new empty -->
+  <div class="term-win tw4" style="opacity:0.4;border-style:dashed">
+    <div class="term-titlebar">
+      <div class="term-dots"><span class="td-r" style="opacity:0.3"></span><span class="td-y" style="opacity:0.3"></span><span class="td-g" style="opacity:0.3"></span></div>
+      <span class="term-name" style="color:rgba(255,255,255,0.15)">+ New terminal</span>
+    </div>
+    <div class="term-body" style="display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.08);font-size:20px">+</div>
+  </div>
+
+  <!-- GOD'S ASSISTANT — Center overlay -->
+  <div class="overlay">
+    <!-- Tab bar -->
+    <div class="tab-bar">
+      <div class="tab active">
+        <div class="tab-dot running"></div>
+        <span>Fix auth</span>
+        <span class="tab-close">×</span>
+      </div>
+      <div class="tab inactive">
+        <div class="tab-dot idle"></div>
+        <span>Research</span>
+        <span class="tab-close">×</span>
+      </div>
+      <div class="tab inactive">
+        <div class="tab-dot running"></div>
+        <span>Deploy</span>
+        <span class="tab-close">×</span>
+      </div>
+      <div class="tab-new">+</div>
+    </div>
+
+    <!-- Top strip -->
+    <div class="top">
+      <div class="orb"></div>
+      <div class="top-title">GOD'S ASSISTANT</div>
+      <div class="top-st">Tab 1 · WORKING</div>
+    </div>
+
+    <!-- Activity stream for active tab -->
+    <div class="stream">
+      <div class="sit"><div class="sic sic-think">🧠</div><div class="sib"><div class="sin">Thinking</div><div class="sid">Reading login.ts to find the bug...</div></div></div>
+      <div class="sit"><div class="sic sic-read">📖</div><div class="sib"><div class="sin">Read</div><div class="sid">src/auth/login.ts — 142 lines</div></div></div>
+      <div class="sit"><div class="sic sic-bash">$_</div><div class="sib"><div class="sin">Edit</div><div class="sid">login.ts:87 — added null check</div></div></div>
+      <div class="sit" style="border-color:rgba(107,203,155,0.1)"><div class="sic sic-bash">$_</div><div class="sib"><div class="sin">Bash</div><div class="sid">npx vitest run auth — running...</div></div></div>
+    </div>
+
+    <!-- Response -->
+    <div class="resp">
+      <div class="rc">Found a missing null check on <code style="background:rgba(107,203,155,0.1);padding:1px 4px;border-radius:3px;color:var(--jade);font-size:8px">line 87</code> of login.ts. Fixed and running tests now.</div>
+    </div>
+
+    <!-- Dock -->
+    <div class="dock">
+      <div class="inp">
+        <input placeholder="Ask anything..." />
+        <div class="snd">Send</div>
+      </div>
+      <div class="effort">
+        <span class="ef on">⚡ Auto</span>
+        <span class="ef off">🏎 Fast</span>
+        <span class="ef off">⚖ Bal</span>
+        <span class="ef off">🧠 Max</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== DESIGN NOTES ===== -->
+<div class="notes">
+  <div class="note">
+    <h3>How it works</h3>
+    <p>
+      Each tab = a <span class="hl">real Terminal.app window</span> + a <span class="hl">claude -p session</span>. When you create a new tab, God's Assistant spawns a Terminal window via AppleScript and positions it around the overlay. The overlay stays centered; terminals arrange in quadrants (top-left, top-right, bottom-left, bottom-right). The tab bar shows all sessions with status dots.
+    </p>
+  </div>
+  <div class="note">
+    <h3>Spatial layout</h3>
+    <p>
+      <span class="hl">Overlay</span> = always centered on screen.<br>
+      <span class="hl">Terminals</span> = positioned in quadrants around the overlay. First terminal goes top-left, second top-right, third bottom-left, fourth bottom-right. 5+ terminals stack/tile. Each terminal is a real macOS window — you can click into it, resize, interact directly.
+    </p>
+  </div>
+  <div class="note">
+    <h3>Tab bar</h3>
+    <p>
+      <span class="hl">Green dot</span> = running (claude is working).<br>
+      <span class="hl">Gray dot</span> = idle (waiting for input).<br>
+      <span class="hl">Red dot</span> = error.<br>
+      <span class="hl">Click tab</span> = switch focus (overlay shows that tab's activity stream, corresponding terminal window comes to front).<br>
+      <span class="hl">+ button</span> = create new session/terminal.<br>
+      <span class="hl">× button</span> = close session + terminal window.
+    </p>
+  </div>
+  <div class="note">
+    <h3>Implementation plan</h3>
+    <p>
+      <span class="hl">Phase 1:</span> Session manager (Python) — track multiple claude -p processes, each with its own stream.<br>
+      <span class="hl">Phase 2:</span> Tab bar (React) — switch between sessions in overlay.<br>
+      <span class="hl">Phase 3:</span> Terminal spawner (Electron) — AppleScript to open Terminal.app, run claude commands, position windows.<br>
+      <span class="hl">Phase 4:</span> Spatial layout — auto-position terminals around overlay in quadrants.
+    </p>
+  </div>
+</div>
+
+</body>
+</html>

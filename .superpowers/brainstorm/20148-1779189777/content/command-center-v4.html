@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>God's Assistant — V4: Idle vs Listening</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#08090d;color:#e2e8f0;font-family:'Inter',sans-serif;display:flex;flex-direction:column;align-items:center;padding:30px 20px;min-height:100vh}
+  h1{font-size:13px;font-weight:400;color:rgba(255,255,255,0.25);letter-spacing:4px;text-transform:uppercase;margin-bottom:6px}
+  .sub{font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:30px}
+
+  .compare{display:flex;gap:24px;margin-bottom:30px}
+  .panel-wrap{display:flex;flex-direction:column;align-items:center;gap:10px}
+  .panel-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase}
+  .label-idle{color:rgba(255,255,255,0.3)}
+  .label-listen{color:#22d3ee}
+
+  /* ============= SHARED OVERLAY STYLES ============= */
+  .ov{
+    width:270px;
+    background:rgba(8,10,18,0.94);backdrop-filter:blur(40px);
+    border:1px solid rgba(255,255,255,0.05);border-radius:16px;
+    position:relative;overflow:hidden;
+    box-shadow:0 4px 40px rgba(0,0,0,0.5),0 0 60px rgba(0,240,255,0.02);
+  }
+  .ov::before{
+    content:'';position:absolute;inset:-1px;border-radius:17px;padding:1px;
+    background:linear-gradient(135deg,rgba(34,211,238,0.1) 0%,transparent 35%,transparent 65%,rgba(168,85,247,0.05) 100%);
+    -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+    -webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;
+  }
+
+  .top{display:flex;align-items:center;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.04)}
+  .orb-w{position:relative;width:30px;height:30px;flex-shrink:0}
+  .orb{width:30px;height:30px;border-radius:50%;box-shadow:inset 0 0 6px rgba(255,255,255,0.08)}
+  .orb-idle{background:radial-gradient(circle at 35% 35%,#475569,#334155 50%,#1e293b 80%);box-shadow:0 0 8px rgba(100,116,139,0.2),inset 0 0 6px rgba(255,255,255,0.05)}
+  .orb-listen{background:radial-gradient(circle at 35% 35%,#22d3ee,#0ea5e9 45%,#0369a1 75%);box-shadow:0 0 16px rgba(34,211,238,0.4),0 0 32px rgba(14,165,233,0.12),inset 0 0 8px rgba(255,255,255,0.08);animation:orbP 3s ease-in-out infinite}
+  @keyframes orbP{0%,100%{transform:scale(1);box-shadow:0 0 16px rgba(34,211,238,0.4),0 0 32px rgba(14,165,233,0.12)}50%{transform:scale(1.04);box-shadow:0 0 22px rgba(34,211,238,0.5),0 0 44px rgba(14,165,233,0.18)}}
+  .ring{position:absolute;inset:-3px;border-radius:50%;border:1px solid rgba(34,211,238,0.15);animation:spin 8s linear infinite}
+  .ring::after{content:'';position:absolute;top:-2px;left:50%;width:3px;height:3px;background:#22d3ee;border-radius:50%;box-shadow:0 0 5px #22d3ee}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .ring-idle{border-color:rgba(255,255,255,0.05);animation:none}
+  .ring-idle::after{display:none}
+
+  .tblock{margin-left:8px;flex:1}
+  .tblock h2{font-size:10px;font-weight:600;color:#f1f5f9;letter-spacing:0.4px}
+  .sline{display:flex;align-items:center;gap:4px;margin-top:1px}
+  .sdot{width:4px;height:4px;border-radius:50%}
+  .sdot-idle{background:rgba(255,255,255,0.15)}
+  .sdot-listen{background:#22d3ee;box-shadow:0 0 4px #22d3ee;animation:bk 2s ease-in-out infinite}
+  @keyframes bk{0%,100%{opacity:1}50%{opacity:.3}}
+  .stxt{font-family:'JetBrains Mono',monospace;font-size:8px}
+  .stxt-idle{color:rgba(255,255,255,0.25)}
+  .stxt-listen{color:rgba(34,211,238,0.6)}
+
+  .stats{display:flex;gap:6px;font-family:'JetBrains Mono',monospace;font-size:7px}
+  .st{display:flex;align-items:center;gap:2px}
+  .d{width:3px;height:3px;border-radius:50%}
+  .d.g{background:#10b981;box-shadow:0 0 2px #10b981}.d.y{background:#f59e0b;box-shadow:0 0 2px #f59e0b}.d.bl{background:#3b82f6;box-shadow:0 0 2px #3b82f6}
+  .d.dim{background:rgba(255,255,255,0.1)}
+  .vl{color:rgba(255,255,255,0.15)}.vv{color:rgba(255,255,255,0.35)}
+  .vv-dim{color:rgba(255,255,255,0.2)}
+
+  /* ---- WAVEFORM ---- */
+  .wv{display:flex;align-items:center;padding:7px 12px;gap:6px;border-bottom:1px solid rgba(255,255,255,0.03)}
+  .wv-live{background:rgba(34,211,238,0.015)}
+  .wv-flat{background:transparent}
+  .bars{display:flex;align-items:center;gap:2px;flex:1;height:22px}
+
+  /* FLAT bars — idle state */
+  .fb{width:2.5px;height:2px;border-radius:1px;background:rgba(255,255,255,0.08);transition:height 0.3s,background 0.3s}
+
+  /* LIVE bars — listening state */
+  .lb{width:2.5px;border-radius:2px;background:linear-gradient(to top,#0ea5e9,#22d3ee);animation:w 1.2s ease-in-out infinite alternate}
+  .lb:nth-child(1){height:5px;animation-delay:0s}.lb:nth-child(2){height:10px;animation-delay:.1s}
+  .lb:nth-child(3){height:18px;animation-delay:.15s}.lb:nth-child(4){height:22px;animation-delay:.2s}
+  .lb:nth-child(5){height:14px;animation-delay:.25s}.lb:nth-child(6){height:20px;animation-delay:.12s}
+  .lb:nth-child(7){height:10px;animation-delay:.3s}.lb:nth-child(8){height:18px;animation-delay:.18s}
+  .lb:nth-child(9){height:8px;animation-delay:.22s}.lb:nth-child(10){height:14px;animation-delay:.08s}
+  .lb:nth-child(11){height:6px;animation-delay:.28s}.lb:nth-child(12){height:16px;animation-delay:.05s}
+  .lb:nth-child(13){height:12px;animation-delay:.17s}.lb:nth-child(14){height:20px;animation-delay:.23s}
+  .lb:nth-child(15){height:8px;animation-delay:.09s}.lb:nth-child(16){height:16px;animation-delay:.14s}
+  .lb:nth-child(17){height:22px;animation-delay:.07s}.lb:nth-child(18){height:12px;animation-delay:.27s}
+  @keyframes w{0%{transform:scaleY(.35);opacity:.4}100%{transform:scaleY(1);opacity:1}}
+
+  .hint{font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(255,255,255,0.15);display:flex;align-items:center;gap:4px;flex-shrink:0}
+  .ky{display:inline-flex;align-items:center;justify-content:center;border-radius:3px;padding:2px 6px;font-size:8px}
+  .ky-idle{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);color:rgba(255,255,255,0.25)}
+  .ky-live{background:rgba(34,211,238,0.08);border:1px solid rgba(34,211,238,0.15);color:#22d3ee;box-shadow:0 0 6px rgba(34,211,238,0.06)}
+
+  /* ---- BOTTOM ---- */
+  .bot{display:flex;align-items:center;justify-content:space-between;padding:7px 12px}
+  .modes{display:flex;gap:3px}
+  .mb{font-family:'JetBrains Mono',monospace;font-size:7px;border-radius:4px;padding:2px 6px;cursor:pointer}
+  .mb-off{color:rgba(255,255,255,0.15);background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03)}
+  .mb-on{color:#22d3ee;background:rgba(34,211,238,0.04);border:1px solid rgba(34,211,238,0.1)}
+  .sc{font-family:'JetBrains Mono',monospace;font-size:7px;color:rgba(255,255,255,0.1);display:flex;gap:8px}
+
+  /* ---- NOTES ---- */
+  .notes{width:564px;margin-top:10px}
+  .note{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:10px;padding:14px 18px;margin-bottom:10px}
+  .note h3{font-size:12px;font-weight:600;color:#f1f5f9;margin-bottom:5px}
+  .note p{font-size:11px;color:rgba(255,255,255,0.4);line-height:1.6}
+  .cy{color:#22d3ee}
+</style>
+</head>
+<body>
+
+<h1>God's Assistant</h1>
+<p class="sub">Waveform behavior: flat when idle, alive when listening</p>
+
+<div class="compare">
+
+  <!-- ===== IDLE STATE ===== -->
+  <div class="panel-wrap">
+    <span class="panel-label label-idle">Idle / Standby</span>
+    <div class="ov">
+      <div class="top">
+        <div class="orb-w"><div class="orb orb-idle"></div><div class="ring ring-idle"></div></div>
+        <div class="tblock">
+          <h2>GOD'S ASSISTANT</h2>
+          <div class="sline"><div class="sdot sdot-idle"></div><span class="stxt stxt-idle">STANDBY</span></div>
+        </div>
+        <div class="stats">
+          <div class="st"><div class="d dim"></div><span class="vl">CPU</span><span class="vv-dim">12%</span></div>
+          <div class="st"><div class="d dim"></div><span class="vl">RAM</span><span class="vv-dim">4.2G</span></div>
+          <div class="st"><div class="d dim"></div><span class="vl">BAT</span><span class="vv-dim">91%</span></div>
+        </div>
+      </div>
+
+      <!-- FLAT waveform — thin silent line -->
+      <div class="wv wv-flat">
+        <div class="bars">
+          <div class="fb"></div><div class="fb"></div><div class="fb"></div><div class="fb"></div>
+          <div class="fb"></div><div class="fb"></div><div class="fb"></div><div class="fb"></div>
+          <div class="fb"></div><div class="fb"></div><div class="fb"></div><div class="fb"></div>
+          <div class="fb"></div><div class="fb"></div><div class="fb"></div><div class="fb"></div>
+          <div class="fb"></div><div class="fb"></div>
+        </div>
+        <div class="hint"><span class="ky ky-idle">SPACE</span> speak</div>
+      </div>
+
+      <div class="bot">
+        <div class="modes"><div class="mb mb-on">PUSH-TO-TALK</div><div class="mb mb-off">ALWAYS ON</div></div>
+        <div class="sc"><span>⌘⇧G</span><span>SPACE</span><span>ESC</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== LISTENING STATE ===== -->
+  <div class="panel-wrap">
+    <span class="panel-label label-listen">● Listening</span>
+    <div class="ov" style="box-shadow:0 4px 40px rgba(0,0,0,0.5),0 0 80px rgba(34,211,238,0.04)">
+      <div class="top" style="border-bottom-color:rgba(34,211,238,0.06)">
+        <div class="orb-w"><div class="orb orb-listen"></div><div class="ring"></div></div>
+        <div class="tblock">
+          <h2>GOD'S ASSISTANT</h2>
+          <div class="sline"><div class="sdot sdot-listen"></div><span class="stxt stxt-listen">LISTENING · 00:03.2</span></div>
+        </div>
+        <div class="stats">
+          <div class="st"><div class="d g"></div><span class="vl">CPU</span><span class="vv">12%</span></div>
+          <div class="st"><div class="d y"></div><span class="vl">RAM</span><span class="vv">4.2G</span></div>
+          <div class="st"><div class="d g"></div><span class="vl">BAT</span><span class="vv">91%</span></div>
+        </div>
+      </div>
+
+      <!-- LIVE waveform — animated bars -->
+      <div class="wv wv-live">
+        <div class="bars">
+          <div class="lb"></div><div class="lb"></div><div class="lb"></div><div class="lb"></div>
+          <div class="lb"></div><div class="lb"></div><div class="lb"></div><div class="lb"></div>
+          <div class="lb"></div><div class="lb"></div><div class="lb"></div><div class="lb"></div>
+          <div class="lb"></div><div class="lb"></div><div class="lb"></div><div class="lb"></div>
+          <div class="lb"></div><div class="lb"></div>
+        </div>
+        <div class="hint"><span class="ky ky-live">SPACE</span> stop</div>
+      </div>
+
+      <!-- Transcript appearing -->
+      <div style="padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.03)">
+        <div style="font-size:12px;color:#f1f5f9;line-height:1.5">"Open Slack and play my morning—"<span class="cursor" style="display:inline-block;width:2px;height:13px;background:#22d3ee;margin-left:2px;animation:cb .8s step-end infinite;vertical-align:text-bottom"></span></div>
+      </div>
+      <style>@keyframes cb{0%,100%{opacity:1}50%{opacity:0}}</style>
+
+      <div class="bot">
+        <div class="modes"><div class="mb mb-on">PUSH-TO-TALK</div><div class="mb mb-off">ALWAYS ON</div></div>
+        <div class="sc"><span>⌘⇧G</span><span>SPACE</span><span>ESC</span></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- TRANSITION NOTES -->
+<div class="notes">
+  <div class="note">
+    <h3>Waveform State Transitions</h3>
+    <p>
+      <span class="cy">Idle:</span> All bars collapse to 2px flat lines, desaturated to dim gray. Silent, minimal. The orb goes slate-gray, ring stops orbiting.<br><br>
+      <span class="cy">Listening (SPACE held / always-on triggered):</span> Bars spring to life — animated heights driven by real mic amplitude. Cyan gradient. The orb lights up cyan, ring starts orbiting with tracking particle. SPACE key glows. Hint changes to "stop".<br><br>
+      <span class="cy">Processing:</span> Bars freeze at last amplitude, fade to gold/amber. Orb shifts to gold.<br><br>
+      <span class="cy">Speaking (TTS):</span> Bars animate to TTS audio waveform. Orb shifts to violet.
+    </p>
+  </div>
+  <div class="note">
+    <h3>Everything Changes Together</h3>
+    <p>
+      The orb color, ring animation, waveform bars, status dot, status text, SPACE key glow, border glow, and system stat brightness all transition together based on state. <span class="cy">Idle = dim everything. Active = light up everything.</span> One coherent visual pulse across the entire UI.
+    </p>
+  </div>
+</div>
+
+</body>
+</html>

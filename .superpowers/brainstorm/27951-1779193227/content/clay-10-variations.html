@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>God's Assistant — 10 Claymorphic Variations</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0f;color:#e8e8ef;font-family:'Inter',sans-serif;padding:24px;min-height:100vh}
+h1{text-align:center;font-size:13px;font-weight:400;color:rgba(255,255,255,0.2);letter-spacing:4px;text-transform:uppercase;margin-bottom:4px}
+.sub{text-align:center;font-size:11px;color:rgba(255,255,255,0.3);margin-bottom:28px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:960px;margin:0 auto}
+.var{position:relative}
+.var-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.var-num{background:rgba(124,58,237,0.15);color:#a78bfa;border-radius:6px;padding:2px 7px;font-weight:600}
+.var-name{color:rgba(255,255,255,0.35)}
+
+/* Shared clay base */
+.ov{width:100%;border-radius:24px;overflow:hidden;position:relative}
+.ov .top{display:flex;align-items:center;padding:10px 14px;gap:8px}
+.ov .orb{width:28px;height:28px;border-radius:50%;flex-shrink:0}
+.ov .tt{font-size:10px;font-weight:600;flex:1;letter-spacing:0.3px}
+.ov .st{font-family:'JetBrains Mono',monospace;font-size:7px;color:rgba(255,255,255,0.25)}
+.ov .inp{margin:0 12px 8px;border-radius:12px;padding:3px;display:flex;align-items:center;gap:4px}
+.ov .inp input{flex:1;background:transparent;border:none;outline:none;color:#e8e8ef;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 8px}
+.ov .inp input::placeholder{color:rgba(255,255,255,0.12)}
+.ov .btn{border:none;border-radius:8px;padding:5px 10px;font-size:9px;font-weight:600;cursor:pointer}
+.ov .resp{margin:0 12px 8px;border-radius:12px;padding:10px 12px;font-size:10px;line-height:1.6}
+.ov .term{margin:0 12px 8px;border-radius:10px;padding:8px 10px;font-family:'JetBrains Mono',monospace;font-size:9px;line-height:1.6;max-height:80px;overflow:auto}
+.ov .cmd{color:#7dd3fc}.ov .cmd::before{content:'❯ ';opacity:0.4}
+.ov .out{color:rgba(255,255,255,0.35);padding-left:12px}
+.ov .agents{margin:0 12px 8px;display:flex;gap:4px}
+.ov .agent{flex:1;border-radius:8px;padding:5px 6px;font-family:'JetBrains Mono',monospace;font-size:7px;display:flex;align-items:center;gap:4px}
+.ov .agent-dot{width:4px;height:4px;border-radius:50%}
+.ov .bot{display:flex;align-items:center;justify-content:space-between;padding:6px 14px;font-family:'JetBrains Mono',monospace;font-size:7px;color:rgba(255,255,255,0.12)}
+
+/* ============ VARIATION 1: Midnight Amethyst ============ */
+.v1{background:linear-gradient(145deg,#1a1528,#120f1e);box-shadow:12px 12px 30px rgba(0,0,0,0.6),-4px -4px 16px rgba(80,50,120,0.06),inset 0 1px 0 rgba(255,255,255,0.05);border:1px solid rgba(124,58,237,0.08)}
+.v1 .orb{background:linear-gradient(135deg,#c084fc,#a855f7 40%,#7c3aed);box-shadow:3px 3px 8px rgba(0,0,0,0.4),inset 0 2px 3px rgba(255,255,255,0.2)}
+.v1 .tt{color:#e8e0f4}
+.v1 .inp{background:linear-gradient(145deg,#14101e,#100d18);box-shadow:inset 2px 2px 5px rgba(0,0,0,0.4),0 1px 2px rgba(0,0,0,0.2);border:1px solid rgba(124,58,237,0.06)}
+.v1 .btn{background:linear-gradient(135deg,#a855f7,#7c3aed);color:white;box-shadow:2px 2px 6px rgba(0,0,0,0.3),inset 0 1px 2px rgba(255,255,255,0.15)}
+.v1 .resp{background:linear-gradient(145deg,#1e1830,#16122a);color:rgba(255,255,255,0.7);box-shadow:4px 4px 10px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.03);border:1px solid rgba(124,58,237,0.05)}
+.v1 .term{background:linear-gradient(145deg,#0e0a16,#0a0812);box-shadow:inset 2px 2px 6px rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.02)}
+.v1 .agent{background:linear-gradient(145deg,#1a1528,#14101e);box-shadow:2px 2px 5px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.02);border:1px solid rgba(124,58,237,0.05);color:rgba(255,255,255,0.4)}
+
+/* ============ VARIATION 2: Ocean Deep ============ */
+.v2{background:linear-gradient(145deg,#0f1a2e,#0a1220);box-shadow:12px 12px 30px rgba(0,0,0,0.6),-4px -4px 16px rgba(30,60,100,0.06),inset 0 1px 0 rgba(255,255,255,0.05);border:1px solid rgba(56,189,248,0.06)}
+.v2 .orb{background:linear-gradient(135deg,#7dd3fc,#38bdf8 40%,#0284c7);box-shadow:3px 3px 8px rgba(0,0,0,0.4),inset 0 2px 3px rgba(255,255,255,0.25)}
+.v2 .tt{color:#e0f0fa}
+.v2 .inp{background:linear-gradient(145deg,#0b1422,#08101a);box-shadow:inset 2px 2px 5px rgba(0,0,0,0.4);border:1px solid rgba(56,189,248,0.05)}
+.v2 .btn{background:linear-gradient(135deg,#38bdf8,#0284c7);color:white;box-shadow:2px 2px 6px rgba(0,0,0,0.3),inset 0 1px 2px rgba(255,255,255,0.2)}
+.v2 .resp{background:linear-gradient(145deg,#0f1e30,#0b1624);color:rgba(255,255,255,0.7);box-shadow:4px 4px 10px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.03);border:1px solid rgba(56,189,248,0.05)}
+.v2 .term{background:linear-gradient(145deg,#060e18,#040a12);box-shadow:inset 2px 2px 6px rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.02)}
+.v2 .agent{background:linear-gradient(145deg,#0f1a2e,#0b1422);box-shadow:2px 2px 5px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.02);border:1px solid rgba(56,189,248,0.04);color:rgba(255,255,255,0.4)}
+
+/* ============ VARIATION 3: Emerald Matrix ============ */
+.v3{background:linear-gradient(145deg,#0f1e18,#0a1610);box-shadow:12px 12px 30px rgba(0,0,0,0.6),-4px -4px 16px rgba(30,100,60,0.05),inset 0 1px 0 rgba(255,255,255,0.04);border:1px solid rgba(52,211,153,0.06)}
+.v3 .orb{background:linear-gradient(135deg,#6ee7b7,#34d399 40%,#059669);box-shadow:3px 3px 8px rgba(0,0,0,0.4),inset 0 2px 3px rgba(255,255,255,0.2)}
+.v3 .tt{color:#d8f5e8}
+.v3 .inp{background:linear-gradient(145deg,#0a1610,#08120c);box-shadow:inset 2px 2px 5px rgba(0,0,0,0.4);border:1px solid rgba(52,211,153,0.05)}
+.v3 .btn{background:linear-gradient(135deg,#34d399,#059669);color:white;box-shadow:2px 2px 6px rgba(0,0,0,0.3),inset 0 1px 2px rgba(255,255,255,0.15)}
+.v3 .resp{background:linear-gradient(145deg,#0f2018,#0b1a12);color:rgba(255,255,255,0.7);box-shadow:4px 4px 10px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.03);border:1px solid rgba(52,211,153,0.05)}
+.v3 .term{background:linear-gradient(145deg,#060e0a,#040c08);box-shadow:inset 2px 2px 6px rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.02)}
+.v3 .agent{background:linear-gradient(145deg,#0f1e18,#0a1610);box-shadow:2px 2px 5px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.02);border:1px solid rgba(52,211,153,0.04);color:rgba(255,255,255,0.4)}
+
+/* ============ VARIATION 4: Rose Gold ============ */
+.v4{background:linear-gradient(145deg,#221a1a,#1a1212);box-shadow:12px 12px 30px rgba(0,0,0,0.6),-4px -4px 16px rgba(120,50,50,0.05),inset 0 1px 0 rgba(255,255,255,0.05);border:1px solid rgba(251,113,133,0.08)}
+.v4 .orb{background:linear-gradient(135deg,#fda4af,#fb7185 40%,#e11d48);box-shadow:3px 3px 8px rgba(0,0,0,0.4),inset 0 2px 3px rgba(255,255,255,0.2)}
+.v4 .tt{color:#fce8ec}
+.v4 .inp{background:linear-gradient(145deg,#1c1414,#160e0e);box-shadow:inset 2px 2px 5px rgba(0,0,0,0.4);border:1px solid rgba(251,113,133,0.06)}
+.v4 .btn{background:linear-gradient(135deg,#fb7185,#e11d48);color:white;box-shadow:2px 2px 6px rgba(0,0,0,0.3),inset 0 1px 2px rgba(255,255,255,0.15)}
+.v4 .resp{background:linear-gradient(145deg,#241a1a,#1c1414);color:rgba(255,255,255,0.7);box-shadow:4px 4px 10px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.03);border:1px solid rgba(251,113,133,0.05)}
+.v4 .term{background:linear-gradient(145deg,#120a0a,#0e0808);box-shadow:inset 2px 2px 6px rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.02)}
+.v4 .agent{background:linear-gradient(145deg,#221a1a,#1c1414);box-shadow:2px 2px 5px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.02);border:1px solid rgba(251,113,133,0.04);color:rgba(255,255,255,0.4)}
+
+/* ============ VARIATION 5: Solar Gold ============ */
+.v5{background:linear-gradient(145deg,#221e0f,#1a160a);box-shadow:12px 12px 30px rgba(0,0,0,0.6),-4px -4px 16px rgba(120,100,30,0.05),inset 0 1px 0 rgba(255,255,255,0.05);border:1px solid rgba(251,191,36,0.08)}
+.v5 .orb{background:linear-gradient(135deg,#fde68a,#fbbf24 40%,#d97706);box-shadow:3px 3px 8px rgba(0,0,0,0.4),inset 0 2px 3px rgba(255,255,255,0.25)}
+.v5 .tt{color:#fef6d8}
+.v5 .inp{background:linear-gradient(145deg,#1a160a,#141108);box-shadow:inset 2px 2px 5px rgba(0,0,0,0.4);border:1px solid rgba(251,191,36,0.06)}
+.v5 .btn{background:linear-gradient(135deg,#fbbf24,#d97706);color:#1a160a;font-weight:700;box-shadow:2px 2px 6px rgba(0,0,0,0.3),inset 0 1px 2px rgba(255,255,255,0.2)}
+.v5 .resp{background:linear-gradient(145deg,#24200f,#1c180a);color:rgba(255,255,255,0.7);box-shadow:4px 4px 10px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.03);border:1px solid rgba(251,191,36,0.05)}
+.v5 .term{background:linear-gradient(145deg,#0e0c06,#0a0804);box-shadow:inset 2px 2px 6px rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.02)}
+.v5 .agent{background:linear-gradient(145deg,#221e0f,#1a160a);box-shadow:2px 2px 5px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.02);border:1px solid rgba(251,191,36,0.04);color:rgba(255,255,255,0.4)}
+
+/* ============ VARIATION 6: Frost White (light clay on dark) ============ */
+.v6{background:linear-gradient(145deg,#20202a,#181820);box-shadow:12px 12px 30px rgba(0,0,0,0.5),-4px -4px 16px rgba(100,100,120,0.06),inset 0 1px 0 rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.06)}
+.v6 .orb{background:linear-gradient(135deg,#e2e8f0,#cbd5e1 40%,#94a3b8);box-shadow:3px 3px 8px rgba(0,0,0,0.4),inset 0 2px 3px rgba(255,255,255,0.4)}
+.v6 .tt{color:#f1f5f9}
+.v6 .inp{background:linear-gradient(145deg,#18181f,#14141a);box-shadow:inset 2px 2px 5px rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.04)}
+.v6 .btn{background:linear-gradient(135deg,#e2e8f0,#cbd5e1);color:#1a1a24;font-weight:700;box-shadow:2px 2px 6px rgba(0,0,0,0.3),inset 0 1px 2px rgba(255,255,255,0.3)}
+.v6 .resp{background:linear-gradient(145deg,#22222c,#1c1c24);color:rgba(255,255,255,0.7);box-shadow:4px 4px 10px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.04)}
+.v6 .term{background:linear-gradient(145deg,#0e0e14,#0a0a10);box-shadow:inset 2px 2px 6px rgba(0,0,0,0.45);border:1px solid rgba(255,255,255,0.02)}
+.v6 .agent{background:linear-gradient(145deg,#20202a,#1a1a22);box-shadow:2px 2px 5px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.04);color:rgba(255,255,255,0.4)}
+.v6 .cmd{color:#94a3b8}
+
+/* ============ VARIATION 7: Neon Cyberpunk ============ */
+.v7{background:linear-gradient(145deg,#1a0f28,#12081e);box-shadow:12px 12px 30px rgba(0,0,0,0.7),-4px -4px 16px rgba(100,20,150,0.05),inset 0 1px 0 rgba(255,255,255,0.04);border:1px solid rgba(236,72,153,0.1)}
+.v7 .orb{background:linear-gradient(135deg,#f0abfc,#e879f9 30%,#c026d3 60%,#86198f);box-shadow:3px 3px 8px rgba(0,0,0,0.5),0 0 12px rgba(236,72,153,0.15),inset 0 2px 3px rgba(255,255,255,0.15)}
+.v7 .tt{color:#fae8ff;font-family:'Space Grotesk',sans-serif}
+.v7 .inp{background:linear-gradient(145deg,#14081e,#100618);box-shadow:inset 2px 2px 5px rgba(0,0,0,0.5),0 0 6px rgba(236,72,153,0.03);border:1px solid rgba(236,72,153,0.08)}
+.v7 .btn{background:linear-gradient(135deg,#ec4899,#be185d);color:white;box-shadow:2px 2px 6px rgba(0,0,0,0.4),0 0 8px rgba(236,72,153,0.15),inset 0 1px 2px rgba(255,255,255,0.1)}
+.v7 .resp{background:linear-gradient(145deg,#1c0f2a,#160a22);color:rgba(255,255,255,0.7);box-shadow:4px 4px 10px rgba(0,0,0,0.35),inset 0 1px 0 rgba(255,255,255,0.03);border:1px solid rgba(236,72,153,0.06)}
+.v7 .term{background:linear-gradient(145deg,#0a0414,#080310);box-shadow:inset 2px 2px 6px rgba(0,0,0,0.6);border:1px solid rgba(236,72,153,0.04)}
+.v7 .agent{background:linear-gradient(145deg,#1a0f28,#14081e);box-shadow:2px 2px 5px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.02);border:1px solid rgba(236,72,153,0.06);color:rgba(255,255,255,0.4)}
+.v7 .cmd{color:#f0abfc}
+
+/* ============ VARIATION 8: Warm Clay (terracotta) ============ */
+.v8{background:linear-gradient(145deg,#221810,#1a120a);box-shadow:12px 12px 30px rgba(0,0,0,0.5),-4px -4px 16px rgba(120,70,30,0.06),inset 0 1px 0 rgba(255,255,255,0.05);border:1px solid rgba(251,146,60,0.08)}
+.v8 .orb{background:linear-gradient(135deg,#fdba74,#fb923c 40%,#ea580c);box-shadow:3px 3px 8px rgba(0,0,0,0.4),inset 0 2px 3px rgba(255,255,255,0.2)}
+.v8 .tt{color:#fef0e0}
+.v8 .inp{background:linear-gradient(145deg,#1a120a,#140e08);box-shadow:inset 2px 2px 5px rgba(0,0,0,0.4);border:1px solid rgba(251,146,60,0.06)}
+.v8 .btn{background:linear-gradient(135deg,#fb923c,#ea580c);color:white;box-shadow:2px 2px 6px rgba(0,0,0,0.3),inset 0 1px 2px rgba(255,255,255,0.15)}
+.v8 .resp{background:linear-gradient(145deg,#241a10,#1c140c);color:rgba(255,255,255,0.7);box-shadow:4px 4px 10px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.03);border:1px solid rgba(251,146,60,0.05)}
+.v8 .term{background:linear-gradient(145deg,#0e0a06,#0a0804);box-shadow:inset 2px 2px 6px rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.02)}
+.v8 .agent{background:linear-gradient(145deg,#221810,#1a120a);box-shadow:2px 2px 5px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.02);border:1px solid rgba(251,146,60,0.04);color:rgba(255,255,255,0.4)}
+.v8 .cmd{color:#fdba74}
+
+/* ============ VARIATION 9: Electric Indigo ============ */
+.v9{background:linear-gradient(145deg,#10102e,#0a0a20);box-shadow:12px 12px 30px rgba(0,0,0,0.6),-4px -4px 16px rgba(60,60,140,0.06),inset 0 1px 0 rgba(255,255,255,0.05);border:1px solid rgba(99,102,241,0.08)}
+.v9 .orb{background:linear-gradient(135deg,#a5b4fc,#818cf8 40%,#6366f1);box-shadow:3px 3px 8px rgba(0,0,0,0.4),inset 0 2px 3px rgba(255,255,255,0.2)}
+.v9 .tt{color:#eef0ff}
+.v9 .inp{background:linear-gradient(145deg,#0c0c24,#08081c);box-shadow:inset 2px 2px 5px rgba(0,0,0,0.4);border:1px solid rgba(99,102,241,0.06)}
+.v9 .btn{background:linear-gradient(135deg,#818cf8,#6366f1);color:white;box-shadow:2px 2px 6px rgba(0,0,0,0.3),inset 0 1px 2px rgba(255,255,255,0.15)}
+.v9 .resp{background:linear-gradient(145deg,#141430,#0e0e26);color:rgba(255,255,255,0.7);box-shadow:4px 4px 10px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.03);border:1px solid rgba(99,102,241,0.05)}
+.v9 .term{background:linear-gradient(145deg,#06060e,#04040a);box-shadow:inset 2px 2px 6px rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.02)}
+.v9 .agent{background:linear-gradient(145deg,#10102e,#0c0c24);box-shadow:2px 2px 5px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.02);border:1px solid rgba(99,102,241,0.04);color:rgba(255,255,255,0.4)}
+.v9 .cmd{color:#a5b4fc}
+
+/* ============ VARIATION 10: Blueberry Cream (your Dost rebrand!) ============ */
+.v10{background:linear-gradient(145deg,#1a1830,#141226);box-shadow:14px 14px 35px rgba(0,0,0,0.55),-5px -5px 18px rgba(80,60,140,0.06),inset 0 2px 0 rgba(255,255,255,0.06);border:1px solid rgba(139,92,246,0.1)}
+.v10 .orb{background:linear-gradient(135deg,#ddd6fe,#c4b5fd 30%,#8b5cf6 60%,#6d28d9);box-shadow:4px 4px 10px rgba(0,0,0,0.4),0 0 10px rgba(139,92,246,0.1),inset 0 2px 4px rgba(255,255,255,0.25)}
+.v10 .tt{color:#f5f0ff;font-family:'Space Grotesk',sans-serif;font-weight:600}
+.v10 .inp{background:linear-gradient(145deg,#141226,#100e1e);box-shadow:inset 2px 2px 6px rgba(0,0,0,0.4),inset -1px -1px 3px rgba(139,92,246,0.02);border:1px solid rgba(139,92,246,0.06)}
+.v10 .btn{background:linear-gradient(135deg,#a78bfa,#8b5cf6,#7c3aed);color:white;box-shadow:3px 3px 8px rgba(0,0,0,0.35),0 0 6px rgba(139,92,246,0.1),inset 0 1px 3px rgba(255,255,255,0.15);letter-spacing:0.5px}
+.v10 .resp{background:linear-gradient(145deg,#1e1a34,#18142c);color:rgba(255,255,255,0.75);box-shadow:5px 5px 14px rgba(0,0,0,0.3),-2px -2px 8px rgba(80,60,120,0.03),inset 0 1px 0 rgba(255,255,255,0.04);border:1px solid rgba(139,92,246,0.06)}
+.v10 .term{background:linear-gradient(145deg,#0a0816,#060412);box-shadow:inset 3px 3px 8px rgba(0,0,0,0.5),inset -1px -1px 3px rgba(139,92,246,0.01);border:1px solid rgba(139,92,246,0.03)}
+.v10 .agent{background:linear-gradient(145deg,#1a1830,#141226);box-shadow:3px 3px 6px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.03);border:1px solid rgba(139,92,246,0.06);color:rgba(199,180,255,0.5)}
+.v10 .cmd{color:#c4b5fd}
+.v10 .bot{color:rgba(139,92,246,0.2)}
+</style>
+</head>
+<body>
+
+<h1>God's Assistant</h1>
+<p class="sub">10 claymorphic terminal overlay variations — click the one you love</p>
+
+<div class="grid">
+
+<!-- TEMPLATE FOR EACH: top bar + input + response + terminal + agents + bottom -->
+
+<!-- V1: Midnight Amethyst -->
+<div class="var" data-choice="1" onclick="toggleSelect(this)">
+  <div class="var-label"><span class="var-num">1</span><span class="var-name">Midnight Amethyst</span></div>
+  <div class="ov v1">
+    <div class="top"><div class="orb"></div><div class="tt">GOD'S ASSISTANT</div><div class="st">CPU 18% · RAM 5.2G</div></div>
+    <div class="inp"><input placeholder="Ask anything..." value="check iPhone mirroring skill" /><div class="btn">Send</div></div>
+    <div class="resp">iPhone mirroring skill loaded. Server reachable, window active.</div>
+    <div class="term"><div class="cmd">claude -p "check iPhone mirroring"</div><div class="out">→ Skill loaded at ~/.claude/skills/iphone-mirroring/</div></div>
+    <div class="agents"><div class="agent"><div class="agent-dot" style="background:#34d399;box-shadow:0 0 3px #34d399"></div>Agent 1: Done (3.2s)</div><div class="agent"><div class="agent-dot" style="background:#38bdf8;box-shadow:0 0 3px #38bdf8"></div>Agent 2: Running...</div></div>
+    <div class="bot"><span>⌘⇧G · SPACE · ESC</span><span>PUSH-TO-TALK</span></div>
+  </div>
+</div>
+
+<!-- V2: Ocean Deep -->
+<div class="var" data-choice="2" onclick="toggleSelect(this)">
+  <div class="var-label"><span class="var-num">2</span><span class="var-name">Ocean Deep</span></div>
+  <div class="ov v2">
+    <div class="top"><div class="orb"></div><div class="tt">GOD'S ASSISTANT</div><div class="st">CPU 18% · RAM 5.2G</div></div>
+    <div class="inp"><input placeholder="Ask anything..." value="check iPhone mirroring skill" /><div class="btn">Send</div></div>
+    <div class="resp">iPhone mirroring skill loaded. Server reachable, window active.</div>
+    <div class="term"><div class="cmd">claude -p "check iPhone mirroring"</div><div class="out">→ Skill loaded</div></div>
+    <div class="agents"><div class="agent"><div class="agent-dot" style="background:#34d399;box-shadow:0 0 3px #34d399"></div>Agent 1: Done</div><div class="agent"><div class="agent-dot" style="background:#38bdf8;box-shadow:0 0 3px #38bdf8"></div>Agent 2: Running</div></div>
+    <div class="bot"><span>⌘⇧G · SPACE · ESC</span><span>PUSH-TO-TALK</span></div>
+  </div>
+</div>
+
+<!-- V3: Emerald Matrix -->
+<div class="var" data-choice="3" onclick="toggleSelect(this)">
+  <div class="var-label"><span class="var-num">3</span><span class="var-name">Emerald Matrix</span></div>
+  <div class="ov v3">
+    <div class="top"><div class="orb"></div><div class="tt">GOD'S ASSISTANT</div><div class="st">CPU 18% · RAM 5.2G</div></div>
+    <div class="inp"><input placeholder="Ask anything..." /><div class="btn">Send</div></div>
+    <div class="resp">iPhone mirroring skill loaded. Server reachable, window active.</div>
+    <div class="term"><div class="cmd">claude -p "check iPhone mirroring"</div><div class="out">→ Skill loaded</div></div>
+    <div class="agents"><div class="agent"><div class="agent-dot" style="background:#34d399;box-shadow:0 0 3px #34d399"></div>Agent 1: Done</div><div class="agent"><div class="agent-dot" style="background:#fbbf24;box-shadow:0 0 3px #fbbf24"></div>Agent 2: Running</div></div>
+    <div class="bot"><span>⌘⇧G · SPACE · ESC</span><span>PUSH-TO-TALK</span></div>
+  </div>
+</div>
+
+<!-- V4: Rose Gold -->
+<div class="var" data-choice="4" onclick="toggleSelect(this)">
+  <div class="var-label"><span class="var-num">4</span><span class="var-name">Rose Gold</span></div>
+  <div class="ov v4">
+    <div class="top"><div class="orb"></div><div class="tt">GOD'S ASSISTANT</div><div class="st">CPU 18% · RAM 5.2G</div></div>
+    <div class="inp"><input placeholder="Ask anything..." /><div class="btn">Send</div></div>
+    <div class="resp">iPhone mirroring skill loaded. Server reachable, window active.</div>
+    <div class="term"><div class="cmd">claude -p "check iPhone mirroring"</div><div class="out">→ Skill loaded</div></div>
+    <div class="agents"><div class="agent"><div class="agent-dot" style="background:#34d399;box-shadow:0 0 3px #34d399"></div>Agent 1: Done</div><div class="agent"><div class="agent-dot" style="background:#fb7185;box-shadow:0 0 3px #fb7185"></div>Agent 2: Running</div></div>
+    <div class="bot"><span>⌘⇧G · SPACE · ESC</span><span>PUSH-TO-TALK</span></div>
+  </div>
+</div>
+
+<!-- V5: Solar Gold -->
+<div class="var" data-choice="5" onclick="toggleSelect(this)">
+  <div class="var-label"><span class="var-num">5</span><span class="var-name">Solar Gold</span></div>
+  <div class="ov v5">
+    <div class="top"><div class="orb"></div><div class="tt">GOD'S ASSISTANT</div><div class="st">CPU 18% · RAM 5.2G</div></div>
+    <div class="inp"><input placeholder="Ask anything..." /><div class="btn">Send</div></div>
+    <div class="resp">iPhone mirroring skill loaded. Server reachable, window active.</div>
+    <div class="term"><div class="cmd">claude -p "check iPhone mirroring"</div><div class="out">→ Skill loaded</div></div>
+    <div class="agents"><div class="agent"><div class="agent-dot" style="background:#34d399;box-shadow:0 0 3px #34d399"></div>Agent 1: Done</div><div class="agent"><div class="agent-dot" style="background:#fbbf24;box-shadow:0 0 3px #fbbf24"></div>Agent 2: Running</div></div>
+    <div class="bot"><span>⌘⇧G · SPACE · ESC</span><span>PUSH-TO-TALK</span></div>
+  </div>
+</div>
+
+<!-- V6: Frost White -->
+<div class="var" data-choice="6" onclick="toggleSelect(this)">
+  <div class="var-label"><span class="var-num">6</span><span class="var-name">Frost White</span></div>
+  <div class="ov v6">
+    <div class="top"><div class="orb"></div><div class="tt">GOD'S ASSISTANT</div><div class="st">CPU 18% · RAM 5.2G</div></div>
+    <div class="inp"><input placeholder="Ask anything..." /><div class="btn">Send</div></div>
+    <div class="resp">iPhone mirroring skill loaded. Server reachable, window active.</div>
+    <div class="term"><div class="cmd">claude -p "check iPhone mirroring"</div><div class="out">→ Skill loaded</div></div>
+    <div class="agents"><div class="agent"><div class="agent-dot" style="background:#34d399;box-shadow:0 0 3px #34d399"></div>Agent 1: Done</div><div class="agent"><div class="agent-dot" style="background:#94a3b8;box-shadow:0 0 3px #94a3b8"></div>Agent 2: Running</div></div>
+    <div class="bot"><span>⌘⇧G · SPACE · ESC</span><span>PUSH-TO-TALK</span></div>
+  </div>
+</div>
+
+<!-- V7: Neon Cyberpunk -->
+<div class="var" data-choice="7" onclick="toggleSelect(this)">
+  <div class="var-label"><span class="var-num">7</span><span class="var-name">Neon Cyberpunk</span></div>
+  <div class="ov v7">
+    <div class="top"><div class="orb"></div><div class="tt">GOD'S ASSISTANT</div><div class="st">CPU 18% · RAM 5.2G</div></div>
+    <div class="inp"><input placeholder="Ask anything..." /><div class="btn">Send</div></div>
+    <div class="resp">iPhone mirroring skill loaded. Server reachable, window active.</div>
+    <div class="term"><div class="cmd">claude -p "check iPhone mirroring"</div><div class="out">→ Skill loaded</div></div>
+    <div class="agents"><div class="agent"><div class="agent-dot" style="background:#34d399;box-shadow:0 0 3px #34d399"></div>Agent 1: Done</div><div class="agent"><div class="agent-dot" style="background:#ec4899;box-shadow:0 0 3px #ec4899"></div>Agent 2: Running</div></div>
+    <div class="bot"><span>⌘⇧G · SPACE · ESC</span><span>PUSH-TO-TALK</span></div>
+  </div>
+</div>
+
+<!-- V8: Warm Clay -->
+<div class="var" data-choice="8" onclick="toggleSelect(this)">
+  <div class="var-label"><span class="var-num">8</span><span class="var-name">Warm Clay (Terracotta)</span></div>
+  <div class="ov v8">
+    <div class="top"><div class="orb"></div><div class="tt">GOD'S ASSISTANT</div><div class="st">CPU 18% · RAM 5.2G</div></div>
+    <div class="inp"><input placeholder="Ask anything..." /><div class="btn">Send</div></div>
+    <div class="resp">iPhone mirroring skill loaded. Server reachable, window active.</div>
+    <div class="term"><div class="cmd">claude -p "check iPhone mirroring"</div><div class="out">→ Skill loaded</div></div>
+    <div class="agents"><div class="agent"><div class="agent-dot" style="background:#34d399;box-shadow:0 0 3px #34d399"></div>Agent 1: Done</div><div class="agent"><div class="agent-dot" style="background:#fb923c;box-shadow:0 0 3px #fb923c"></div>Agent 2: Running</div></div>
+    <div class="bot"><span>⌘⇧G · SPACE · ESC</span><span>PUSH-TO-TALK</span></div>
+  </div>
+</div>
+
+<!-- V9: Electric Indigo -->
+<div class="var" data-choice="9" onclick="toggleSelect(this)">
+  <div class="var-label"><span class="var-num">9</span><span class="var-name">Electric Indigo</span></div>
+  <div class="ov v9">
+    <div class="top"><div class="orb"></div><div class="tt">GOD'S ASSISTANT</div><div class="st">CPU 18% · RAM 5.2G</div></div>
+    <div class="inp"><input placeholder="Ask anything..." /><div class="btn">Send</div></div>
+    <div class="resp">iPhone mirroring skill loaded. Server reachable, window active.</div>
+    <div class="term"><div class="cmd">claude -p "check iPhone mirroring"</div><div class="out">→ Skill loaded</div></div>
+    <div class="agents"><div class="agent"><div class="agent-dot" style="background:#34d399;box-shadow:0 0 3px #34d399"></div>Agent 1: Done</div><div class="agent"><div class="agent-dot" style="background:#818cf8;box-shadow:0 0 3px #818cf8"></div>Agent 2: Running</div></div>
+    <div class="bot"><span>⌘⇧G · SPACE · ESC</span><span>PUSH-TO-TALK</span></div>
+  </div>
+</div>
+
+<!-- V10: Blueberry Cream -->
+<div class="var" data-choice="10" onclick="toggleSelect(this)">
+  <div class="var-label"><span class="var-num">10</span><span class="var-name">Blueberry Cream (your Dost palette!)</span></div>
+  <div class="ov v10">
+    <div class="top"><div class="orb"></div><div class="tt">GOD'S ASSISTANT</div><div class="st">CPU 18% · RAM 5.2G</div></div>
+    <div class="inp"><input placeholder="Ask anything..." value="check iPhone mirroring skill" /><div class="btn">Send</div></div>
+    <div class="resp">iPhone mirroring skill loaded. Server reachable, window active. The skill is at ~/.claude/skills/iphone-mirroring/SKILL.md</div>
+    <div class="term"><div class="cmd">claude -p "check iPhone mirroring"</div><div class="out">→ Skill loaded at ~/.claude/skills/iphone-mirroring/</div><div class="out">→ mirroir-mcp server: reachable</div></div>
+    <div class="agents"><div class="agent"><div class="agent-dot" style="background:#34d399;box-shadow:0 0 3px #34d399"></div>Agent 1: Done (3.2s)</div><div class="agent"><div class="agent-dot" style="background:#8b5cf6;box-shadow:0 0 3px #8b5cf6"></div>Agent 2: Running...</div></div>
+    <div class="bot"><span>⌘⇧G · SPACE · ESC</span><span>PUSH-TO-TALK</span></div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

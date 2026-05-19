@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>God's Assistant — Complete Stream UI</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#080a08;color:#c8f0d8;font-family:'Bricolage Grotesque',sans-serif;padding:24px;min-height:100vh;display:flex;flex-direction:column;align-items:center}
+h1{font-size:13px;font-weight:600;color:rgba(255,255,255,0.18);letter-spacing:5px;text-transform:uppercase;margin-bottom:4px}
+.sub{font-size:11px;color:rgba(255,255,255,0.22);margin-bottom:20px}
+.section-title{font-size:11px;font-weight:700;color:rgba(107,203,155,0.4);letter-spacing:3px;text-transform:uppercase;margin:24px 0 12px;text-align:center}
+
+:root{
+  --bg:#14261c;--bg-l:#1a2e22;--bg-d:#0a1810;
+  --jade:#6bcb9b;--jade-m:#2d9b6a;--jade-dim:rgba(107,203,155,0.12);
+  --gold:#f0c060;--gold-m:#d4a030;
+  --violet:#b49cdb;--violet-m:#7e5fad;
+  --pink:#ed64a6;--pink-m:#b83280;
+  --blue:#63b3ed;--blue-m:#3182ce;
+  --cyan:#4fd1c5;--cyan-m:#2c7a7b;
+  --orange:#f6ad55;--orange-m:#c05621;
+  --txt:#c8f0d8;--txt-d:rgba(200,240,216,0.5);--txt-m:rgba(200,240,216,0.22);
+  --ok:#6ee7b7;--warn:#f0c060;--err:#f07060;
+  --w08:rgba(255,255,255,0.08);--w04:rgba(255,255,255,0.04);--w02:rgba(255,255,255,0.02);
+  --co:12px 12px 28px rgba(0,0,0,0.55),inset -6px -6px 14px rgba(0,0,0,0.3),inset 6px 6px 14px rgba(255,255,255,0.05);
+  --cr:4px 4px 10px rgba(0,0,0,0.4),inset -3px -3px 6px rgba(0,0,0,0.2),inset 3px 3px 6px rgba(255,255,255,0.06);
+  --cs:inset 4px 4px 10px rgba(0,0,0,0.45),inset -2px -2px 5px rgba(255,255,255,0.02);
+  --cb:3px 3px 8px rgba(0,0,0,0.35),inset -2px -2px 4px rgba(0,0,0,0.2),inset 2px 2px 4px rgba(255,255,255,0.15);
+}
+
+.ov{
+  width:560px;background:linear-gradient(145deg,var(--bg-l),var(--bg));
+  border-radius:32px;overflow:hidden;position:relative;
+  box-shadow:var(--co);border:1px solid rgba(107,203,155,0.06);
+  margin-bottom:16px;display:flex;flex-direction:column;
+}
+
+/* TOP STRIP */
+.top{display:flex;align-items:center;padding:10px 20px;gap:10px;background:linear-gradient(180deg,rgba(255,255,255,0.015) 0%,transparent 100%);border-bottom:1px solid var(--w04)}
+.orb{width:28px;height:28px;border-radius:50%;flex-shrink:0;position:relative;background:linear-gradient(135deg,var(--jade),var(--jade-m));box-shadow:3px 3px 8px rgba(0,0,0,0.4),inset -2px -2px 5px rgba(0,0,0,0.2),inset 2px 2px 5px rgba(255,255,255,0.18),0 0 10px rgba(107,203,155,0.2)}
+.orb::after{content:'';position:absolute;inset:-3px;border-radius:50%;border:1px solid rgba(107,203,155,0.15);animation:spin 8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.tt{font-size:11px;font-weight:700;letter-spacing:1px;flex:1;color:var(--txt)}
+.ts{display:flex;align-items:center;gap:4px}
+.td{width:4px;height:4px;border-radius:50%;background:var(--jade);box-shadow:0 0 5px rgba(107,203,155,0.5);animation:p 2s ease-in-out infinite}
+@keyframes p{0%,100%{opacity:1}50%{opacity:.3}}
+.tst{font-family:'Geist Mono',monospace;font-size:8px;color:rgba(107,203,155,0.5)}
+.tstats{display:flex;gap:6px;font-family:'Geist Mono',monospace;font-size:7px}
+.tstats span{color:var(--txt-m)}
+
+/* WAVE */
+.wave{display:flex;align-items:center;padding:5px 20px;gap:6px;border-bottom:1px solid var(--w04)}
+.wbs{display:flex;align-items:center;gap:1.5px;flex:1;height:14px}
+.wb{width:2px;height:2px;border-radius:1px;background:var(--w08)}
+.wh{font-family:'Geist Mono',monospace;font-size:7px;color:var(--txt-m);display:flex;align-items:center;gap:4px}
+.wh span{padding:1px 5px;border-radius:3px;background:var(--w04);border:1px solid var(--w08);font-size:7px}
+
+/* MIDDLE */
+.mid{flex:1;overflow-y:auto;max-height:480px}
+
+/* STREAM */
+.stream{padding:8px 14px}
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;padding:0 4px}
+.sl{font-family:'Geist Mono',monospace;font-size:8px;color:var(--txt-m);letter-spacing:1.5px;text-transform:uppercase}
+.sb{font-family:'Geist Mono',monospace;font-size:7px;color:var(--jade);background:var(--jade-dim);border-radius:6px;padding:2px 6px}
+
+.feed{display:flex;flex-direction:column;gap:3px}
+
+/* Stream items */
+.it{display:flex;gap:8px;padding:6px 10px;background:linear-gradient(145deg,var(--bg-l),var(--bg));border-radius:12px;box-shadow:var(--cr);border:1px solid var(--w02);font-family:'Geist Mono',monospace;font-size:9px;transition:border-color 0.3s}
+.it.act{border-color:rgba(107,203,155,0.1);animation:ip 3s ease-in-out infinite}
+@keyframes ip{0%,100%{border-color:rgba(107,203,155,0.1)}50%{border-color:rgba(107,203,155,0.18)}}
+
+.ic{width:22px;height:22px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;box-shadow:2px 2px 4px rgba(0,0,0,0.3),inset 0 1px 2px rgba(255,255,255,0.12)}
+/* Icon variants */
+.ic-think{background:linear-gradient(135deg,var(--violet),var(--violet-m));color:white}
+.ic-read{background:linear-gradient(135deg,var(--jade),var(--jade-m));color:white}
+.ic-bash{background:linear-gradient(135deg,#2a3a30,#1a2a20);color:var(--jade)}
+.ic-edit{background:linear-gradient(135deg,var(--gold),var(--gold-m));color:var(--bg-d)}
+.ic-write{background:linear-gradient(135deg,var(--blue),var(--blue-m));color:white}
+.ic-agent{background:linear-gradient(135deg,var(--pink),var(--pink-m));color:white}
+.ic-search{background:linear-gradient(135deg,#48bb78,#276749);color:white}
+.ic-glob{background:linear-gradient(135deg,var(--cyan),var(--cyan-m));color:white}
+.ic-grep{background:linear-gradient(135deg,#9f7aea,#6b46c1);color:white}
+.ic-skill{background:linear-gradient(135deg,var(--orange),var(--orange-m));color:white}
+.ic-fetch{background:linear-gradient(135deg,#4299e1,#2b6cb0);color:white}
+.ic-done{background:linear-gradient(135deg,var(--jade),var(--jade-m));color:white}
+.ic-err{background:linear-gradient(135deg,var(--err),#c04040);color:white}
+.ic-mcp{background:linear-gradient(135deg,#f687b3,#b83280);color:white}
+.ic-plan{background:linear-gradient(135deg,#fbd38d,#c05621);color:var(--bg-d)}
+
+.ib{flex:1;min-width:0}
+.in{color:var(--txt);font-weight:500;font-size:9px;margin-bottom:1px}
+.id{color:var(--txt-d);font-size:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.id code{background:rgba(107,203,155,0.1);padding:0 4px;border-radius:3px;color:var(--jade);font-size:8px}
+.itm{color:var(--txt-m);font-size:7px;flex-shrink:0;margin-top:2px}
+
+/* Bash inline */
+.bi{margin-top:4px;padding:4px 6px;border-radius:6px;background:linear-gradient(145deg,var(--bg-d),#08140c);box-shadow:var(--cs);border:1px solid var(--w02);font-size:8px;line-height:1.5;max-height:55px;overflow-y:auto}
+.bi .c{color:var(--jade)}.bi .c::before{content:'❯ ';opacity:0.35}
+.bi .o{color:var(--ok);padding-left:10px}
+.bi .e{color:var(--err);padding-left:10px}
+
+/* Agent nested — indented sub-feed */
+.agent-nest{margin:4px 0 0 30px;padding-left:8px;border-left:2px solid rgba(237,100,166,0.15)}
+.agent-nest .it{background:linear-gradient(145deg,#1e1828,#18142a);border-color:rgba(237,100,166,0.05)}
+
+/* Skill pill */
+.skill-tag{display:inline-flex;align-items:center;gap:3px;background:rgba(246,173,85,0.1);border:1px solid rgba(246,173,85,0.15);border-radius:6px;padding:1px 6px;font-size:7px;color:var(--orange);margin-left:4px}
+
+/* RESP */
+.rsp{padding:6px 14px 10px}
+.rc{background:linear-gradient(145deg,var(--bg-l),var(--bg));border-radius:18px;padding:12px 16px;box-shadow:6px 6px 16px rgba(0,0,0,0.3),inset -4px -4px 10px rgba(0,0,0,0.2),inset 4px 4px 10px rgba(255,255,255,0.03);border:1px solid var(--w02)}
+.rc .q{font-family:'Geist Mono',monospace;font-size:9px;color:var(--txt-d);margin-bottom:6px;font-style:italic}
+.rc .a{font-size:11px;color:var(--txt);line-height:1.7;max-height:200px;overflow-y:auto}
+.rc .a code{background:rgba(107,203,155,0.1);padding:1px 5px;border-radius:4px;color:var(--jade);font-size:10px;font-family:'Geist Mono',monospace}
+.rc .a strong{color:var(--jade);font-weight:600}
+
+/* DOCK */
+.dock{border-top:1px solid var(--w04);padding:10px 14px 12px;background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,0.06) 100%)}
+.ip{display:flex;align-items:center;gap:6px;border-radius:22px;padding:5px 5px 5px 16px;background:linear-gradient(145deg,#122418,#0e2014);box-shadow:var(--cs);border:1px solid var(--w02);margin-bottom:8px}
+.ip input{flex:1;background:transparent;border:none;outline:none;color:var(--txt);font-family:'Geist Mono',monospace;font-size:11px;padding:8px 0}
+.ip input::placeholder{color:rgba(200,240,216,0.12)}
+.mic{border:none;border-radius:14px;padding:8px 11px;background:linear-gradient(145deg,var(--bg-l),var(--bg));color:var(--txt-m);font-size:14px;cursor:pointer;box-shadow:var(--cr)}
+.snd{border:none;border-radius:16px;padding:8px 16px;background:linear-gradient(135deg,var(--gold),var(--gold-m));color:var(--bg-d);font-weight:700;font-size:10px;cursor:pointer;box-shadow:var(--cb);font-family:'Bricolage Grotesque',sans-serif}
+.dr{display:flex;align-items:center;justify-content:space-between}
+.ms{display:flex;gap:4px}
+.mm{font-family:'Geist Mono',monospace;font-size:7px;border-radius:8px;padding:3px 8px;border:none;cursor:pointer}
+.mm.on{background:linear-gradient(135deg,var(--jade),var(--jade-m));color:var(--bg-d);font-weight:700;box-shadow:var(--cb)}
+.mm.off{background:linear-gradient(145deg,var(--bg-l),var(--bg));color:var(--txt-m);box-shadow:2px 2px 5px rgba(0,0,0,0.2);border:1px solid var(--w04)}
+.ks{font-family:'Geist Mono',monospace;font-size:7px;color:var(--txt-m);display:flex;gap:8px}
+</style>
+</head>
+<body>
+
+<h1>God's Assistant</h1>
+<p class="sub">Complete activity stream — every Claude Code event type + agents + skills</p>
+
+<!-- ===== SCENARIO 1: Complex multi-step with agent spawn ===== -->
+<div class="section-title">Scenario: "Build me a login page with tests"</div>
+
+<div class="ov">
+  <div class="top">
+    <div class="orb"></div>
+    <div class="tt">GOD'S ASSISTANT</div>
+    <div class="ts"><div class="td"></div><span class="tst">WORKING · 34s</span></div>
+    <div class="tstats"><span>CPU 45%</span><span>·</span><span>BAT 82%</span></div>
+  </div>
+  <div class="wave"><div class="wbs"><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div></div><div class="wh"><span>SPACE</span>speak</div></div>
+
+  <div class="mid">
+    <div class="stream">
+      <div class="sh"><span class="sl">▾ Activity</span><span class="sb">12 steps</span></div>
+      <div class="feed">
+
+        <!-- Thinking -->
+        <div class="it"><div class="ic ic-think">🧠</div><div class="ib"><div class="in">Thinking</div><div class="id">Planning login page architecture — React component + auth flow...</div></div><div class="itm">0.8s</div></div>
+
+        <!-- Skill loaded -->
+        <div class="it"><div class="ic ic-skill">⚡</div><div class="ib"><div class="in">Skill loaded<span class="skill-tag">superpowers:brainstorming</span></div><div class="id">Using brainstorming skill for design exploration</div></div><div class="itm">0.1s</div></div>
+
+        <!-- Glob search -->
+        <div class="it"><div class="ic ic-glob">🔎</div><div class="ib"><div class="in">Glob</div><div class="id"><code>src/components/**/*.tsx</code> — 14 matches</div></div><div class="itm">0.1s</div></div>
+
+        <!-- Read -->
+        <div class="it"><div class="ic ic-read">📖</div><div class="ib"><div class="in">Read</div><div class="id"><code>src/components/App.tsx</code> — 42 lines</div></div><div class="itm">0.1s</div></div>
+
+        <!-- Grep -->
+        <div class="it"><div class="ic ic-grep">⊕</div><div class="ib"><div class="in">Grep</div><div class="id"><code>auth|login|session</code> in <code>src/**</code> — 8 matches</div></div><div class="itm">0.2s</div></div>
+
+        <!-- Write new file -->
+        <div class="it"><div class="ic ic-write">✍️</div><div class="ib"><div class="in">Write</div><div class="id"><code>src/components/LoginPage.tsx</code> — created (87 lines)</div></div><div class="itm">0.3s</div></div>
+
+        <!-- Edit existing -->
+        <div class="it"><div class="ic ic-edit">✏️</div><div class="ib"><div class="in">Edit</div><div class="id"><code>src/App.tsx:12-15</code> — added LoginPage route</div></div><div class="itm">0.1s</div></div>
+
+        <!-- Bash: install dep -->
+        <div class="it"><div class="ic ic-bash">$_</div><div class="ib"><div class="in">Bash</div><div class="bi"><div class="c">npm install @auth/core</div><div class="o">added 12 packages in 3.2s</div></div></div><div class="itm">3.4s</div></div>
+
+        <!-- Agent spawned — with nested activity -->
+        <div class="it act" style="border-color:rgba(237,100,166,0.12)"><div class="ic ic-agent">🤖</div><div class="ib"><div class="in">Agent: Write login tests</div><div class="id">Subagent working on test suite...</div></div><div class="itm">8.2s</div></div>
+
+        <!-- Nested agent activity -->
+        <div class="agent-nest">
+          <div class="it"><div class="ic ic-write" style="width:18px;height:18px;border-radius:6px;font-size:8px">✍️</div><div class="ib"><div class="in" style="font-size:8px">Write</div><div class="id"><code>tests/LoginPage.test.tsx</code></div></div><div class="itm">0.2s</div></div>
+          <div class="it"><div class="ic ic-bash" style="width:18px;height:18px;border-radius:6px;font-size:8px">$_</div><div class="ib"><div class="in" style="font-size:8px">Bash</div><div class="bi"><div class="c">npx vitest run tests/LoginPage.test.tsx</div><div class="o">✓ 5 tests passed</div></div></div><div class="itm">2.1s</div></div>
+          <div class="it"><div class="ic ic-done" style="width:18px;height:18px;border-radius:6px;font-size:8px">✓</div><div class="ib"><div class="in" style="font-size:8px;color:var(--ok)">Agent done</div><div class="id">5/5 tests passing</div></div><div class="itm">10.5s</div></div>
+        </div>
+
+        <!-- MCP tool -->
+        <div class="it"><div class="ic ic-mcp">🔌</div><div class="ib"><div class="in">MCP: chrome-devtools</div><div class="id">Taking screenshot of localhost:5173/login</div></div><div class="itm">1.2s</div></div>
+
+        <!-- WebFetch -->
+        <div class="it"><div class="ic ic-fetch">🌐</div><div class="ib"><div class="in">WebFetch</div><div class="id"><code>https://auth.js.org/getting-started</code> — 2.4KB</div></div><div class="itm">0.8s</div></div>
+
+        <!-- Skill: code review -->
+        <div class="it act"><div class="ic ic-skill">⚡</div><div class="ib"><div class="in">Skill<span class="skill-tag">superpowers:requesting-code-review</span></div><div class="id">Running code review on login implementation...</div></div><div class="itm">2.1s</div></div>
+
+      </div>
+    </div>
+
+    <div class="rsp">
+      <div class="rc">
+        <div class="q">"build me a login page with tests"</div>
+        <div class="a">
+          Done! Here's what I built:
+          <br><br>
+          <strong>LoginPage.tsx</strong> — React component with email/password fields, form validation, error states, and loading spinner. Uses <code>@auth/core</code> for session management.
+          <br><br>
+          <strong>LoginPage.test.tsx</strong> — 5 tests covering: render, validation, successful login, failed login, loading state. <strong>All passing.</strong>
+          <br><br>
+          Route added to <code>App.tsx</code> at <code>/login</code>. Screenshot verified at localhost:5173/login.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dock">
+    <div class="ip"><input placeholder="Ask anything... or hold SPACE to speak" /><div class="mic">🎤</div><div class="snd">Send</div></div>
+    <div class="dr"><div class="ms"><button class="mm on">PUSH-TO-TALK</button><button class="mm off">ALWAYS ON</button></div><div class="ks"><span>⌘⇧G summon</span><span>SPACE speak</span><span>ESC close</span></div></div>
+  </div>
+</div>
+
+<!-- ===== SCENARIO 2: Error handling ===== -->
+<div class="section-title">Scenario: Error + Recovery</div>
+
+<div class="ov">
+  <div class="top">
+    <div class="orb" style="background:linear-gradient(135deg,var(--err),#c04040);box-shadow:3px 3px 8px rgba(0,0,0,0.4),inset -2px -2px 5px rgba(0,0,0,0.2),inset 2px 2px 5px rgba(255,255,255,0.12),0 0 10px rgba(240,112,96,0.2)"></div>
+    <div class="tt">GOD'S ASSISTANT</div>
+    <div class="ts"><div class="td" style="background:var(--err);box-shadow:0 0 5px rgba(240,112,96,0.5)"></div><span class="tst" style="color:rgba(240,112,96,0.5)">ERROR · RECOVERING</span></div>
+    <div class="tstats"><span>CPU 12%</span></div>
+  </div>
+  <div class="wave"><div class="wbs"><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div></div><div class="wh"><span>SPACE</span>speak</div></div>
+
+  <div class="mid">
+    <div class="stream">
+      <div class="sh"><span class="sl">▾ Activity</span><span class="sb" style="color:var(--err);background:rgba(240,112,96,0.1)">error</span></div>
+      <div class="feed">
+        <div class="it"><div class="ic ic-bash">$_</div><div class="ib"><div class="in">Bash</div><div class="bi"><div class="c">npm run deploy</div><div class="e">Error: EACCES permission denied '/usr/local/bin/deploy'</div></div></div><div class="itm">0.4s</div></div>
+        <div class="it" style="border-color:rgba(240,112,96,0.1)"><div class="ic ic-err">✗</div><div class="ib"><div class="in" style="color:var(--err)">Error</div><div class="id">Permission denied — need sudo or different deploy path</div></div><div class="itm">—</div></div>
+        <div class="it"><div class="ic ic-think">🧠</div><div class="ib"><div class="in">Thinking</div><div class="id">Trying alternative: deploy via npx instead of global binary...</div></div><div class="itm">0.2s</div></div>
+        <div class="it act"><div class="ic ic-bash">$_</div><div class="ib"><div class="in">Bash</div><div class="bi"><div class="c">npx vercel deploy --prod</div><div class="o">Deployed to https://my-app.vercel.app</div></div></div><div class="itm">12.3s</div></div>
+      </div>
+    </div>
+
+    <div class="rsp">
+      <div class="rc">
+        <div class="q">"deploy to production"</div>
+        <div class="a">
+          Hit a permission error with the global deploy binary. Switched to <code>npx vercel deploy --prod</code> instead.
+          <br><br>
+          <strong>Deployed successfully</strong> to <code>https://my-app.vercel.app</code>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dock">
+    <div class="ip"><input placeholder="Ask anything..." /><div class="mic">🎤</div><div class="snd">Send</div></div>
+    <div class="dr"><div class="ms"><button class="mm on">PUSH-TO-TALK</button><button class="mm off">ALWAYS ON</button></div><div class="ks"><span>⌘⇧G</span><span>SPACE</span><span>ESC</span></div></div>
+  </div>
+</div>
+
+<!-- ===== SCENARIO 3: Idle state (compact) ===== -->
+<div class="section-title">Idle State (compact)</div>
+
+<div class="ov" style="max-height:none">
+  <div class="top">
+    <div class="orb" style="background:linear-gradient(135deg,#4a7a60,#2d5a42);box-shadow:3px 3px 8px rgba(0,0,0,0.4),inset -2px -2px 5px rgba(0,0,0,0.2),inset 2px 2px 5px rgba(255,255,255,0.1)"></div>
+    <div class="tt">GOD'S ASSISTANT</div>
+    <div class="ts"><div class="td" style="background:var(--txt-m);box-shadow:none;animation:none"></div><span class="tst" style="color:var(--txt-m)">READY</span></div>
+    <div class="tstats"><span>CPU 8%</span><span>·</span><span>BAT 91%</span></div>
+  </div>
+  <div class="wave"><div class="wbs"><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div></div><div class="wh"><span>SPACE</span>speak</div></div>
+  <div class="dock">
+    <div class="ip"><input placeholder="Ask anything... or hold SPACE to speak" /><div class="mic">🎤</div><div class="snd">Send</div></div>
+    <div class="dr"><div class="ms"><button class="mm on">PUSH-TO-TALK</button><button class="mm off">ALWAYS ON</button></div><div class="ks"><span>⌘⇧G summon</span><span>SPACE speak</span><span>ESC close</span></div></div>
+  </div>
+</div>
+
+<!-- ===== COMPLETE EVENT TYPE REFERENCE ===== -->
+<div class="section-title">All Event Types</div>
+
+<div style="width:560px;display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:40px">
+
+  <div class="it"><div class="ic ic-think">🧠</div><div class="ib"><div class="in">Thinking</div><div class="id">Claude's internal reasoning</div></div></div>
+  <div class="it"><div class="ic ic-read">📖</div><div class="ib"><div class="in">Read</div><div class="id">Reading a file from disk</div></div></div>
+  <div class="it"><div class="ic ic-write">✍️</div><div class="ib"><div class="in">Write</div><div class="id">Creating a new file</div></div></div>
+  <div class="it"><div class="ic ic-edit">✏️</div><div class="ib"><div class="in">Edit</div><div class="id">Modifying existing file</div></div></div>
+  <div class="it"><div class="ic ic-bash">$_</div><div class="ib"><div class="in">Bash</div><div class="id">Shell command execution</div></div></div>
+  <div class="it"><div class="ic ic-glob">🔎</div><div class="ib"><div class="in">Glob</div><div class="id">File pattern search</div></div></div>
+  <div class="it"><div class="ic ic-grep">⊕</div><div class="ib"><div class="in">Grep</div><div class="id">Content search in files</div></div></div>
+  <div class="it"><div class="ic ic-search">🔍</div><div class="ib"><div class="in">WebSearch</div><div class="id">Searching the web</div></div></div>
+  <div class="it"><div class="ic ic-fetch">🌐</div><div class="ib"><div class="in">WebFetch</div><div class="id">Fetching a URL</div></div></div>
+  <div class="it"><div class="ic ic-agent">🤖</div><div class="ib"><div class="in">Agent</div><div class="id">Subagent spawned</div></div></div>
+  <div class="it"><div class="ic ic-skill">⚡</div><div class="ib"><div class="in">Skill</div><div class="id">Skill loaded/invoked</div></div></div>
+  <div class="it"><div class="ic ic-mcp">🔌</div><div class="ib"><div class="in">MCP Tool</div><div class="id">External tool via MCP</div></div></div>
+  <div class="it"><div class="ic ic-plan">📋</div><div class="ib"><div class="in">Plan</div><div class="id">TaskCreate / TodoWrite</div></div></div>
+  <div class="it"><div class="ic ic-done">✓</div><div class="ib"><div class="in">Done</div><div class="id">Task/agent completed</div></div></div>
+  <div class="it"><div class="ic ic-err">✗</div><div class="ib"><div class="in">Error</div><div class="id">Something failed</div></div></div>
+  <div class="it"><div class="ic" style="background:linear-gradient(135deg,#718096,#4a5568);color:white">💬</div><div class="ib"><div class="in">Text</div><div class="id">Claude's response output</div></div></div>
+
+</div>
+
+</body>
+</html>

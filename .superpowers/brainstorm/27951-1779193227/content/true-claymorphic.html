@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>God's Assistant — True Claymorphic</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=DM+Mono:wght@400;500&family=Outfit:wght@400;500;600;700;800&family=Sora:wght@400;500;600;700&family=Rubik:wght@400;500;600;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#12111a;color:#f0eef6;font-family:'Outfit',sans-serif;padding:30px 16px;min-height:100vh}
+h1{text-align:center;font-size:14px;font-weight:700;color:rgba(255,255,255,0.25);letter-spacing:5px;text-transform:uppercase;margin-bottom:4px;font-family:'Sora',sans-serif}
+.sub{text-align:center;font-size:11px;color:rgba(255,255,255,0.3);margin-bottom:10px}
+.note{text-align:center;font-size:10px;color:rgba(255,255,255,0.15);margin-bottom:28px;max-width:600px;margin-left:auto;margin-right:auto;line-height:1.6}
+.note b{color:rgba(255,255,255,0.35)}
+
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:28px;max-width:1060px;margin:0 auto}
+
+.var{display:flex;flex-direction:column;align-items:center;gap:10px}
+.var-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;display:flex;align-items:center;gap:8px}
+.var-num{border-radius:8px;padding:3px 8px;font-weight:700;font-size:10px}
+.var-name{color:rgba(255,255,255,0.4)}
+
+/* ==============================
+   CLAYMORPHISM RECIPE:
+   background: VIVID SATURATED color
+   border-radius: 32px+ (puffy)
+   box-shadow:
+     outer: 8-12px lift
+     inset dark: bottom-right depth
+     inset light: top-left highlight
+   ============================== */
+
+/* Shared overlay structure */
+.ov{width:480px;border-radius:36px;overflow:hidden;position:relative}
+.ov .top{display:flex;align-items:center;padding:14px 20px;gap:10px}
+.ov .orb{width:32px;height:32px;border-radius:50%;flex-shrink:0}
+.ov .title{font-size:13px;font-weight:700;flex:1;letter-spacing:0.5px}
+.ov .stats{font-family:'DM Mono',monospace;font-size:8px;opacity:0.5}
+
+.ov .inp-wrap{padding:0 16px 10px}
+.ov .inp-pill{display:flex;align-items:center;gap:6px;border-radius:20px;padding:4px 4px 4px 16px}
+.ov .inp-pill input{flex:1;background:transparent;border:none;outline:none;font-family:'DM Mono',monospace;font-size:11px;padding:8px 0}
+.ov .send{border:none;border-radius:16px;padding:8px 16px;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:0.5px}
+.ov .mic{border:none;border-radius:14px;padding:8px 12px;font-size:14px;cursor:pointer}
+
+.ov .resp-wrap{padding:0 16px 10px}
+.ov .resp{border-radius:24px;padding:14px 18px;font-size:12px;line-height:1.7}
+.ov .resp .q{font-size:11px;opacity:0.6;margin-bottom:6px;font-style:italic}
+
+.ov .term-wrap{padding:0 16px 10px}
+.ov .term-label{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;padding-left:4px;opacity:0.4}
+.ov .term{border-radius:20px;padding:12px 14px;font-family:'DM Mono',monospace;font-size:10px;line-height:1.7;max-height:90px;overflow:auto}
+
+.ov .agents-wrap{padding:0 16px 10px}
+.ov .agents{display:flex;gap:6px}
+.ov .agent{flex:1;border-radius:16px;padding:8px 10px;font-family:'DM Mono',monospace;font-size:8px;display:flex;align-items:center;gap:6px}
+.ov .agent-dot{width:6px;height:6px;border-radius:50%}
+.ov .agent-name{flex:1}
+.ov .agent-time{opacity:0.5}
+
+.ov .bot{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;font-family:'DM Mono',monospace;font-size:8px;opacity:0.3}
+
+/* ============ V1: Cosmic Lavender ============ */
+.bg1{background:#1a1628}
+.c1{
+  background: linear-gradient(145deg, #6c5ce7, #5f4dd0);
+  border-radius:36px;
+  box-shadow: 10px 10px 24px rgba(0,0,0,0.5), inset -6px -6px 12px rgba(0,0,0,0.25), inset 6px 6px 12px rgba(255,255,255,0.12);
+}
+.c1 .orb{background:linear-gradient(135deg,#a29bfe,#6c5ce7);box-shadow:4px 4px 10px rgba(0,0,0,0.4),inset -3px -3px 6px rgba(0,0,0,0.2),inset 3px 3px 6px rgba(255,255,255,0.3)}
+.c1 .title{color:#f0ecff}
+.c1 .inp-pill{background:#4a3db8;box-shadow:inset 3px 3px 8px rgba(0,0,0,0.3),inset -2px -2px 6px rgba(255,255,255,0.05)}
+.c1 .inp-pill input{color:#e8e0ff}
+.c1 .inp-pill input::placeholder{color:rgba(255,255,255,0.2)}
+.c1 .send{background:linear-gradient(135deg,#fd79a8,#e84393);color:white;box-shadow:4px 4px 10px rgba(0,0,0,0.3),inset -2px -2px 4px rgba(0,0,0,0.15),inset 2px 2px 4px rgba(255,255,255,0.2)}
+.c1 .mic{background:#5a4bc5;color:rgba(255,255,255,0.4);box-shadow:3px 3px 6px rgba(0,0,0,0.3),inset -2px -2px 4px rgba(0,0,0,0.15),inset 2px 2px 4px rgba(255,255,255,0.08)}
+.c1 .resp{background:#5a4bc5;color:rgba(255,255,255,0.85);box-shadow:6px 6px 14px rgba(0,0,0,0.3),inset -4px -4px 8px rgba(0,0,0,0.2),inset 4px 4px 8px rgba(255,255,255,0.06)}
+.c1 .term{background:#3d2f9e;color:rgba(255,255,255,0.7);box-shadow:inset 4px 4px 10px rgba(0,0,0,0.4),inset -2px -2px 6px rgba(255,255,255,0.03)}
+.c1 .agent{background:#5a4bc5;color:rgba(255,255,255,0.6);box-shadow:4px 4px 8px rgba(0,0,0,0.3),inset -3px -3px 6px rgba(0,0,0,0.2),inset 3px 3px 6px rgba(255,255,255,0.06)}
+.c1 .agent-dot.ok{background:#00b894;box-shadow:0 0 6px #00b894}
+.c1 .agent-dot.run{background:#fd79a8;box-shadow:0 0 6px #fd79a8}
+.c1 .cmd{color:#a29bfe}.c1 .out{color:rgba(255,255,255,0.4);padding-left:12px}
+.c1 .var-num{background:rgba(108,92,231,0.3);color:#a29bfe}
+
+/* ============ V2: Sunset Coral ============ */
+.bg2{background:#1a1210}
+.c2{
+  background: linear-gradient(145deg, #e17055, #d35d47);
+  border-radius:36px;
+  box-shadow: 10px 10px 24px rgba(0,0,0,0.5), inset -6px -6px 12px rgba(0,0,0,0.25), inset 6px 6px 12px rgba(255,255,255,0.15);
+}
+.c2 .orb{background:linear-gradient(135deg,#fab1a0,#e17055);box-shadow:4px 4px 10px rgba(0,0,0,0.4),inset -3px -3px 6px rgba(0,0,0,0.2),inset 3px 3px 6px rgba(255,255,255,0.3)}
+.c2 .title{color:#fff5f0;font-family:'Nunito',sans-serif;font-weight:800}
+.c2 .inp-pill{background:#c0503c;box-shadow:inset 3px 3px 8px rgba(0,0,0,0.3),inset -2px -2px 6px rgba(255,255,255,0.06)}
+.c2 .inp-pill input{color:#ffe8e0;font-family:'DM Mono',monospace}
+.c2 .inp-pill input::placeholder{color:rgba(255,255,255,0.2)}
+.c2 .send{background:linear-gradient(135deg,#fdcb6e,#f9a825);color:#5a2d0c;box-shadow:4px 4px 10px rgba(0,0,0,0.3),inset -2px -2px 4px rgba(0,0,0,0.15),inset 2px 2px 4px rgba(255,255,255,0.25)}
+.c2 .mic{background:#b84535;color:rgba(255,255,255,0.4);box-shadow:3px 3px 6px rgba(0,0,0,0.3),inset -2px -2px 4px rgba(0,0,0,0.15),inset 2px 2px 4px rgba(255,255,255,0.08)}
+.c2 .resp{background:#c85740;color:rgba(255,255,255,0.85);box-shadow:6px 6px 14px rgba(0,0,0,0.3),inset -4px -4px 8px rgba(0,0,0,0.2),inset 4px 4px 8px rgba(255,255,255,0.08)}
+.c2 .term{background:#9e3a28;color:rgba(255,255,255,0.7);box-shadow:inset 4px 4px 10px rgba(0,0,0,0.4),inset -2px -2px 6px rgba(255,255,255,0.03)}
+.c2 .agent{background:#c85740;color:rgba(255,255,255,0.6);box-shadow:4px 4px 8px rgba(0,0,0,0.3),inset -3px -3px 6px rgba(0,0,0,0.2),inset 3px 3px 6px rgba(255,255,255,0.06)}
+.c2 .agent-dot.ok{background:#00cec9;box-shadow:0 0 6px #00cec9}
+.c2 .agent-dot.run{background:#fdcb6e;box-shadow:0 0 6px #fdcb6e}
+.c2 .cmd{color:#fab1a0}.c2 .out{color:rgba(255,255,255,0.4);padding-left:12px}
+.c2 .var-num{background:rgba(225,112,85,0.3);color:#fab1a0}
+
+/* ============ V3: Mint Dream ============ */
+.bg3{background:#0f1a16}
+.c3{
+  background: linear-gradient(145deg, #00b894, #00a381);
+  border-radius:36px;
+  box-shadow: 10px 10px 24px rgba(0,0,0,0.5), inset -6px -6px 12px rgba(0,0,0,0.25), inset 6px 6px 12px rgba(255,255,255,0.15);
+}
+.c3 .orb{background:linear-gradient(135deg,#55efc4,#00b894);box-shadow:4px 4px 10px rgba(0,0,0,0.4),inset -3px -3px 6px rgba(0,0,0,0.2),inset 3px 3px 6px rgba(255,255,255,0.3)}
+.c3 .title{color:#e8fff6;font-family:'Rubik',sans-serif;font-weight:700}
+.c3 .inp-pill{background:#009472;box-shadow:inset 3px 3px 8px rgba(0,0,0,0.3),inset -2px -2px 6px rgba(255,255,255,0.06)}
+.c3 .inp-pill input{color:#d0fff0}
+.c3 .inp-pill input::placeholder{color:rgba(255,255,255,0.2)}
+.c3 .send{background:linear-gradient(135deg,#a29bfe,#6c5ce7);color:white;box-shadow:4px 4px 10px rgba(0,0,0,0.3),inset -2px -2px 4px rgba(0,0,0,0.15),inset 2px 2px 4px rgba(255,255,255,0.2)}
+.c3 .mic{background:#008565;color:rgba(255,255,255,0.4);box-shadow:3px 3px 6px rgba(0,0,0,0.3),inset -2px -2px 4px rgba(0,0,0,0.15),inset 2px 2px 4px rgba(255,255,255,0.08)}
+.c3 .resp{background:#009e78;color:rgba(255,255,255,0.85);box-shadow:6px 6px 14px rgba(0,0,0,0.3),inset -4px -4px 8px rgba(0,0,0,0.2),inset 4px 4px 8px rgba(255,255,255,0.08)}
+.c3 .term{background:#006b50;color:rgba(255,255,255,0.7);box-shadow:inset 4px 4px 10px rgba(0,0,0,0.4),inset -2px -2px 6px rgba(255,255,255,0.03)}
+.c3 .agent{background:#009e78;color:rgba(255,255,255,0.6);box-shadow:4px 4px 8px rgba(0,0,0,0.3),inset -3px -3px 6px rgba(0,0,0,0.2),inset 3px 3px 6px rgba(255,255,255,0.06)}
+.c3 .agent-dot.ok{background:#fdcb6e;box-shadow:0 0 6px #fdcb6e}
+.c3 .agent-dot.run{background:#74b9ff;box-shadow:0 0 6px #74b9ff}
+.c3 .cmd{color:#55efc4}.c3 .out{color:rgba(255,255,255,0.4);padding-left:12px}
+.c3 .var-num{background:rgba(0,184,148,0.3);color:#55efc4}
+
+/* ============ V4: Electric Blue ============ */
+.bg4{background:#0a1628}
+.c4{
+  background: linear-gradient(145deg, #0984e3, #0770c2);
+  border-radius:36px;
+  box-shadow: 10px 10px 24px rgba(0,0,0,0.5), inset -6px -6px 12px rgba(0,0,0,0.25), inset 6px 6px 12px rgba(255,255,255,0.15);
+}
+.c4 .orb{background:linear-gradient(135deg,#74b9ff,#0984e3);box-shadow:4px 4px 10px rgba(0,0,0,0.4),inset -3px -3px 6px rgba(0,0,0,0.2),inset 3px 3px 6px rgba(255,255,255,0.3)}
+.c4 .title{color:#e8f4ff;font-family:'Sora',sans-serif;font-weight:700}
+.c4 .inp-pill{background:#066db5;box-shadow:inset 3px 3px 8px rgba(0,0,0,0.3),inset -2px -2px 6px rgba(255,255,255,0.06)}
+.c4 .inp-pill input{color:#d0eaff}
+.c4 .inp-pill input::placeholder{color:rgba(255,255,255,0.2)}
+.c4 .send{background:linear-gradient(135deg,#00cec9,#00b5ad);color:#0a2540;box-shadow:4px 4px 10px rgba(0,0,0,0.3),inset -2px -2px 4px rgba(0,0,0,0.15),inset 2px 2px 4px rgba(255,255,255,0.25)}
+.c4 .mic{background:#055a96;color:rgba(255,255,255,0.4);box-shadow:3px 3px 6px rgba(0,0,0,0.3),inset -2px -2px 4px rgba(0,0,0,0.15),inset 2px 2px 4px rgba(255,255,255,0.08)}
+.c4 .resp{background:#0770c2;color:rgba(255,255,255,0.85);box-shadow:6px 6px 14px rgba(0,0,0,0.3),inset -4px -4px 8px rgba(0,0,0,0.2),inset 4px 4px 8px rgba(255,255,255,0.08)}
+.c4 .term{background:#044a80;color:rgba(255,255,255,0.7);box-shadow:inset 4px 4px 10px rgba(0,0,0,0.4),inset -2px -2px 6px rgba(255,255,255,0.03)}
+.c4 .agent{background:#0770c2;color:rgba(255,255,255,0.6);box-shadow:4px 4px 8px rgba(0,0,0,0.3),inset -3px -3px 6px rgba(0,0,0,0.2),inset 3px 3px 6px rgba(255,255,255,0.06)}
+.c4 .agent-dot.ok{background:#55efc4;box-shadow:0 0 6px #55efc4}
+.c4 .agent-dot.run{background:#ffeaa7;box-shadow:0 0 6px #ffeaa7}
+.c4 .cmd{color:#74b9ff}.c4 .out{color:rgba(255,255,255,0.4);padding-left:12px}
+.c4 .var-num{background:rgba(9,132,227,0.3);color:#74b9ff}
+
+/* ============ V5: Candy Pink ============ */
+.bg5{background:#1a0f18}
+.c5{
+  background: linear-gradient(145deg, #e84393, #d63384);
+  border-radius:36px;
+  box-shadow: 10px 10px 24px rgba(0,0,0,0.5), inset -6px -6px 12px rgba(0,0,0,0.25), inset 6px 6px 12px rgba(255,255,255,0.15);
+}
+.c5 .orb{background:linear-gradient(135deg,#fd79a8,#e84393);box-shadow:4px 4px 10px rgba(0,0,0,0.4),inset -3px -3px 6px rgba(0,0,0,0.2),inset 3px 3px 6px rgba(255,255,255,0.3)}
+.c5 .title{color:#fff0f6;font-family:'Nunito',sans-serif;font-weight:900}
+.c5 .inp-pill{background:#c22e78;box-shadow:inset 3px 3px 8px rgba(0,0,0,0.3),inset -2px -2px 6px rgba(255,255,255,0.06)}
+.c5 .inp-pill input{color:#ffe0f0}
+.c5 .inp-pill input::placeholder{color:rgba(255,255,255,0.2)}
+.c5 .send{background:linear-gradient(135deg,#ffeaa7,#fdcb6e);color:#5a1a40;box-shadow:4px 4px 10px rgba(0,0,0,0.3),inset -2px -2px 4px rgba(0,0,0,0.15),inset 2px 2px 4px rgba(255,255,255,0.25)}
+.c5 .mic{background:#a82668;color:rgba(255,255,255,0.4);box-shadow:3px 3px 6px rgba(0,0,0,0.3),inset -2px -2px 4px rgba(0,0,0,0.15),inset 2px 2px 4px rgba(255,255,255,0.08)}
+.c5 .resp{background:#d03080;color:rgba(255,255,255,0.85);box-shadow:6px 6px 14px rgba(0,0,0,0.3),inset -4px -4px 8px rgba(0,0,0,0.2),inset 4px 4px 8px rgba(255,255,255,0.08)}
+.c5 .term{background:#8e1e58;color:rgba(255,255,255,0.7);box-shadow:inset 4px 4px 10px rgba(0,0,0,0.4),inset -2px -2px 6px rgba(255,255,255,0.03)}
+.c5 .agent{background:#d03080;color:rgba(255,255,255,0.6);box-shadow:4px 4px 8px rgba(0,0,0,0.3),inset -3px -3px 6px rgba(0,0,0,0.2),inset 3px 3px 6px rgba(255,255,255,0.06)}
+.c5 .agent-dot.ok{background:#55efc4;box-shadow:0 0 6px #55efc4}
+.c5 .agent-dot.run{background:#ffeaa7;box-shadow:0 0 6px #ffeaa7}
+.c5 .cmd{color:#fd79a8}.c5 .out{color:rgba(255,255,255,0.4);padding-left:12px}
+.c5 .var-num{background:rgba(232,67,147,0.3);color:#fd79a8}
+
+</style>
+</head>
+<body>
+
+<h1>God's Assistant</h1>
+<p class="sub">TRUE Claymorphic — inflated, puffy, saturated, tactile</p>
+<p class="note"><b>What changed:</b> Every element is a vivid saturated color (not dark grey). 3-shadow recipe on everything: outer lift + inset dark (bottom-right depth) + inset light (top-left highlight). 36px border-radius. Elements feel like inflated clay blobs sitting on the surface.</p>
+
+<div class="grid">
+
+<!-- V1: Cosmic Lavender -->
+<div class="var" data-choice="1" onclick="toggleSelect(this)">
+  <div class="var-label"><span class="var-num c1">1</span><span class="var-name">Cosmic Lavender</span></div>
+  <div class="ov c1">
+    <div class="top"><div class="orb"></div><div class="title">GOD'S ASSISTANT</div><div class="stats">CPU 18% · BAT 87%</div></div>
+    <div class="inp-wrap"><div class="inp-pill"><input value="check iPhone mirroring skill" /><div class="mic">🎤</div><div class="send">Send</div></div></div>
+    <div class="resp-wrap"><div class="resp"><div class="q">"check iPhone mirroring skill"</div>iPhone mirroring skill is loaded. The mirroir-mcp server is reachable and the iPhone Mirroring window is active.</div></div>
+    <div class="term-wrap"><div class="term-label">Terminal</div><div class="term"><div class="cmd">claude -p "check iPhone mirroring"</div><div class="out">→ Skill loaded at ~/.claude/skills/iphone-mirroring/</div><div class="out">→ mirroir-mcp: reachable</div></div></div>
+    <div class="agents-wrap"><div class="agents"><div class="agent"><div class="agent-dot ok"></div><span class="agent-name">Claude Code</span><span class="agent-time">3.2s ✓</span></div><div class="agent"><div class="agent-dot run"></div><span class="agent-name">Fix auth bug</span><span class="agent-time">running</span></div></div></div>
+    <div class="bot"><span>⌘⇧G · SPACE · ESC</span><span>PUSH-TO-TALK</span></div>
+  </div>
+</div>
+
+<!-- V2: Sunset Coral -->
+<div class="var" data-choice="2" onclick="toggleSelect(this)">
+  <div class="var-label"><span class="var-num c2">2</span><span class="var-name">Sunset Coral</span></div>
+  <div class="ov c2">
+    <div class="top"><div class="orb"></div><div class="title">GOD'S ASSISTANT</div><div class="stats">CPU 18% · BAT 87%</div></div>
+    <div class="inp-wrap"><div class="inp-pill"><input value="check iPhone mirroring skill" /><div class="mic">🎤</div><div class="send">Send</div></div></div>
+    <div class="resp-wrap"><div class="resp"><div class="q">"check iPhone mirroring skill"</div>iPhone mirroring skill is loaded and ready.</div></div>
+    <div class="term-wrap"><div class="term-label">Terminal</div><div class="term"><div class="cmd">claude -p "check iPhone mirroring"</div><div class="out">→ Skill loaded</div></div></div>
+    <div class="agents-wrap"><div class="agents"><div class="agent"><div class="agent-dot ok"></div><span class="agent-name">Claude Code</span><span class="agent-time">3.2s ✓</span></div><div class="agent"><div class="agent-dot run"></div><span class="agent-name">Agent 2</span><span class="agent-time">running</span></div></div></div>
+    <div class="bot"><span>⌘⇧G · SPACE · ESC</span><span>PUSH-TO-TALK</span></div>
+  </div>
+</div>
+
+<!-- V3: Mint Dream -->
+<div class="var" data-choice="3" onclick="toggleSelect(this)">
+  <div class="var-label"><span class="var-num c3">3</span><span class="var-name">Mint Dream</span></div>
+  <div class="ov c3">
+    <div class="top"><div class="orb"></div><div class="title">GOD'S ASSISTANT</div><div class="stats">CPU 18% · BAT 87%</div></div>
+    <div class="inp-wrap"><div class="inp-pill"><input value="check iPhone mirroring skill" /><div class="mic">🎤</div><div class="send">Send</div></div></div>
+    <div class="resp-wrap"><div class="resp"><div class="q">"check iPhone mirroring skill"</div>iPhone mirroring skill is loaded and ready.</div></div>
+    <div class="term-wrap"><div class="term-label">Terminal</div><div class="term"><div class="cmd">claude -p "check iPhone mirroring"</div><div class="out">→ Skill loaded</div></div></div>
+    <div class="agents-wrap"><div class="agents"><div class="agent"><div class="agent-dot ok"></div><span class="agent-name">Claude Code</span><span class="agent-time">3.2s ✓</span></div><div class="agent"><div class="agent-dot run"></div><span class="agent-name">Agent 2</span><span class="agent-time">running</span></div></div></div>
+    <div class="bot"><span>⌘⇧G · SPACE · ESC</span><span>PUSH-TO-TALK</span></div>
+  </div>
+</div>
+
+<!-- V4: Electric Blue -->
+<div class="var" data-choice="4" onclick="toggleSelect(this)">
+  <div class="var-label"><span class="var-num c4">4</span><span class="var-name">Electric Blue</span></div>
+  <div class="ov c4">
+    <div class="top"><div class="orb"></div><div class="title">GOD'S ASSISTANT</div><div class="stats">CPU 18% · BAT 87%</div></div>
+    <div class="inp-wrap"><div class="inp-pill"><input value="check iPhone mirroring skill" /><div class="mic">🎤</div><div class="send">Send</div></div></div>
+    <div class="resp-wrap"><div class="resp"><div class="q">"check iPhone mirroring skill"</div>iPhone mirroring skill is loaded and ready.</div></div>
+    <div class="term-wrap"><div class="term-label">Terminal</div><div class="term"><div class="cmd">claude -p "check iPhone mirroring"</div><div class="out">→ Skill loaded</div></div></div>
+    <div class="agents-wrap"><div class="agents"><div class="agent"><div class="agent-dot ok"></div><span class="agent-name">Claude Code</span><span class="agent-time">3.2s ✓</span></div><div class="agent"><div class="agent-dot run"></div><span class="agent-name">Agent 2</span><span class="agent-time">running</span></div></div></div>
+    <div class="bot"><span>⌘⇧G · SPACE · ESC</span><span>PUSH-TO-TALK</span></div>
+  </div>
+</div>
+
+<!-- V5: Candy Pink -->
+<div class="var" data-choice="5" onclick="toggleSelect(this)">
+  <div class="var-label"><span class="var-num c5">5</span><span class="var-name">Candy Pink</span></div>
+  <div class="ov c5">
+    <div class="top"><div class="orb"></div><div class="title">GOD'S ASSISTANT</div><div class="stats">CPU 18% · BAT 87%</div></div>
+    <div class="inp-wrap"><div class="inp-pill"><input value="check iPhone mirroring skill" /><div class="mic">🎤</div><div class="send">Send</div></div></div>
+    <div class="resp-wrap"><div class="resp"><div class="q">"check iPhone mirroring skill"</div>iPhone mirroring skill is loaded and ready.</div></div>
+    <div class="term-wrap"><div class="term-label">Terminal</div><div class="term"><div class="cmd">claude -p "check iPhone mirroring"</div><div class="out">→ Skill loaded</div></div></div>
+    <div class="agents-wrap"><div class="agents"><div class="agent"><div class="agent-dot ok"></div><span class="agent-name">Claude Code</span><span class="agent-time">3.2s ✓</span></div><div class="agent"><div class="agent-dot run"></div><span class="agent-name">Agent 2</span><span class="agent-time">running</span></div></div></div>
+    <div class="bot"><span>⌘⇧G · SPACE · ESC</span><span>PUSH-TO-TALK</span></div>
+  </div>
+</div>
+
+</div>
+
+<p style="text-align:center;margin:30px 0 10px;font-size:10px;color:rgba(255,255,255,0.2)">Scroll down for 5 more →</p>
+
+</body>
+</html>

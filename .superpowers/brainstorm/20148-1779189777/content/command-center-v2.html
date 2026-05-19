@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>God's Assistant — Command Center V2</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #08090d;
+    color: #e2e8f0;
+    font-family: 'Inter', -apple-system, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    min-height: 100vh;
+  }
+
+  h1 {
+    font-size: 14px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.3);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .subtitle {
+    font-size: 13px;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 40px;
+  }
+
+  .mockup-frame {
+    width: 520px;
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 40px;
+  }
+
+  /* ============= THE OVERLAY MOCKUP ============= */
+  .overlay {
+    background: rgba(8, 10, 18, 0.92);
+    backdrop-filter: blur(40px);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 20px;
+    padding: 0;
+    position: relative;
+    overflow: hidden;
+    box-shadow:
+      0 0 0 1px rgba(0,240,255,0.03),
+      0 4px 30px rgba(0,0,0,0.5),
+      0 0 100px rgba(0,240,255,0.03);
+  }
+
+  /* Subtle gradient border glow */
+  .overlay::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 21px;
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(0,240,255,0.1) 0%, transparent 40%, transparent 60%, rgba(168,85,247,0.08) 100%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  /* ---- TOP BAR ---- */
+  .top-bar {
+    display: flex;
+    align-items: center;
+    padding: 14px 18px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+
+  .orb-container {
+    position: relative;
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+  }
+
+  .orb {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #22d3ee, #0ea5e9 40%, #0369a1 70%, #0c4a6e);
+    box-shadow:
+      0 0 20px rgba(34,211,238,0.4),
+      0 0 40px rgba(14,165,233,0.15),
+      inset 0 0 10px rgba(255,255,255,0.1);
+    animation: orbPulse 3s ease-in-out infinite;
+  }
+
+  @keyframes orbPulse {
+    0%, 100% { box-shadow: 0 0 20px rgba(34,211,238,0.4), 0 0 40px rgba(14,165,233,0.15); transform: scale(1); }
+    50% { box-shadow: 0 0 25px rgba(34,211,238,0.5), 0 0 50px rgba(14,165,233,0.2); transform: scale(1.04); }
+  }
+
+  /* Orbiting ring */
+  .orb-ring {
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    border: 1px solid rgba(34,211,238,0.2);
+    animation: spin 8s linear infinite;
+  }
+  .orb-ring::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: 50%;
+    width: 4px;
+    height: 4px;
+    background: #22d3ee;
+    border-radius: 50%;
+    box-shadow: 0 0 6px #22d3ee;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .title-block {
+    margin-left: 12px;
+    flex: 1;
+  }
+
+  .title-block h2 {
+    font-size: 12px;
+    font-weight: 600;
+    color: #f1f5f9;
+    letter-spacing: 0.5px;
+  }
+
+  .status-line {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 2px;
+  }
+
+  .status-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #22d3ee;
+    box-shadow: 0 0 4px #22d3ee;
+    animation: blink 2s ease-in-out infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .status-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: rgba(34,211,238,0.7);
+    letter-spacing: 0.5px;
+  }
+
+  .sys-stats {
+    display: flex;
+    gap: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+  }
+
+  .stat {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .stat-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+  }
+
+  .stat-dot.green { background: #10b981; box-shadow: 0 0 3px #10b981; }
+  .stat-dot.yellow { background: #f59e0b; box-shadow: 0 0 3px #f59e0b; }
+  .stat-dot.blue { background: #3b82f6; box-shadow: 0 0 3px #3b82f6; }
+
+  .stat-label { color: rgba(255,255,255,0.25); }
+  .stat-value { color: rgba(255,255,255,0.5); }
+
+  /* ---- WAVEFORM BAR ---- */
+  .waveform-section {
+    display: flex;
+    align-items: center;
+    padding: 10px 18px;
+    gap: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    background: rgba(34,211,238,0.02);
+  }
+
+  .waveform-bars {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex: 1;
+    height: 28px;
+  }
+
+  .wbar {
+    width: 3px;
+    border-radius: 3px;
+    background: linear-gradient(to top, #0ea5e9, #22d3ee);
+    animation: wave 1.2s ease-in-out infinite alternate;
+  }
+
+  .wbar:nth-child(1) { height: 6px; animation-delay: 0s; }
+  .wbar:nth-child(2) { height: 12px; animation-delay: 0.1s; }
+  .wbar:nth-child(3) { height: 20px; animation-delay: 0.15s; }
+  .wbar:nth-child(4) { height: 26px; animation-delay: 0.2s; }
+  .wbar:nth-child(5) { height: 18px; animation-delay: 0.25s; }
+  .wbar:nth-child(6) { height: 24px; animation-delay: 0.12s; }
+  .wbar:nth-child(7) { height: 14px; animation-delay: 0.3s; }
+  .wbar:nth-child(8) { height: 22px; animation-delay: 0.18s; }
+  .wbar:nth-child(9) { height: 10px; animation-delay: 0.22s; }
+  .wbar:nth-child(10) { height: 16px; animation-delay: 0.08s; }
+  .wbar:nth-child(11) { height: 8px; animation-delay: 0.28s; }
+  .wbar:nth-child(12) { height: 20px; animation-delay: 0.05s; }
+  .wbar:nth-child(13) { height: 14px; animation-delay: 0.17s; }
+  .wbar:nth-child(14) { height: 24px; animation-delay: 0.23s; }
+  .wbar:nth-child(15) { height: 10px; animation-delay: 0.09s; }
+  .wbar:nth-child(16) { height: 18px; animation-delay: 0.14s; }
+
+  @keyframes wave {
+    0% { transform: scaleY(0.4); opacity: 0.5; }
+    100% { transform: scaleY(1); opacity: 1; }
+  }
+
+  .spacebar-hint {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .key {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 9px;
+    color: rgba(255,255,255,0.4);
+    min-width: 50px;
+  }
+
+  .key.active {
+    background: rgba(34,211,238,0.1);
+    border-color: rgba(34,211,238,0.2);
+    color: #22d3ee;
+    box-shadow: 0 0 8px rgba(34,211,238,0.1);
+  }
+
+  /* ---- TRANSCRIPT ---- */
+  .transcript-section {
+    padding: 12px 18px;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+  }
+
+  .transcript-text {
+    font-size: 14px;
+    font-weight: 400;
+    color: #f1f5f9;
+    line-height: 1.5;
+  }
+
+  .transcript-text .cursor {
+    display: inline-block;
+    width: 2px;
+    height: 16px;
+    background: #22d3ee;
+    margin-left: 2px;
+    animation: cursorBlink 0.8s step-end infinite;
+    vertical-align: text-bottom;
+  }
+
+  @keyframes cursorBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  .response-text {
+    font-size: 13px;
+    color: rgba(255,255,255,0.6);
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255,255,255,0.04);
+    line-height: 1.5;
+  }
+
+  /* ---- TERMINAL OUTPUT ---- */
+  .terminal-section {
+    padding: 12px 18px;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+  }
+
+  .terminal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .terminal-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.2);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  .terminal-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px;
+    color: #10b981;
+    background: rgba(16,185,129,0.08);
+    border: 1px solid rgba(16,185,129,0.12);
+    border-radius: 4px;
+    padding: 2px 6px;
+  }
+
+  .terminal-output {
+    background: rgba(0,0,0,0.25);
+    border: 1px solid rgba(255,255,255,0.03);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    line-height: 1.7;
+    max-height: 120px;
+    overflow-y: auto;
+  }
+
+  .cmd-line {
+    color: #22d3ee;
+  }
+
+  .cmd-line::before {
+    content: '❯ ';
+    color: rgba(34,211,238,0.5);
+  }
+
+  .output-line {
+    color: rgba(255,255,255,0.45);
+    padding-left: 16px;
+  }
+
+  .output-line.success {
+    color: #10b981;
+  }
+
+  .output-line.error {
+    color: #ef4444;
+  }
+
+  /* ---- ACTION PILLS ---- */
+  .actions-section {
+    padding: 10px 18px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+  }
+
+  .action-pill {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    border-radius: 6px;
+    padding: 4px 10px;
+    transition: all 0.2s;
+  }
+
+  .action-pill.done {
+    color: #10b981;
+    background: rgba(16,185,129,0.06);
+    border: 1px solid rgba(16,185,129,0.1);
+  }
+
+  .action-pill.running {
+    color: #22d3ee;
+    background: rgba(34,211,238,0.06);
+    border: 1px solid rgba(34,211,238,0.1);
+    animation: actionPulse 2s ease-in-out infinite;
+  }
+
+  .action-pill.error {
+    color: #ef4444;
+    background: rgba(239,68,68,0.06);
+    border: 1px solid rgba(239,68,68,0.1);
+  }
+
+  @keyframes actionPulse {
+    0%, 100% { border-color: rgba(34,211,238,0.1); }
+    50% { border-color: rgba(34,211,238,0.25); }
+  }
+
+  /* ---- BOTTOM BAR ---- */
+  .bottom-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 18px;
+  }
+
+  .mode-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .mode-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: rgba(255,255,255,0.25);
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 6px;
+    padding: 4px 10px;
+    cursor: pointer;
+  }
+
+  .mode-btn.active {
+    color: #22d3ee;
+    background: rgba(34,211,238,0.06);
+    border-color: rgba(34,211,238,0.15);
+  }
+
+  .shortcuts {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: rgba(255,255,255,0.15);
+    display: flex;
+    gap: 12px;
+  }
+
+  /* ============= COMPARISON NOTES ============= */
+  .notes {
+    width: 520px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .note {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 12px;
+    padding: 16px 20px;
+  }
+
+  .note h3 {
+    font-size: 13px;
+    font-weight: 600;
+    color: #f1f5f9;
+    margin-bottom: 6px;
+  }
+
+  .note p {
+    font-size: 12px;
+    color: rgba(255,255,255,0.45);
+    line-height: 1.6;
+  }
+
+  .note .highlight {
+    color: #22d3ee;
+  }
+</style>
+</head>
+<body>
+  <h1>God's Assistant</h1>
+  <p class="subtitle">Command Center V2 — Polished, information-dense, impressive</p>
+
+  <!-- ===== THE MOCKUP ===== -->
+  <div class="mockup-frame">
+    <div class="overlay">
+
+      <!-- TOP BAR: Orb + Title + System Stats -->
+      <div class="top-bar">
+        <div class="orb-container">
+          <div class="orb"></div>
+          <div class="orb-ring"></div>
+        </div>
+        <div class="title-block">
+          <h2>GOD'S ASSISTANT</h2>
+          <div class="status-line">
+            <div class="status-dot"></div>
+            <span class="status-text">LISTENING · 00:03.2</span>
+          </div>
+        </div>
+        <div class="sys-stats">
+          <div class="stat">
+            <div class="stat-dot green"></div>
+            <span class="stat-label">CPU</span>
+            <span class="stat-value">12%</span>
+          </div>
+          <div class="stat">
+            <div class="stat-dot yellow"></div>
+            <span class="stat-label">RAM</span>
+            <span class="stat-value">4.2G</span>
+          </div>
+          <div class="stat">
+            <div class="stat-dot blue"></div>
+            <span class="stat-label">NET</span>
+            <span class="stat-value">↑2↓14</span>
+          </div>
+          <div class="stat">
+            <div class="stat-dot green"></div>
+            <span class="stat-label">BAT</span>
+            <span class="stat-value">91%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- WAVEFORM BAR -->
+      <div class="waveform-section">
+        <div class="waveform-bars">
+          <div class="wbar"></div><div class="wbar"></div><div class="wbar"></div><div class="wbar"></div>
+          <div class="wbar"></div><div class="wbar"></div><div class="wbar"></div><div class="wbar"></div>
+          <div class="wbar"></div><div class="wbar"></div><div class="wbar"></div><div class="wbar"></div>
+          <div class="wbar"></div><div class="wbar"></div><div class="wbar"></div><div class="wbar"></div>
+        </div>
+        <div class="spacebar-hint">
+          <span class="key active">SPACE</span>
+          <span>to speak</span>
+        </div>
+      </div>
+
+      <!-- TRANSCRIPT -->
+      <div class="transcript-section">
+        <div class="transcript-text">
+          "Open Slack and play my morning playlist"<span class="cursor"></span>
+        </div>
+        <div class="response-text">
+          Opening Slack and starting Morning Mix on Spotify for you.
+        </div>
+      </div>
+
+      <!-- TERMINAL OUTPUT -->
+      <div class="terminal-section">
+        <div class="terminal-header">
+          <span class="terminal-label">Terminal Output</span>
+          <span class="terminal-badge">2 commands</span>
+        </div>
+        <div class="terminal-output">
+          <div class="cmd-line">osascript -e 'tell app "Slack" to activate'</div>
+          <div class="output-line success">→ Slack activated</div>
+          <div class="cmd-line">open spotify:playlist:morning-mix</div>
+          <div class="output-line success">→ Now playing: Morning Mix</div>
+        </div>
+      </div>
+
+      <!-- ACTION PILLS -->
+      <div class="actions-section">
+        <div class="action-pill done">✓ Slack opened</div>
+        <div class="action-pill done">✓ Spotify playing</div>
+        <div class="action-pill running">⟳ Loading calendar...</div>
+      </div>
+
+      <!-- BOTTOM BAR -->
+      <div class="bottom-bar">
+        <div class="mode-toggle">
+          <div class="mode-btn active">PUSH-TO-TALK</div>
+          <div class="mode-btn">ALWAYS ON</div>
+        </div>
+        <div class="shortcuts">
+          <span>⌘⇧G summon</span>
+          <span>SPACE speak</span>
+          <span>ESC close</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== DESIGN NOTES ===== -->
+  <div class="notes">
+    <div class="note">
+      <h3>What's new in V2</h3>
+      <p>
+        <span class="highlight">Gradient border glow</span> that shifts cyan→purple.
+        <span class="highlight">Orbiting ring</span> with a tracking particle on the mini-orb.
+        <span class="highlight">Animated waveform bar</span> with 16 bars reacting to voice.
+        <span class="highlight">Live terminal output</span> showing exact commands and results.
+        <span class="highlight">System stats</span> with color-coded dots (green=good, yellow=warning, red=critical).
+        <span class="highlight">Action pills</span> with animated pulse for running tasks.
+        <span class="highlight">Mode toggle</span> for push-to-talk vs always-listening.
+        <span class="highlight">SPACE to speak</span> prominently shown.
+      </p>
+    </div>
+    <div class="note">
+      <h3>Input Modes</h3>
+      <p>
+        <span class="highlight">Push-to-Talk:</span> Hold SPACE to record, release to process. Also ⌘⇧G to toggle.<br>
+        <span class="highlight">Always On:</span> Wake word detection via openWakeWord — listens continuously, activates on "Hey God" or "Hey Assistant".
+      </p>
+    </div>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>God's Assistant — V5 Full States</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#08090d;color:#e2e8f0;font-family:'Inter',sans-serif;padding:30px 20px;min-height:100vh}
+
+  .page-title{text-align:center;font-size:13px;font-weight:400;color:rgba(255,255,255,0.25);letter-spacing:4px;text-transform:uppercase;margin-bottom:6px}
+  .page-sub{text-align:center;font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:30px}
+
+  .states-grid{display:flex;flex-wrap:wrap;gap:20px;justify-content:center;margin-bottom:40px}
+  .state-col{display:flex;flex-direction:column;align-items:center;gap:8px}
+  .state-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase}
+  .sl-idle{color:rgba(255,255,255,0.3)}
+  .sl-listen{color:#22d3ee}
+  .sl-process{color:#f59e0b}
+  .sl-speak{color:#a855f7}
+
+  /* ============= OVERLAY BASE ============= */
+  .ov{
+    width:280px;background:rgba(8,10,18,0.94);backdrop-filter:blur(40px);
+    border:1px solid rgba(255,255,255,0.05);border-radius:16px;
+    position:relative;overflow:hidden;
+    box-shadow:0 4px 30px rgba(0,0,0,0.5),0 0 60px rgba(0,240,255,0.02);
+  }
+  .ov::before{
+    content:'';position:absolute;inset:-1px;border-radius:17px;padding:1px;
+    background:linear-gradient(135deg,rgba(34,211,238,0.1) 0%,transparent 35%,transparent 65%,rgba(168,85,247,0.05) 100%);
+    -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+    -webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;
+  }
+  .ov-listen{box-shadow:0 4px 30px rgba(0,0,0,0.5),0 0 80px rgba(34,211,238,0.04)}
+  .ov-listen::before{background:linear-gradient(135deg,rgba(34,211,238,0.15) 0%,transparent 35%,transparent 65%,rgba(34,211,238,0.05) 100%)}
+  .ov-process{box-shadow:0 4px 30px rgba(0,0,0,0.5),0 0 80px rgba(245,158,11,0.04)}
+  .ov-process::before{background:linear-gradient(135deg,rgba(245,158,11,0.12) 0%,transparent 35%,transparent 65%,rgba(245,158,11,0.04) 100%)}
+  .ov-speak{box-shadow:0 4px 30px rgba(0,0,0,0.5),0 0 80px rgba(168,85,247,0.04)}
+  .ov-speak::before{background:linear-gradient(135deg,rgba(168,85,247,0.12) 0%,transparent 35%,transparent 65%,rgba(168,85,247,0.04) 100%)}
+
+  /* ---- TOP BAR ---- */
+  .top{display:flex;align-items:center;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.04)}
+  .orb-w{position:relative;width:30px;height:30px;flex-shrink:0}
+  .orb{width:30px;height:30px;border-radius:50%}
+  .orb-idle{background:radial-gradient(circle at 35% 35%,#475569,#334155 50%,#1e293b);box-shadow:0 0 8px rgba(100,116,139,0.2)}
+  .orb-listen{background:radial-gradient(circle at 35% 35%,#22d3ee,#0ea5e9 45%,#0369a1);box-shadow:0 0 16px rgba(34,211,238,0.4),0 0 32px rgba(14,165,233,0.12);animation:op 3s ease-in-out infinite}
+  .orb-process{background:radial-gradient(circle at 35% 35%,#fbbf24,#f59e0b 45%,#b45309);box-shadow:0 0 16px rgba(245,158,11,0.4),0 0 32px rgba(245,158,11,0.12);animation:op 2s ease-in-out infinite}
+  .orb-speak{background:radial-gradient(circle at 35% 35%,#c084fc,#a855f7 45%,#7c3aed);box-shadow:0 0 16px rgba(168,85,247,0.4),0 0 32px rgba(168,85,247,0.12);animation:op 2.5s ease-in-out infinite}
+  @keyframes op{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+
+  .ring{position:absolute;inset:-3px;border-radius:50%;border:1px solid rgba(34,211,238,0.15);animation:spin 8s linear infinite}
+  .ring::after{content:'';position:absolute;top:-2px;left:50%;width:3px;height:3px;border-radius:50%;box-shadow:0 0 5px currentColor}
+  .ring-idle{border-color:rgba(255,255,255,0.05);animation:none}.ring-idle::after{display:none}
+  .ring-listen{border-color:rgba(34,211,238,0.15);color:#22d3ee}
+  .ring-process{border-color:rgba(245,158,11,0.15);color:#f59e0b;animation:spin 4s linear infinite}
+  .ring-speak{border-color:rgba(168,85,247,0.15);color:#a855f7;animation:spin 6s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  .tb{margin-left:8px;flex:1}
+  .tb h2{font-size:10px;font-weight:600;color:#f1f5f9;letter-spacing:0.4px}
+  .sln{display:flex;align-items:center;gap:4px;margin-top:1px}
+  .sd{width:4px;height:4px;border-radius:50%}
+  .sd-idle{background:rgba(255,255,255,0.15)}
+  .sd-listen{background:#22d3ee;box-shadow:0 0 4px #22d3ee;animation:bk 2s ease-in-out infinite}
+  .sd-process{background:#f59e0b;box-shadow:0 0 4px #f59e0b;animation:bk 1s ease-in-out infinite}
+  .sd-speak{background:#a855f7;box-shadow:0 0 4px #a855f7;animation:bk 1.5s ease-in-out infinite}
+  @keyframes bk{0%,100%{opacity:1}50%{opacity:.3}}
+  .st{font-family:'JetBrains Mono',monospace;font-size:8px}
+  .st-idle{color:rgba(255,255,255,0.25)}.st-listen{color:rgba(34,211,238,0.6)}.st-process{color:rgba(245,158,11,0.6)}.st-speak{color:rgba(168,85,247,0.6)}
+
+  .stats{display:flex;gap:6px;font-family:'JetBrains Mono',monospace;font-size:7px}
+  .si{display:flex;align-items:center;gap:2px}
+  .dd{width:3px;height:3px;border-radius:50%}
+  .dd.g{background:#10b981;box-shadow:0 0 2px #10b981}.dd.y{background:#f59e0b;box-shadow:0 0 2px #f59e0b}.dd.dm{background:rgba(255,255,255,0.1)}
+  .vl{color:rgba(255,255,255,0.15)}.vv{color:rgba(255,255,255,0.35)}.vd{color:rgba(255,255,255,0.2)}
+
+  /* ---- WAVEFORM ---- */
+  .wv{display:flex;align-items:center;padding:7px 12px;gap:6px;border-bottom:1px solid rgba(255,255,255,0.03)}
+  .wv-idle{background:transparent}
+  .wv-listen{background:rgba(34,211,238,0.015)}
+  .wv-process{background:rgba(245,158,11,0.015)}
+  .wv-speak{background:rgba(168,85,247,0.015)}
+  .bars{display:flex;align-items:center;gap:2px;flex:1;height:22px}
+  .fb{width:2.5px;height:2px;border-radius:1px;background:rgba(255,255,255,0.08)}
+  .lb{width:2.5px;border-radius:2px;background:linear-gradient(to top,#0ea5e9,#22d3ee);animation:w 1.2s ease-in-out infinite alternate}
+  .pb{width:2.5px;border-radius:2px;background:linear-gradient(to top,#b45309,#f59e0b);animation:none;opacity:0.5}
+  .sb{width:2.5px;border-radius:2px;background:linear-gradient(to top,#7c3aed,#c084fc);animation:w 1.5s ease-in-out infinite alternate}
+  .lb:nth-child(1){height:5px;animation-delay:0s}.lb:nth-child(2){height:10px;animation-delay:.1s}.lb:nth-child(3){height:18px;animation-delay:.15s}
+  .lb:nth-child(4){height:22px;animation-delay:.2s}.lb:nth-child(5){height:14px;animation-delay:.25s}.lb:nth-child(6){height:20px;animation-delay:.12s}
+  .lb:nth-child(7){height:10px;animation-delay:.3s}.lb:nth-child(8){height:18px;animation-delay:.18s}.lb:nth-child(9){height:8px;animation-delay:.22s}
+  .lb:nth-child(10){height:14px;animation-delay:.08s}.lb:nth-child(11){height:6px;animation-delay:.28s}.lb:nth-child(12){height:16px;animation-delay:.05s}
+  .lb:nth-child(13){height:12px;animation-delay:.17s}.lb:nth-child(14){height:20px;animation-delay:.23s}.lb:nth-child(15){height:8px;animation-delay:.09s}
+  .lb:nth-child(16){height:16px;animation-delay:.14s}.lb:nth-child(17){height:22px;animation-delay:.07s}.lb:nth-child(18){height:12px;animation-delay:.27s}
+  .pb:nth-child(1){height:14px}.pb:nth-child(2){height:18px}.pb:nth-child(3){height:10px}.pb:nth-child(4){height:20px}
+  .pb:nth-child(5){height:8px}.pb:nth-child(6){height:16px}.pb:nth-child(7){height:12px}.pb:nth-child(8){height:22px}
+  .pb:nth-child(9){height:6px}.pb:nth-child(10){height:14px}.pb:nth-child(11){height:18px}.pb:nth-child(12){height:10px}
+  .pb:nth-child(13){height:20px}.pb:nth-child(14){height:8px}.pb:nth-child(15){height:16px}.pb:nth-child(16){height:12px}
+  .pb:nth-child(17){height:22px}.pb:nth-child(18){height:6px}
+  .sb:nth-child(1){height:8px;animation-delay:0s}.sb:nth-child(2){height:14px;animation-delay:.12s}.sb:nth-child(3){height:20px;animation-delay:.06s}
+  .sb:nth-child(4){height:16px;animation-delay:.18s}.sb:nth-child(5){height:10px;animation-delay:.24s}.sb:nth-child(6){height:22px;animation-delay:.08s}
+  .sb:nth-child(7){height:12px;animation-delay:.2s}.sb:nth-child(8){height:18px;animation-delay:.14s}.sb:nth-child(9){height:6px;animation-delay:.26s}
+  .sb:nth-child(10){height:16px;animation-delay:.1s}.sb:nth-child(11){height:8px;animation-delay:.22s}.sb:nth-child(12){height:20px;animation-delay:.04s}
+  .sb:nth-child(13){height:14px;animation-delay:.16s}.sb:nth-child(14){height:18px;animation-delay:.08s}.sb:nth-child(15){height:10px;animation-delay:.2s}
+  .sb:nth-child(16){height:22px;animation-delay:.02s}.sb:nth-child(17){height:12px;animation-delay:.15s}.sb:nth-child(18){height:16px;animation-delay:.1s}
+  @keyframes w{0%{transform:scaleY(.35);opacity:.4}100%{transform:scaleY(1);opacity:1}}
+  .hint{font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(255,255,255,0.15);display:flex;align-items:center;gap:4px;flex-shrink:0}
+  .ky{display:inline-flex;align-items:center;justify-content:center;border-radius:3px;padding:2px 6px;font-size:8px}
+  .ky-dim{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);color:rgba(255,255,255,0.25)}
+  .ky-cyan{background:rgba(34,211,238,0.08);border:1px solid rgba(34,211,238,0.15);color:#22d3ee}
+
+  /* ---- CONTENT SECTIONS ---- */
+  .sec{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.03)}
+  .sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+  .sl2{font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:500;color:rgba(255,255,255,0.18);letter-spacing:1.5px;text-transform:uppercase}
+  .badge{font-family:'JetBrains Mono',monospace;font-size:7px;border-radius:3px;padding:2px 5px}
+  .bg-cyan{color:#22d3ee;background:rgba(34,211,238,0.06);border:1px solid rgba(34,211,238,0.1)}
+  .bg-dim{color:rgba(255,255,255,0.3);background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05)}
+
+  /* Transcript */
+  .tx{font-size:12px;color:#f1f5f9;line-height:1.5}
+  .tx-dim{color:rgba(255,255,255,0.4)}
+  .resp{font-size:11px;color:rgba(255,255,255,0.45);margin-top:5px;padding-top:5px;border-top:1px solid rgba(255,255,255,0.03);line-height:1.5}
+
+  /* Tasks */
+  .tl{display:flex;flex-direction:column;gap:3px}
+  .tr{display:flex;align-items:center;gap:6px;padding:4px 8px;background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.02);border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:9px}
+  .tr-run{background:rgba(34,211,238,0.02);border-color:rgba(34,211,238,0.05)}
+  .ti{width:14px;text-align:center;flex-shrink:0;font-size:9px}
+  .ti-done{color:#10b981}.ti-run{color:#22d3ee;animation:si 1.5s linear infinite}.ti-pend{color:rgba(255,255,255,0.12)}.ti-err{color:#ef4444}
+  @keyframes si{to{transform:rotate(360deg)}}
+  .tn{flex:1;color:rgba(255,255,255,0.5)}.tn-act{color:#f1f5f9}
+  .td{font-size:8px;color:rgba(255,255,255,0.2)}.td-ok{color:rgba(16,185,129,0.5)}.td-run{color:rgba(34,211,238,0.5)}
+  .tt{font-size:8px;color:rgba(255,255,255,0.12);min-width:28px;text-align:right}
+
+  /* Terminal */
+  .to{background:rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.03);border-radius:6px;padding:6px 8px;font-family:'JetBrains Mono',monospace;font-size:9px;line-height:1.7;max-height:80px;overflow-y:auto}
+  .cm{color:#22d3ee}.cm::before{content:'❯ ';color:rgba(34,211,238,0.4)}
+  .ou{color:rgba(255,255,255,0.35);padding-left:12px}.ou.ok{color:#10b981}
+
+  /* Processes */
+  .pg{display:grid;grid-template-columns:1fr 1fr;gap:3px}
+  .pi{display:flex;align-items:center;gap:5px;padding:3px 6px;background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.02);border-radius:5px;font-family:'JetBrains Mono',monospace;font-size:8px}
+  .pd{width:4px;height:4px;border-radius:50%;flex-shrink:0}
+  .pd.al{background:#10b981;box-shadow:0 0 3px rgba(16,185,129,0.4)}
+  .pd.wr{background:#f59e0b;box-shadow:0 0 3px rgba(245,158,11,0.4)}
+  .pd.id{background:rgba(255,255,255,0.12)}
+  .pn{color:rgba(255,255,255,0.4);flex:1}.pm{color:rgba(255,255,255,0.18)}
+
+  /* Bottom */
+  .bot{display:flex;align-items:center;justify-content:space-between;padding:7px 12px}
+  .modes{display:flex;gap:3px}
+  .mb{font-family:'JetBrains Mono',monospace;font-size:7px;border-radius:4px;padding:2px 6px}
+  .mb-off{color:rgba(255,255,255,0.15);background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03)}
+  .mb-on{color:#22d3ee;background:rgba(34,211,238,0.04);border:1px solid rgba(34,211,238,0.1)}
+  .sc{font-family:'JetBrains Mono',monospace;font-size:7px;color:rgba(255,255,255,0.1);display:flex;gap:8px}
+
+  /* ---- FULL MOCKUP ---- */
+  .full-section{display:flex;flex-direction:column;align-items:center;margin-bottom:40px}
+  .full-label{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#22d3ee;margin-bottom:12px}
+  .full-ov{width:540px}
+</style>
+</head>
+<body>
+
+<h1 class="page-title">God's Assistant</h1>
+<p class="page-sub">All four states + full executing mockup with every panel</p>
+
+<!-- ===== 4 STATES SIDE BY SIDE ===== -->
+<div class="states-grid">
+
+  <!-- IDLE -->
+  <div class="state-col">
+    <span class="state-label sl-idle">Idle</span>
+    <div class="ov">
+      <div class="top">
+        <div class="orb-w"><div class="orb orb-idle"></div><div class="ring ring-idle"></div></div>
+        <div class="tb"><h2>GOD'S ASSISTANT</h2><div class="sln"><div class="sd sd-idle"></div><span class="st st-idle">STANDBY</span></div></div>
+        <div class="stats"><div class="si"><div class="dd dm"></div><span class="vl">CPU</span><span class="vd">12%</span></div><div class="si"><div class="dd dm"></div><span class="vl">RAM</span><span class="vd">4.2G</span></div></div>
+      </div>
+      <div class="wv wv-idle"><div class="bars"><div class="fb"></div><div class="fb"></div><div class="fb"></div><div class="fb"></div><div class="fb"></div><div class="fb"></div><div class="fb"></div><div class="fb"></div><div class="fb"></div><div class="fb"></div><div class="fb"></div><div class="fb"></div><div class="fb"></div><div class="fb"></div><div class="fb"></div><div class="fb"></div><div class="fb"></div><div class="fb"></div></div><div class="hint"><span class="ky ky-dim">SPACE</span> speak</div></div>
+      <div class="bot"><div class="modes"><div class="mb mb-on">PTT</div><div class="mb mb-off">ALWAYS</div></div><div class="sc"><span>⌘⇧G</span><span>ESC</span></div></div>
+    </div>
+  </div>
+
+  <!-- LISTENING -->
+  <div class="state-col">
+    <span class="state-label sl-listen">● Listening</span>
+    <div class="ov ov-listen">
+      <div class="top" style="border-bottom-color:rgba(34,211,238,0.06)">
+        <div class="orb-w"><div class="orb orb-listen"></div><div class="ring ring-listen"></div></div>
+        <div class="tb"><h2>GOD'S ASSISTANT</h2><div class="sln"><div class="sd sd-listen"></div><span class="st st-listen">LISTENING · 00:03</span></div></div>
+        <div class="stats"><div class="si"><div class="dd g"></div><span class="vl">CPU</span><span class="vv">14%</span></div><div class="si"><div class="dd y"></div><span class="vl">RAM</span><span class="vv">4.2G</span></div></div>
+      </div>
+      <div class="wv wv-listen"><div class="bars"><div class="lb"></div><div class="lb"></div><div class="lb"></div><div class="lb"></div><div class="lb"></div><div class="lb"></div><div class="lb"></div><div class="lb"></div><div class="lb"></div><div class="lb"></div><div class="lb"></div><div class="lb"></div><div class="lb"></div><div class="lb"></div><div class="lb"></div><div class="lb"></div><div class="lb"></div><div class="lb"></div></div><div class="hint"><span class="ky ky-cyan">SPACE</span> stop</div></div>
+      <div class="sec"><div class="tx">"Open Slack and—"<span style="display:inline-block;width:2px;height:12px;background:#22d3ee;animation:cb .8s step-end infinite;vertical-align:text-bottom;margin-left:1px"></span></div></div>
+      <style>@keyframes cb{0%,100%{opacity:1}50%{opacity:0}}</style>
+      <div class="bot"><div class="modes"><div class="mb mb-on">PTT</div><div class="mb mb-off">ALWAYS</div></div><div class="sc"><span>⌘⇧G</span><span>ESC</span></div></div>
+    </div>
+  </div>
+
+  <!-- PROCESSING -->
+  <div class="state-col">
+    <span class="state-label sl-process">◆ Processing</span>
+    <div class="ov ov-process">
+      <div class="top" style="border-bottom-color:rgba(245,158,11,0.06)">
+        <div class="orb-w"><div class="orb orb-process"></div><div class="ring ring-process"></div></div>
+        <div class="tb"><h2>GOD'S ASSISTANT</h2><div class="sln"><div class="sd sd-process"></div><span class="st st-process">PROCESSING</span></div></div>
+        <div class="stats"><div class="si"><div class="dd y"></div><span class="vl">CPU</span><span class="vv">48%</span></div><div class="si"><div class="dd y"></div><span class="vl">RAM</span><span class="vv">5.1G</span></div></div>
+      </div>
+      <div class="wv wv-process"><div class="bars"><div class="pb"></div><div class="pb"></div><div class="pb"></div><div class="pb"></div><div class="pb"></div><div class="pb"></div><div class="pb"></div><div class="pb"></div><div class="pb"></div><div class="pb"></div><div class="pb"></div><div class="pb"></div><div class="pb"></div><div class="pb"></div><div class="pb"></div><div class="pb"></div><div class="pb"></div><div class="pb"></div></div><div class="hint" style="color:rgba(245,158,11,0.3)">thinking...</div></div>
+      <div class="sec"><div class="tx">"Good morning routine"</div><div class="resp" style="color:rgba(245,158,11,0.5)">Analyzing command...</div></div>
+      <div class="bot"><div class="modes"><div class="mb mb-on">PTT</div><div class="mb mb-off">ALWAYS</div></div><div class="sc"><span>⌘⇧G</span><span>ESC</span></div></div>
+    </div>
+  </div>
+
+  <!-- SPEAKING -->
+  <div class="state-col">
+    <span class="state-label sl-speak">◉ Speaking</span>
+    <div class="ov ov-speak">
+      <div class="top" style="border-bottom-color:rgba(168,85,247,0.06)">
+        <div class="orb-w"><div class="orb orb-speak"></div><div class="ring ring-speak"></div></div>
+        <div class="tb"><h2>GOD'S ASSISTANT</h2><div class="sln"><div class="sd sd-speak"></div><span class="st st-speak">SPEAKING</span></div></div>
+        <div class="stats"><div class="si"><div class="dd g"></div><span class="vl">CPU</span><span class="vv">22%</span></div><div class="si"><div class="dd g"></div><span class="vl">RAM</span><span class="vv">4.8G</span></div></div>
+      </div>
+      <div class="wv wv-speak"><div class="bars"><div class="sb"></div><div class="sb"></div><div class="sb"></div><div class="sb"></div><div class="sb"></div><div class="sb"></div><div class="sb"></div><div class="sb"></div><div class="sb"></div><div class="sb"></div><div class="sb"></div><div class="sb"></div><div class="sb"></div><div class="sb"></div><div class="sb"></div><div class="sb"></div><div class="sb"></div><div class="sb"></div></div><div class="hint" style="color:rgba(168,85,247,0.3)">speaking</div></div>
+      <div class="sec"><div class="tx">"Good morning routine"</div><div class="resp">Running your morning workflow — 5 steps queued.</div></div>
+      <div class="bot"><div class="modes"><div class="mb mb-on">PTT</div><div class="mb mb-off">ALWAYS</div></div><div class="sc"><span>⌘⇧G</span><span>ESC</span></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== FULL EXECUTING MOCKUP ===== -->
+<div class="full-section">
+  <span class="full-label">Full View — Executing Workflow</span>
+  <div class="ov full-ov ov-listen">
+
+    <!-- TOP -->
+    <div class="top" style="border-bottom-color:rgba(34,211,238,0.06)">
+      <div class="orb-w"><div class="orb orb-listen"></div><div class="ring ring-listen"></div></div>
+      <div class="tb"><h2>GOD'S ASSISTANT</h2><div class="sln"><div class="sd sd-listen"></div><span class="st st-listen">EXECUTING · 3/5 TASKS</span></div></div>
+      <div class="stats">
+        <div class="si"><div class="dd g"></div><span class="vl">CPU</span><span class="vv">23%</span></div>
+        <div class="si"><div class="dd y"></div><span class="vl">RAM</span><span class="vv">5.1G</span></div>
+        <div class="si"><div class="dd g"></div><span class="vl">NET</span><span class="vv">↑2↓14</span></div>
+        <div class="si"><div class="dd g"></div><span class="vl">BAT</span><span class="vv">91%</span></div>
+      </div>
+    </div>
+
+    <!-- WAVEFORM (flat — not talking during execution) -->
+    <div class="wv wv-idle">
+      <div class="bars"><div class="fb"></div><div class="fb"></div><div class="fb"></div><div class="fb"></div><div class="fb"></div><div class="fb"></div><div class="fb"></div><div class="fb"></div><div class="fb"></div><div class="fb"></div><div class="fb"></div><div class="fb"></div><div class="fb"></div><div class="fb"></div><div class="fb"></div><div class="fb"></div><div class="fb"></div><div class="fb"></div></div>
+      <div class="hint"><span class="ky ky-dim">SPACE</span> speak</div>
+    </div>
+
+    <!-- TRANSCRIPT -->
+    <div class="sec">
+      <div class="tx">"Good morning routine"</div>
+      <div class="resp">Running your morning workflow — 5 steps queued.</div>
+    </div>
+
+    <!-- TASKS -->
+    <div class="sec">
+      <div class="sh"><span class="sl2">Tasks</span><span class="badge bg-cyan">3/5 complete</span></div>
+      <div class="tl">
+        <div class="tr"><div class="ti ti-done">✓</div><span class="tn">Open Slack</span><span class="td td-ok">activated</span><span class="tt">0.3s</span></div>
+        <div class="tr"><div class="ti ti-done">✓</div><span class="tn">Open VS Code → gods-assistant</span><span class="td td-ok">workspace loaded</span><span class="tt">1.2s</span></div>
+        <div class="tr"><div class="ti ti-done">✓</div><span class="tn">Set Do Not Disturb ON</span><span class="td td-ok">enabled</span><span class="tt">0.1s</span></div>
+        <div class="tr tr-run"><div class="ti ti-run">⟳</div><span class="tn tn-act">Play Morning Mix on Spotify</span><span class="td td-run">connecting...</span><span class="tt">2.1s</span></div>
+        <div class="tr"><div class="ti ti-pend">○</div><span class="tn">Read today's calendar</span><span class="td">queued</span><span class="tt">—</span></div>
+      </div>
+    </div>
+
+    <!-- TERMINAL -->
+    <div class="sec">
+      <div class="sh"><span class="sl2">Terminal</span><span class="badge bg-dim">4 cmds</span></div>
+      <div class="to">
+        <div class="cm">osascript -e 'tell app "Slack" to activate'</div>
+        <div class="ou ok">→ Slack activated</div>
+        <div class="cm">code ~/gods-assistant</div>
+        <div class="ou ok">→ VS Code opened</div>
+        <div class="cm">shortcuts run "DND On"</div>
+        <div class="ou ok">→ Do Not Disturb enabled</div>
+        <div class="cm">open spotify:playlist:morning-mix</div>
+        <div class="ou" style="color:rgba(34,211,238,0.4)">→ Connecting to Spotify...</div>
+      </div>
+    </div>
+
+    <!-- PROCESSES -->
+    <div class="sec">
+      <div class="sh"><span class="sl2">Processes</span><span class="badge bg-dim">6 active</span></div>
+      <div class="pg">
+        <div class="pi"><div class="pd al"></div><span class="pn">node (vite)</span><span class="pm">:5173</span></div>
+        <div class="pi"><div class="pd al"></div><span class="pn">python (engine)</span><span class="pm">:9377</span></div>
+        <div class="pi"><div class="pd al"></div><span class="pn">Slack</span><span class="pm">142MB</span></div>
+        <div class="pi"><div class="pd al"></div><span class="pn">Spotify</span><span class="pm">98MB</span></div>
+        <div class="pi"><div class="pd wr"></div><span class="pn">Chrome (12 tabs)</span><span class="pm">1.4GB</span></div>
+        <div class="pi"><div class="pd id"></div><span class="pn">Docker</span><span class="pm">idle</span></div>
+      </div>
+    </div>
+
+    <!-- BOTTOM -->
+    <div class="bot">
+      <div class="modes"><div class="mb mb-on">PUSH-TO-TALK</div><div class="mb mb-off">ALWAYS ON</div></div>
+      <div class="sc"><span>⌘⇧G summon</span><span>SPACE speak</span><span>ESC close</span></div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
