@@ -10,7 +10,7 @@ interface WSMessage {
 
 export function useWebSocket() {
   const wsRef = useRef<WebSocket | null>(null);
-  const reconnectTimer = useRef<ReturnType<typeof setTimeout>>();
+  const reconnectTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const { setOrbState, setTranscript, setResponse, addAction, updateAction } =
     useAssistantStore();
