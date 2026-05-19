@@ -19,7 +19,7 @@ logging.basicConfig(level=logging.INFO, format="[engine] %(message)s")
 log = logging.getLogger(__name__)
 
 config = load_config()
-clients: set[ServerConnection] = set()
+clients = set()  # type: set
 
 
 async def broadcast(message: dict) -> None:

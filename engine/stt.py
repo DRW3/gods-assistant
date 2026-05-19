@@ -6,7 +6,8 @@ from faster_whisper import WhisperModel
 
 log = logging.getLogger(__name__)
 
-_model: WhisperModel | None = None
+from typing import Optional
+_model: Optional[WhisperModel] = None
 
 
 def get_model(model_size: str = "large-v3-turbo") -> WhisperModel:

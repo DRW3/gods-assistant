@@ -1,10 +1,11 @@
 import json
 import logging
+from typing import Optional
 from groq import Groq
 
 log = logging.getLogger(__name__)
 
-_client: Groq | None = None
+_client: Optional[Groq] = None
 
 
 def get_client(api_key: str) -> Groq:
@@ -44,7 +45,7 @@ Return ONLY valid JSON, no explanation."""
     return json.loads(raw)
 
 
-def ask_brain(text: str, api_key: str, model: str = "llama-3.3-70b-versatile", history: list | None = None) -> str:
+def ask_brain(text: str, api_key: str, model: str = "llama-3.3-70b-versatile", history: Optional[list] = None) -> str:
     client = get_client(api_key)
 
     messages = [
