@@ -24,14 +24,32 @@ async def emit_terminal(ws, text: str, line_type: str = "cmd", status: str = "")
     await emit(ws, "terminal_line", {"type": line_type, "text": text, "status": status})
 
 
+AFFIRMATIONS = ["On it.", "Got it.", "Working on that.", "Right away.", "Let me check.", "Looking into it."]
+_affirm_index = 0
+
+
 async def route_intent(ws, text: str, config: dict) -> None:
     """Pipe to Claude Code with stream-json, emit structured events."""
+    global _affirm_index
     t0 = time.time()
 
     await emit(ws, "stream_item", {
         "id": "stream_0", "event": "thinking", "title": "Thinking...",
         "detail": text[:80], "status": "running",
     })
+
+    # Instant voice affirmation — speak before Claude starts working
+    if config.get("voice_response", True):
+        affirm = AFFIRMATIONS[_affirm_index % len(AFFIRMATIONS)]
+        _affirm_index += 1
+        try:
+            loop = asyncio.get_event_loop()
+            voice = config.get("tts_voice", "af_heart")
+            audio_b64 = await loop.run_in_executor(None, synthesize, affirm, voice)
+            if audio_b64:
+                await emit(ws, "audio", {"audio": audio_b64})
+        except Exception as e:
+            log.error(f"Affirmation TTS failed: {e}")
 
     if not is_claude_available():
         response_text = await _groq_fallback(ws, text, config)
