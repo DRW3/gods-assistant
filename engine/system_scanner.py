@@ -9,6 +9,36 @@ log = logging.getLogger(__name__)
 
 SESSIONS_DIR = Path.home() / ".claude" / "sessions"
 
+# Cache terminal titles to avoid repeated AppleScript calls
+_title_cache: Dict[str, str] = {}
+
+
+def _get_terminal_title(tty: str) -> str:
+    """Get the Terminal.app window title for a given TTY."""
+    if tty in _title_cache:
+        return _title_cache[tty]
+    try:
+        # Get all terminal window names
+        out = subprocess.run(
+            ["osascript", "-e", 'tell application "Terminal" to get name of every window'],
+            capture_output=True, text=True, timeout=3
+        ).stdout.strip()
+        # Match by tty number — Terminal titles usually contain the tab info
+        tty_num = tty.replace("ttys", "")
+        for title in out.split(", "):
+            title = title.strip()
+            if title:
+                _title_cache[tty] = title
+        # Return first match or empty
+        # Since we can't directly match tty to window, return based on order
+        titles = [t.strip() for t in out.split(", ") if t.strip()]
+        idx = int(tty_num) if tty_num.isdigit() else -1
+        if 0 <= idx < len(titles):
+            return titles[idx]
+    except Exception:
+        pass
+    return ""
+
 
 def scan_claude_sessions() -> List[Dict]:
     """Scan the system for all running Claude Code terminal sessions.
@@ -58,10 +88,20 @@ def scan_claude_sessions() -> List[Dict]:
         session_id = session_data.get("sessionId", f"ext_{pid}")
         kind = session_data.get("kind", "interactive")
 
+        # Get Terminal window title for a better name
+        term_title = _get_terminal_title(tty)
+
         # Determine a meaningful name
         has_continue = "--continue" in command
-        name = f"{project_name}"
-        if has_continue:
+        if term_title and "claude" in term_title.lower():
+            # Extract the meaningful part from terminal title
+            # e.g. "✳ Build WhatsApp health monitoring — claude" → "Build WhatsApp health..."
+            name = term_title.split("—")[0].strip().lstrip("✳ ").strip()
+            if len(name) > 25:
+                name = name[:25] + "..."
+        else:
+            name = f"{project_name}"
+        if has_continue and name == "home":
             name += " (continued)"
 
         sessions.append({
