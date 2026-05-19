@@ -64,7 +64,7 @@ async def handle_message(ws: ServerConnection, raw: str) -> None:
 
             if text:
                 from intent import route_intent
-                await route_intent(ws, text, config)
+                await route_intent(ws, text, config, voice_input=True)
             else:
                 await ws.send(json.dumps({
                     "type": "state",
@@ -75,7 +75,7 @@ async def handle_message(ws: ServerConnection, raw: str) -> None:
             text = payload.get("text", "")
             if text:
                 from intent import route_intent
-                await route_intent(ws, text, config)
+                await route_intent(ws, text, config, voice_input=False)
             else:
                 await ws.send(json.dumps({
                     "type": "state",

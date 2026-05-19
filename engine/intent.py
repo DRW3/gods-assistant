@@ -28,8 +28,9 @@ AFFIRMATIONS = ["On it.", "Got it.", "Working on that.", "Right away.", "Let me 
 _affirm_index = 0
 
 
-async def route_intent(ws, text: str, config: dict) -> None:
-    """Pipe to Claude Code with stream-json, emit structured events."""
+async def route_intent(ws, text: str, config: dict, voice_input: bool = False) -> None:
+    """Pipe to Claude Code with stream-json, emit structured events.
+    voice_input: True if user spoke, False if user typed. Controls TTS behavior."""
     global _affirm_index
     t0 = time.time()
 
@@ -38,8 +39,8 @@ async def route_intent(ws, text: str, config: dict) -> None:
         "detail": text[:80], "status": "running",
     })
 
-    # Instant voice affirmation — speak before Claude starts working
-    if config.get("voice_response", True):
+    # Voice affirmation ONLY when user spoke (not typed)
+    if voice_input and config.get("voice_response", True):
         affirm = AFFIRMATIONS[_affirm_index % len(AFFIRMATIONS)]
         _affirm_index += 1
         try:
@@ -71,8 +72,8 @@ async def route_intent(ws, text: str, config: dict) -> None:
     # Send text response immediately
     await emit(ws, "response", {"text": response_text, "audio": ""})
 
-    # TTS — speak a short summary in background
-    if config.get("voice_response", True) and response_text:
+    # TTS — speak response ONLY for voice commands, not text
+    if voice_input and config.get("voice_response", True) and response_text:
         tts_text = _truncate_for_tts(response_text)
         try:
             loop = asyncio.get_event_loop()
