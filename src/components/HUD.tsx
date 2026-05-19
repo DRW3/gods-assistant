@@ -27,6 +27,11 @@ export default function HUD() {
 
   const beginRecording = useCallback(() => {
     console.log('[HUD] beginRecording, current state:', orbStateRef.current);
+    // Clear previous results
+    useAssistantStore.getState().setTasks([]);
+    useAssistantStore.getState().clearTerminal();
+    useAssistantStore.getState().setTranscript('');
+    useAssistantStore.getState().setResponse('');
     setOrbState('listening');
     startRecording((base64) => {
       console.log('[HUD] audio chunk ready, sending to engine');

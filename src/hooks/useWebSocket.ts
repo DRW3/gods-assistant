@@ -87,7 +87,15 @@ export function useWebSocket() {
           if (t.tasks) {
             setTasks(t.tasks);
           } else if (t.id) {
-            updateTask(t.id, t);
+            // Upsert: add if new, update if exists
+            const existing = useAssistantStore.getState().tasks;
+            if (existing.some((task: any) => task.id === t.id)) {
+              updateTask(t.id, { name: t.name, status: t.status, detail: t.detail, time: t.time });
+            } else {
+              useAssistantStore.getState().addTask({
+                id: t.id, name: t.name, status: t.status, detail: t.detail || '', time: t.time || '',
+              });
+            }
           }
           break;
         }
