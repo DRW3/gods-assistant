@@ -48,10 +48,11 @@ export function spawnTerminal(sessionId: string, name: string): Promise<void> {
 
   const displayName = name || `Session ${q + 1}`;
 
+  // Launch claude in the new terminal so it's a real Claude session
   const script = `
 tell application "Terminal"
   activate
-  do script "clear && echo '=== Gods Assistant: ${displayName} ===' && echo 'Session: ${sessionId}' && echo '---' && echo 'Ready for commands.'"
+  do script "clear && claude"
   delay 0.5
   set bounds of front window to {${x}, ${y}, ${x + w}, ${y + h}}
   set custom title of front tab of front window to "${displayName}"

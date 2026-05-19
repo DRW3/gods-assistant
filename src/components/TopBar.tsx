@@ -2,16 +2,24 @@ import { useMemo } from 'react';
 import { useAssistantStore } from '../stores/assistantStore';
 import { palette, clay, fonts, orbGradient, orbGlow, type OrbState } from '../styles/theme';
 
+// Claude web-inspired greetings — warm, personal, varied
 const GREETINGS = [
-  "At your service", "Ready when you are", "What's the mission?",
-  "Command me", "Your move", "Awaiting orders",
-  "What shall we conquer?", "The throne is yours",
-  "Speak and it shall be done", "I'm listening",
-  "What needs doing?", "All systems go",
-  "Point me at something", "Say the word",
-  "Standing by", "What's on your mind?",
-  "Let's make something happen", "Fire away",
-  "The world awaits", "Ready to roll",
+  "Good to see you, Abhishek",
+  "What can I help with today?",
+  "Hey — what are we building?",
+  "Back for more? Let's go",
+  "The terminals are yours",
+  "All ears. What's next?",
+  "Your empire awaits a command",
+  "What's on the agenda?",
+  "Ready to make things happen",
+  "Standing by for greatness",
+  "Got something in mind?",
+  "How can I help?",
+  "What are we tackling today?",
+  "I'm here. What do you need?",
+  "Let's get to work",
+  "Where were we?",
 ];
 
 export default function TopBar() {
@@ -21,7 +29,7 @@ export default function TopBar() {
   const greeting = useMemo(() => GREETINGS[Math.floor(Math.random() * GREETINGS.length)], []);
 
   const statusLabel: Record<OrbState, string> = {
-    idle: greeting, listening: 'LISTENING', processing: 'THINKING',
+    idle: 'READY', listening: 'LISTENING', processing: 'THINKING',
     speaking: 'SPEAKING', executing: 'EXECUTING', error: 'ERROR',
   };
 
