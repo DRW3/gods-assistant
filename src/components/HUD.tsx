@@ -75,6 +75,18 @@ export default function HUD() {
         isHoldingRef.current = true;
         beginRecording();
       }
+      // O+G chord — quick dismiss/summon (within overlay)
+      if (e.key === 'o' || e.key === 'O') {
+        (window as any).__ogPending = Date.now();
+      }
+      if ((e.key === 'g' || e.key === 'G') && (window as any).__ogPending && Date.now() - (window as any).__ogPending < 500) {
+        (window as any).__ogPending = 0;
+        console.log('[HUD] O+G chord — hiding');
+        const api = (window as any).electronAPI;
+        api?.hideOverlay();
+        return;
+      }
+
       if (e.key === 'Escape') {
         console.log('[HUD] ESC — closing');
         isHoldingRef.current = false;

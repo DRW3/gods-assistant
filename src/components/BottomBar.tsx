@@ -24,7 +24,7 @@ export default function BottomBar() {
         <button style={btn(mode === 'always-on')} onClick={() => setMode('always-on')}>ALWAYS ON</button>
       </div>
       <div style={{ fontFamily: fonts.mono, fontSize: 7, color: palette.textMuted, display: 'flex', gap: 10 }}>
-        <span>⌥G summon</span>
+        <span>⌘⇧G summon</span>
         <span>SPACE speak</span>
         <span>ESC close</span>
       </div>
