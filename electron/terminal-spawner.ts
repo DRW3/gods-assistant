@@ -131,11 +131,12 @@ export function focusSystemTerminal(windowName: string): void {
 function focusAndPositionTerminal(searchTerm: string): void {
   const { width: sw, height: sh } = screen.getPrimaryDisplay().workAreaSize;
 
-  const overlayW = 420;
+  const overlayW = 400;
+  const gap = 2;
   const termX = 0;
-  const termY = 25;
-  const termW = sw - overlayW - 20;
-  const termH = sh - 35;
+  const termY = 0;
+  const termW = sw - overlayW - gap;
+  const termH = sh;
 
   const safeName = searchTerm.replace(/"/g, '\\"').replace(/\\/g, '\\\\');
   const searchWords = safeName.split(/[\s—◂·]+/).filter(w => w.length > 2).slice(0, 3).join(' ');
@@ -201,42 +202,39 @@ export function getActiveTerminalCount(): number {
 
 export function layoutAllTerminals(): void {
   /**
-   * When God's Assistant is invoked, organize ALL open Terminal windows:
-   * - Overlay: right side (narrower ~420px)
-   * - Terminals: left ~2/3 of screen, stacked max 3 visible, rest minimized
+   * Zero-waste layout:
+   * - Terminals: fill left portion edge-to-edge, no gaps
+   * - Overlay: pinned right, full height
    */
   const { width: sw, height: sh } = screen.getPrimaryDisplay().workAreaSize;
 
-  const overlayW = 420;
+  const overlayW = 400;
+  const gap = 2;
   const termX = 0;
-  const termW = sw - overlayW - 20;  // give terminals most of the width
-  const topY = 25;
-  const totalH = sh - 35;
-  const maxVisible = 3;  // only show 3 terminals, minimize the rest
+  const termW = sw - overlayW - gap;
+  const topY = 0;  // start from very top of work area
+  const totalH = sh;
+  const maxVisible = 3;
 
   const script = `
 tell application "Terminal"
   set winCount to count of windows
   if winCount is 0 then return
 
-  -- Only show up to ${maxVisible} terminals, minimize the rest
   set visCount to winCount
   if visCount > ${maxVisible} then
     set visCount to ${maxVisible}
   end if
 
   set termHeight to (${totalH} / visCount) as integer
-  if termHeight < 200 then
-    set termHeight to 200
-  end if
 
   set yPos to ${topY}
   repeat with i from 1 to winCount
     try
       if i <= ${maxVisible} then
         set miniaturized of window i to false
-        set bounds of window i to {${termX}, yPos, ${termX + termW}, yPos + termHeight}
-        set yPos to yPos + termHeight + 2
+        set bounds of window i to {${termX}, yPos, ${termW}, yPos + termHeight}
+        set yPos to yPos + termHeight
       else
         set miniaturized of window i to true
       end if
