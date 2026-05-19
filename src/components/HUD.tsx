@@ -20,9 +20,20 @@ export default function HUD() {
   const effort = useAssistantStore((s) => s.effort);
   const reset = useAssistantStore((s) => s.reset);
   const glow = orbGlow(orbState);
-  const createSession = useCallback(() => send('create_session', { name: '' }), [send]);
-  const switchSession = useCallback((id: string) => send('switch_session', { session_id: id }), [send]);
-  const closeSession = useCallback((id: string) => send('close_session', { session_id: id }), [send]);
+  const createSession = useCallback(() => {
+    send('create_session', { name: '' });
+    // Terminal will be spawned when session_created comes back via sessions_list
+  }, [send]);
+  const switchSession = useCallback((id: string) => {
+    send('switch_session', { session_id: id });
+    const api = (window as any).electronAPI;
+    api?.invoke('focus-terminal', { sessionId: id });
+  }, [send]);
+  const closeSession = useCallback((id: string) => {
+    send('close_session', { session_id: id });
+    const api = (window as any).electronAPI;
+    api?.invoke('close-terminal', { sessionId: id });
+  }, [send]);
   const [textInput, setTextInput] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);

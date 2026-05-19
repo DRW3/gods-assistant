@@ -1,4 +1,5 @@
 import { ipcMain, BrowserWindow } from 'electron';
+import { spawnTerminal, focusTerminal, closeTerminal } from './terminal-spawner';
 
 export function setupIPC(mainWindow: BrowserWindow): void {
   // Hide overlay window
@@ -18,5 +19,21 @@ export function setupIPC(mainWindow: BrowserWindow): void {
       const [width] = mainWindow.getSize();
       mainWindow.setSize(width, Math.round(height));
     }
+  });
+
+  // Terminal window management
+  ipcMain.handle('spawn-terminal', async (_event, { sessionId, name }: { sessionId: string; name: string }) => {
+    await spawnTerminal(sessionId, name);
+    return { success: true };
+  });
+
+  ipcMain.handle('focus-terminal', async (_event, { sessionId }: { sessionId: string }) => {
+    focusTerminal(sessionId);
+    return { success: true };
+  });
+
+  ipcMain.handle('close-terminal', async (_event, { sessionId }: { sessionId: string }) => {
+    closeTerminal(sessionId);
+    return { success: true };
   });
 }
