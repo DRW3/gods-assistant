@@ -106,6 +106,20 @@ export function useWebSocket() {
           useAssistantStore.getState().setSystemSessions((msg.payload as any).sessions || []);
           break;
 
+        case 'session_activity': {
+          // A terminal session changed — auto-refresh context if it's the active tab
+          const actPid = (msg.payload as any).pid;
+          const actSid = (msg.payload as any).session_id;
+          const activeSysId = useAssistantStore.getState().activeSessionId;
+          const sysSessions = useAssistantStore.getState().systemSessions;
+          const activeSession = sysSessions.find((s: any) => s.id === activeSysId);
+          if (activeSession && activeSession.pid === actPid) {
+            // Active tab changed — auto-refresh context
+            send('get_session_context', { pid: actPid, session_id: activeSysId });
+          }
+          break;
+        }
+
         case 'session_context':
           useAssistantStore.getState().setTranscript((msg.payload as any).last_topic || '');
           useAssistantStore.getState().setResponse(

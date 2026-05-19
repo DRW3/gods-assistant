@@ -8,6 +8,7 @@ from config import load_config
 from system_monitor import start_system_monitor
 from process_monitor import get_processes_async
 from session_manager import manager
+from session_watcher import start_session_watcher
 from system_scanner import get_system_sessions_async
 
 # Load .env from project root
@@ -196,8 +197,9 @@ async def main() -> None:
     port = config["ws_port"]
     log.info(f"Starting WebSocket server on port {port}")
 
-    # Start system monitor background task
-    asyncio.create_task(start_system_monitor(broadcast, interval=3.0))
+    # Start background watchers
+    asyncio.create_task(start_system_monitor(broadcast, interval=5.0))
+    asyncio.create_task(start_session_watcher(broadcast, interval=3.0))
 
     async with serve(handler, "localhost", port):
         await asyncio.Future()  # run forever
