@@ -25,24 +25,29 @@ async def emit_terminal(ws, text: str, line_type: str = "cmd", status: str = "")
 
 
 async def route_intent(ws, text: str, config: dict) -> None:
-    """Seamless: pipe to Claude Code, stream output, done."""
+    """Pipe to Claude Code with stream-json, emit structured events."""
     t0 = time.time()
 
-    await emit_task(ws, "claude", "Thinking...", "running", "")
+    await emit(ws, "stream_item", {
+        "id": "stream_0", "event": "thinking", "title": "Thinking...",
+        "detail": text[:80], "status": "running",
+    })
 
     if not is_claude_available():
         response_text = await _groq_fallback(ws, text, config)
     else:
-        async def on_line(line: str):
-            await emit_terminal(ws, line, "output", "ok")
+        async def on_event(item):
+            await emit(ws, "stream_item", item)
 
-        response_text = await stream_claude(text, on_line=on_line, timeout=120)
+        response_text = await stream_claude(text, on_event=on_event, timeout=120)
 
         elapsed = f"{time.time() - t0:.1f}s"
-        if response_text:
-            await emit_task(ws, "claude", "Done", "done", elapsed, "")
-        else:
-            await emit_task(ws, "claude", "No response", "error", "", "")
+        if not response_text:
+            await emit(ws, "stream_item", {
+                "id": "no_response", "event": "error",
+                "title": "No response", "detail": "Claude returned empty",
+                "status": "error",
+            })
             response_text = "No response from Claude."
 
     # Send text response immediately
