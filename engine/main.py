@@ -129,11 +129,24 @@ async def handle_message(ws: ServerConnection, raw: str) -> None:
         elif msg_type == "get_session_context":
             pid = payload.get("pid", 0)
             if pid:
-                from system_scanner import read_session_context
-                context_text = await asyncio.get_event_loop().run_in_executor(None, read_session_context, pid, 8)
+                from system_scanner import read_last_exchange, read_session_context
 
-                # Summarize with Groq
-                summary_result = {"summary": context_text[:200], "last_topic": "", "suggestion": ""}
+                # Step 1: Send last prompt + response IMMEDIATELY (no delay)
+                exchange = await asyncio.get_event_loop().run_in_executor(None, read_last_exchange, pid)
+                await ws.send(json.dumps({
+                    "type": "session_context",
+                    "payload": {
+                        "pid": pid,
+                        "session_id": payload.get("session_id", ""),
+                        "last_prompt": exchange.get("last_prompt", ""),
+                        "last_response": exchange.get("last_response", ""),
+                        "summary": "",
+                        "suggestion": "",
+                    },
+                }))
+
+                # Step 2: Then summarize with Groq in background (arrives as update)
+                context_text = await asyncio.get_event_loop().run_in_executor(None, read_session_context, pid, 8)
                 api_key = config.get("groq_api_key", "")
                 if api_key and not context_text.startswith("No ") and not context_text.startswith("Could not"):
                     try:
@@ -151,13 +164,18 @@ async def handle_message(ws: ServerConnection, raw: str) -> None:
                         )
                         import json as json_mod
                         summary_result = json_mod.loads(resp.choices[0].message.content.strip())
+                        await ws.send(json.dumps({
+                            "type": "session_context",
+                            "payload": {
+                                "pid": pid,
+                                "session_id": payload.get("session_id", ""),
+                                "last_prompt": exchange.get("last_prompt", ""),
+                                "last_response": exchange.get("last_response", ""),
+                                **summary_result,
+                            },
+                        }))
                     except Exception as e:
                         log.error(f"Context summarization failed: {e}")
-
-                await ws.send(json.dumps({
-                    "type": "session_context",
-                    "payload": {"pid": pid, "session_id": payload.get("session_id", ""), **summary_result},
-                }))
 
         elif msg_type == "ping":
             await ws.send(json.dumps({"type": "pong"}))

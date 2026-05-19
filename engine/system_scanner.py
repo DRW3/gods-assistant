@@ -194,6 +194,75 @@ def read_session_context(pid: int, max_messages: int = 10) -> str:
     return "\n".join(recent)
 
 
+def read_last_exchange(pid: int) -> dict:
+    """Read the last user prompt and Claude response from a session.
+    Returns {last_prompt, last_response} — raw text, no summarization."""
+    session_file = SESSIONS_DIR / f"{pid}.json"
+    if not session_file.exists():
+        return {"last_prompt": "", "last_response": ""}
+
+    try:
+        with open(session_file) as f:
+            session_data = json.load(f)
+    except Exception:
+        return {"last_prompt": "", "last_response": ""}
+
+    session_id = session_data.get("sessionId", "")
+    if not session_id:
+        return {"last_prompt": "", "last_response": ""}
+
+    projects_dir = Path.home() / ".claude" / "projects"
+    transcript_path = None
+    for project_dir in projects_dir.iterdir():
+        if project_dir.is_dir():
+            candidate = project_dir / f"{session_id}.jsonl"
+            if candidate.exists():
+                transcript_path = candidate
+                break
+
+    if not transcript_path:
+        return {"last_prompt": "", "last_response": ""}
+
+    try:
+        with open(transcript_path) as f:
+            lines = f.readlines()
+    except Exception:
+        return {"last_prompt": "", "last_response": ""}
+
+    last_prompt = ""
+    last_response = ""
+
+    # Read backwards to find the last user prompt and last assistant response
+    for line in reversed(lines):
+        try:
+            entry = json.loads(line.strip())
+            entry_type = entry.get("type", "")
+            content = entry.get("message", {}).get("content", "")
+
+            if isinstance(content, list):
+                text = " ".join(b.get("text", "") for b in content if isinstance(b, dict) and b.get("type") == "text")
+            elif isinstance(content, str):
+                text = content
+            else:
+                text = str(content)
+
+            text = text.strip()
+            if not text:
+                continue
+
+            if entry_type == "assistant" and not last_response:
+                last_response = text[:500]
+            elif entry_type == "human" and not last_prompt:
+                last_prompt = text[:200]
+
+            if last_prompt and last_response:
+                break
+        except Exception:
+            continue
+
+    return {"last_prompt": last_prompt, "last_response": last_response}
+
+
 async def get_system_sessions_async():
     """Run scan in executor to avoid blocking."""
     import asyncio

@@ -120,13 +120,27 @@ export function useWebSocket() {
           break;
         }
 
-        case 'session_context':
-          useAssistantStore.getState().setTranscript((msg.payload as any).last_topic || '');
-          useAssistantStore.getState().setResponse(
-            ((msg.payload as any).summary || '') +
-            ((msg.payload as any).suggestion ? '\n\nSuggestion: ' + (msg.payload as any).suggestion : '')
-          );
+        case 'session_context': {
+          const ctx = msg.payload as any;
+          // Show last prompt + last response immediately
+          const prompt = ctx.last_prompt || ctx.last_topic || '';
+          const resp = ctx.last_response || '';
+          const summary = ctx.summary || '';
+          const suggestion = ctx.suggestion || '';
+
+          useAssistantStore.getState().setTranscript(prompt);
+
+          // Build response: last response first, then summary + suggestion below
+          let fullResponse = resp;
+          if (summary && summary !== resp) {
+            fullResponse += (fullResponse ? '\n\n---\n' : '') + summary;
+          }
+          if (suggestion) {
+            fullResponse += '\n\nNext: ' + suggestion;
+          }
+          useAssistantStore.getState().setResponse(fullResponse);
           break;
+        }
 
         case 'effort_changed':
           useAssistantStore.getState().setEffort(msg.payload.level as any);
