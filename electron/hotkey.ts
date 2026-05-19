@@ -8,8 +8,8 @@ export function registerHotkeys(mainWindow: BrowserWindow): void {
     } else {
       mainWindow.show();
       mainWindow.focus();
+      mainWindow.webContents.send('toggle-overlay');
     }
-    mainWindow.webContents.send('toggle-overlay');
   });
 
   // Cmd+Shift+S — toggle mute

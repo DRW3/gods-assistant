@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import TopBar from './TopBar';
 import WaveformBar from './WaveformBar';
 import TasksPanel from './TasksPanel';
@@ -8,7 +8,7 @@ import BottomBar from './BottomBar';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useAudio } from '../hooks/useAudio';
 import { useAssistantStore } from '../stores/assistantStore';
-import { stateColors, fonts } from '../styles/theme';
+import { stateColors } from '../styles/theme';
 
 export default function HUD() {
   const { send } = useWebSocket();
@@ -20,20 +20,38 @@ export default function HUD() {
   const reset = useAssistantStore((s) => s.reset);
   const sc = stateColors(orbState);
 
-  // Spacebar push-to-talk
-  useEffect(() => {
-    let isHolding = false;
+  // Use ref to track holding state — avoids stale closure
+  const isHoldingRef = useRef(false);
+  const orbStateRef = useRef(orbState);
+  orbStateRef.current = orbState;
 
+  const beginRecording = useCallback(() => {
+    console.log('[HUD] beginRecording, current state:', orbStateRef.current);
+    setOrbState('listening');
+    startRecording((base64) => {
+      console.log('[HUD] audio chunk ready, sending to engine');
+      send('audio_chunk', { data: base64, sampleRate: 16000 });
+    });
+  }, [setOrbState, startRecording, send]);
+
+  const endRecording = useCallback(() => {
+    console.log('[HUD] endRecording');
+    stopRecording();
+    setOrbState('processing');
+  }, [stopRecording, setOrbState]);
+
+  // Spacebar push-to-talk — single registration, uses refs
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.code === 'Space' && !isHolding && orbState === 'idle') {
+      if (e.code === 'Space' && !isHoldingRef.current && orbStateRef.current === 'idle') {
         e.preventDefault();
-        isHolding = true;
-        setOrbState('listening');
-        startRecording((base64) => {
-          send('audio_chunk', { data: base64, sampleRate: 16000 });
-        });
+        console.log('[HUD] SPACE down — start recording');
+        isHoldingRef.current = true;
+        beginRecording();
       }
       if (e.key === 'Escape') {
+        console.log('[HUD] ESC — closing');
+        isHoldingRef.current = false;
         stopRecording();
         reset();
         const api = (window as any).electronAPI;
@@ -42,11 +60,11 @@ export default function HUD() {
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
-      if (e.code === 'Space' && isHolding) {
+      if (e.code === 'Space' && isHoldingRef.current) {
         e.preventDefault();
-        isHolding = false;
-        stopRecording();
-        setOrbState('processing');
+        console.log('[HUD] SPACE up — stop recording');
+        isHoldingRef.current = false;
+        endRecording();
       }
     };
 
@@ -56,28 +74,32 @@ export default function HUD() {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [orbState, send, startRecording, stopRecording, setOrbState, reset]);
+  }, [beginRecording, endRecording, stopRecording, reset]);
 
-  // Electron IPC toggle
+  // Electron IPC toggle (Cmd+Shift+G)
   useEffect(() => {
     const api = (window as any).electronAPI;
     if (!api) return;
-    const unsub1 = api.on('toggle-overlay', () => {
-      if (orbState === 'idle') {
-        setOrbState('listening');
-        startRecording((base64) => {
-          send('audio_chunk', { data: base64, sampleRate: 16000 });
-        });
-      } else if (orbState === 'listening') {
-        stopRecording();
-        setOrbState('processing');
+    const unsub = api.on('toggle-overlay', () => {
+      console.log('[HUD] toggle-overlay IPC, state:', orbStateRef.current);
+      if (orbStateRef.current === 'idle') {
+        beginRecording();
+      } else if (orbStateRef.current === 'listening') {
+        endRecording();
       }
     });
-    const unsub2 = api.on('toggle-mute', () => {
+    return () => { unsub?.(); };
+  }, [beginRecording, endRecording]);
+
+  // Mute toggle
+  useEffect(() => {
+    const api = (window as any).electronAPI;
+    if (!api) return;
+    const unsub = api.on('toggle-mute', () => {
       useAssistantStore.getState().toggleMute();
     });
-    return () => { unsub1?.(); unsub2?.(); };
-  }, [orbState, send, startRecording, stopRecording, setOrbState]);
+    return () => { unsub?.(); };
+  }, []);
 
   return (
     <div style={{
