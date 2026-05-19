@@ -1,8 +1,8 @@
 import { globalShortcut, BrowserWindow } from 'electron';
 
 export function registerHotkeys(mainWindow: BrowserWindow): void {
-  // Cmd+Shift+G — toggle overlay visibility
-  globalShortcut.register('CommandOrControl+Shift+G', () => {
+  // Option+G — toggle overlay visibility
+  globalShortcut.register('Alt+G', () => {
     if (mainWindow.isVisible()) {
       mainWindow.hide();
     } else {
