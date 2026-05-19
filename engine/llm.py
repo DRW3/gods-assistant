@@ -63,3 +63,43 @@ def ask_brain(text: str, api_key: str, model: str = "llama-3.3-70b-versatile", h
     )
 
     return resp.choices[0].message.content.strip()
+
+
+def generate_command(text: str, api_key: str, model: str = "llama-3.3-70b-versatile") -> dict:
+    """Translate a natural language request into an executable shell command.
+    Returns {"command": "...", "explanation": "...", "needs_confirmation": false}"""
+    client = get_client(api_key)
+
+    system_prompt = """You are a macOS terminal command generator for a voice assistant.
+Given a user's natural language request, generate the exact shell command(s) to execute on macOS.
+
+Return ONLY a JSON object with:
+- "command": the exact shell command to run (use && to chain multiple commands)
+- "explanation": one short sentence explaining what it does
+- "needs_confirmation": true if the command is destructive (rm, kill, etc.)
+
+Rules:
+- Use macOS commands: osascript, open, defaults, pmset, screencapture, mdfind, pbcopy, pbpaste, etc.
+- For checking if something exists, use: which, ls, mdfind, find
+- For app control: osascript -e 'tell application "AppName" to activate'
+- For system info: sw_vers, sysctl, df -h, ps aux, lsof
+- For file search: mdfind "query" or find ~ -name "pattern" -maxdepth 3
+- Keep commands safe and non-destructive by default
+- If the request is unclear, generate a diagnostic command that shows relevant info
+
+Return ONLY valid JSON, no explanation outside the JSON."""
+
+    resp = client.chat.completions.create(
+        model=model,
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": text},
+        ],
+        temperature=0.1,
+        max_tokens=300,
+        response_format={"type": "json_object"},
+    )
+
+    raw = resp.choices[0].message.content.strip()
+    log.info(f"Generated command: {raw}")
+    return json.loads(raw)
