@@ -29,6 +29,10 @@ export function setupIPC(mainWindow: BrowserWindow): void {
 
   ipcMain.handle('focus-terminal', async (_event, { sessionId, windowName }: { sessionId: string; windowName?: string }) => {
     if (windowName) {
+      // Move overlay to right half when focusing a terminal
+      const { width: sw, height: sh } = require('electron').screen.getPrimaryDisplay().workAreaSize;
+      const overlayW = Math.round(sw / 2) - 10;
+      mainWindow.setBounds({ x: Math.round(sw / 2), y: 25, width: overlayW, height: mainWindow.getBounds().height });
       focusSystemTerminal(windowName);
     } else {
       focusTerminal(sessionId);

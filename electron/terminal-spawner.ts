@@ -81,47 +81,41 @@ export function focusSystemTerminal(windowName: string): void {
 function focusAndPositionTerminal(searchTerm: string): void {
   const { width: sw, height: sh } = screen.getPrimaryDisplay().workAreaSize;
 
-  // Overlay sits top-center, terminals fill the rest of the screen below
-  const overlayW = 540;
-  const overlayY = 25; // near top of screen
-  const overlayX = Math.round((sw - overlayW) / 2);
+  // Selected terminal: left half of screen, full height
+  const termX = 0;
+  const termY = 25;
+  const termW = Math.round(sw / 2) - 10;
+  const termH = sh - 35;
 
-  // Selected terminal: full width below overlay area, large
-  const termX = 10;
-  const termY = Math.round(sh * 0.45); // bottom half of screen
-  const termW = sw - 20;
-  const termH = sh - termY - 10;
+  // Overlay will be on the right side
+  const safeName = searchTerm.replace(/"/g, '\\"').replace(/\\/g, '\\\\');
 
-  const safeName = searchTerm.replace(/"/g, '\\"');
+  // Use partial matching — try first few significant words
+  const searchWords = safeName.split(/[\s—◂·]+/).filter(w => w.length > 2).slice(0, 3).join(' ');
+  const searchShort = searchWords || safeName.slice(0, 20);
 
   const script = `
 tell application "Terminal"
-  -- First, minimize/push back all other terminal windows
+  set found to false
   repeat with w in windows
     set wName to name of w
-    if wName does not contain "${safeName}" then
-      -- Push non-selected terminals to a small strip on the left
-      try
-        set bounds of w to {0, ${overlayY}, 200, ${Math.round(sh * 0.44)}}
-        set miniaturized of w to false
-      end try
-    end if
-  end repeat
-
-  -- Now bring the selected terminal to front and make it big
-  repeat with w in windows
-    set wName to name of w
-    if wName contains "${safeName}" then
+    if wName contains "${searchShort}" then
       set bounds of w to {${termX}, ${termY}, ${termX + termW}, ${termY + termH}}
       set index of w to 1
+      set found to true
       exit repeat
     end if
   end repeat
+  if not found then
+    -- Fallback: just bring first window to front
+    if (count of windows) > 0 then
+      set bounds of window 1 to {${termX}, ${termY}, ${termX + termW}, ${termY + termH}}
+    end if
+  end if
   activate
 end tell
 
--- Bring overlay back on top
-delay 0.3
+delay 0.2
 tell application "System Events"
   set frontmost of process "Electron" to true
 end tell
