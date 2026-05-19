@@ -9,6 +9,18 @@ export interface SessionInfo {
   context_summary: string;
 }
 
+export interface SystemSession {
+  id: string;
+  pid: number;
+  tty: string;
+  name: string;
+  cwd: string;
+  status: string;
+  started: string;
+  is_external: boolean;
+  command: string;
+}
+
 export interface SystemStats {
   cpu_percent: number;
   ram_gb: number;
@@ -28,6 +40,7 @@ interface AssistantState {
   waveformData: Float32Array;
   sessions: SessionInfo[];
   activeSessionId: string | null;
+  systemSessions: SystemSession[];
   expandedSections: { activity: boolean };
 
   setOrbState: (s: OrbState) => void;
@@ -43,6 +56,7 @@ interface AssistantState {
   setWaveformData: (d: Float32Array) => void;
   setSessions: (sessions: SessionInfo[], activeId: string | null) => void;
   setActiveSession: (id: string | null) => void;
+  setSystemSessions: (s: SystemSession[]) => void;
   toggleSection: (s: 'activity') => void;
   reset: () => void;
 }
@@ -59,6 +73,7 @@ export const useAssistantStore = create<AssistantState>((set) => ({
   waveformData: new Float32Array(128),
   sessions: [],
   activeSessionId: null,
+  systemSessions: [],
   expandedSections: { activity: true },
 
   setOrbState: (orbState) => set({ orbState }),
@@ -76,6 +91,7 @@ export const useAssistantStore = create<AssistantState>((set) => ({
   setWaveformData: (waveformData) => set({ waveformData }),
   setSessions: (sessions, activeId) => set({ sessions, activeSessionId: activeId }),
   setActiveSession: (activeSessionId) => set({ activeSessionId }),
+  setSystemSessions: (systemSessions) => set({ systemSessions }),
   toggleSection: (section) => set((s) => ({
     expandedSections: { ...s.expandedSections, [section]: !s.expandedSections[section] },
   })),

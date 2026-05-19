@@ -8,6 +8,7 @@ from config import load_config
 from system_monitor import start_system_monitor
 from process_monitor import get_processes_async
 from session_manager import manager
+from system_scanner import get_system_sessions_async
 
 # Load .env from project root
 env_file = Path(__file__).parent.parent / ".env"
@@ -117,6 +118,13 @@ async def handle_message(ws: ServerConnection, raw: str) -> None:
         elif msg_type == "list_sessions":
             await ws.send(json.dumps({"type": "sessions_list", "payload": {"sessions": manager.list_sessions(), "active_id": manager.active_id}}))
 
+        elif msg_type == "scan_sessions":
+            system_sessions = await get_system_sessions_async()
+            await ws.send(json.dumps({
+                "type": "system_sessions",
+                "payload": {"sessions": system_sessions},
+            }))
+
         elif msg_type == "ping":
             await ws.send(json.dumps({"type": "pong"}))
 
@@ -134,6 +142,15 @@ async def handle_message(ws: ServerConnection, raw: str) -> None:
 async def handler(ws: ServerConnection) -> None:
     clients.add(ws)
     log.info(f"Client connected ({len(clients)} total)")
+    # Auto-scan system sessions on connect
+    try:
+        system_sessions = await get_system_sessions_async()
+        await ws.send(json.dumps({
+            "type": "system_sessions",
+            "payload": {"sessions": system_sessions},
+        }))
+    except Exception:
+        pass
     try:
         async for raw in ws:
             await handle_message(ws, raw)

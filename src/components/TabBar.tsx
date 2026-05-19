@@ -8,6 +8,7 @@ export default function TabBar({ onCreateSession, onSwitchSession, onCloseSessio
 }) {
   const sessions = useAssistantStore((s) => s.sessions);
   const activeSessionId = useAssistantStore((s) => s.activeSessionId);
+  const systemSessions = useAssistantStore((s) => s.systemSessions);
 
   if (sessions.length === 0) return null;
 
@@ -53,6 +54,36 @@ export default function TabBar({ onCreateSession, onSwitchSession, onCloseSessio
           </div>
         );
       })}
+      {/* System sessions divider */}
+      {systemSessions.length > 0 && sessions.length > 0 && (
+        <div style={{ width: 1, height: 16, background: palette.white08, margin: '0 4px', flexShrink: 0 }} />
+      )}
+
+      {/* External system sessions */}
+      {systemSessions.map((s) => (
+        <div key={s.id} onClick={() => onSwitchSession(s.id)} title={`${s.command}\n${s.cwd}\nStarted: ${s.started}`} style={{
+          display: 'flex', alignItems: 'center', gap: 5,
+          padding: '5px 8px', borderRadius: '10px 10px 0 0',
+          fontFamily: fonts.mono, fontSize: 7, cursor: 'pointer',
+          whiteSpace: 'nowrap' as const, flexShrink: 0,
+          background: 'transparent',
+          color: palette.textMuted,
+          border: `1px dashed rgba(107,203,155,0.08)`,
+          borderBottom: 'none',
+          opacity: 0.7,
+        }}>
+          <div style={{
+            width: 5, height: 5, borderRadius: '50%',
+            background: s.status === 'running' ? '#f0c060' : s.status === 'idle' ? palette.jade : 'rgba(200,240,216,0.15)',
+            boxShadow: s.status !== 'unknown' ? `0 0 3px ${s.status === 'running' ? '#f0c060' : palette.jade}` : 'none',
+          }} />
+          <div style={{ display: 'flex', flexDirection: 'column' as const }}>
+            <span>{s.name}</span>
+            <span style={{ fontSize: 5, opacity: 0.5 }}>{s.tty} · pid {s.pid}</span>
+          </div>
+        </div>
+      ))}
+
       <div onClick={onCreateSession} style={{
         width: 20, height: 20, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontSize: 12, color: palette.textMuted, cursor: 'pointer',
