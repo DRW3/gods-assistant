@@ -14,7 +14,7 @@ export function useWebSocket() {
 
   const {
     setOrbState, setTranscript, setResponse,
-    setTasks, updateTask, addTerminalLine,
+    addStreamItem,
     setSystemStats,
   } = useAssistantStore();
 
@@ -77,26 +77,8 @@ export function useWebSocket() {
           setSystemStats(msg.payload as any);
           break;
 
-        case 'task_update': {
-          const t = msg.payload as any;
-          if (t.tasks) {
-            setTasks(t.tasks);
-          } else if (t.id) {
-            // Upsert: add if new, update if exists
-            const existing = useAssistantStore.getState().tasks;
-            if (existing.some((task: any) => task.id === t.id)) {
-              updateTask(t.id, { name: t.name, status: t.status, detail: t.detail, time: t.time });
-            } else {
-              useAssistantStore.getState().addTask({
-                id: t.id, name: t.name, status: t.status, detail: t.detail || '', time: t.time || '',
-              });
-            }
-          }
-          break;
-        }
-
-        case 'terminal_line':
-          addTerminalLine(msg.payload as any);
+        case 'stream_item':
+          addStreamItem(msg.payload as any);
           break;
 
         case 'pong':
@@ -116,7 +98,7 @@ export function useWebSocket() {
       console.error('[ws] error:', err);
       ws.close();
     };
-  }, [setOrbState, setTranscript, setResponse, setTasks, updateTask, addTerminalLine, setSystemStats]);
+  }, [setOrbState, setTranscript, setResponse, addStreamItem, setSystemStats]);
 
   useEffect(() => {
     connect();

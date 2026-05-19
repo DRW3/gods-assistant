@@ -1,8 +1,7 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import TopBar from './TopBar';
 import WaveformBar from './WaveformBar';
-import TasksPanel from './TasksPanel';
-import TerminalOutput from './TerminalOutput';
+import ActivityStream from './ActivityStream';
 import BottomBar from './BottomBar';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useAudio } from '../hooks/useAudio';
@@ -15,8 +14,7 @@ export default function HUD() {
   const orbState = useAssistantStore((s) => s.orbState);
   const transcript = useAssistantStore((s) => s.transcript);
   const response = useAssistantStore((s) => s.response);
-  const tasks = useAssistantStore((s) => s.tasks);
-  const lines = useAssistantStore((s) => s.terminalLines);
+  const streamItems = useAssistantStore((s) => s.streamItems);
   const setOrbState = useAssistantStore((s) => s.setOrbState);
   const reset = useAssistantStore((s) => s.reset);
   const glow = orbGlow(orbState);
@@ -27,8 +25,7 @@ export default function HUD() {
   const sendTextCommand = useCallback((text: string) => {
     if (!text.trim()) return;
     console.log('[HUD] text command:', text);
-    useAssistantStore.getState().setTasks([]);
-    useAssistantStore.getState().clearTerminal();
+    useAssistantStore.getState().clearStream();
     useAssistantStore.getState().setTranscript(text);
     useAssistantStore.getState().setResponse('');
     setOrbState('processing');
@@ -44,8 +41,7 @@ export default function HUD() {
   const beginRecording = useCallback(() => {
     console.log('[HUD] beginRecording, current state:', orbStateRef.current);
     // Clear previous results
-    useAssistantStore.getState().setTasks([]);
-    useAssistantStore.getState().clearTerminal();
+    useAssistantStore.getState().clearStream();
     useAssistantStore.getState().setTranscript('');
     useAssistantStore.getState().setResponse('');
     setOrbState('listening');
@@ -154,7 +150,7 @@ export default function HUD() {
     const observer = new ResizeObserver(measure);
     if (containerRef.current) observer.observe(containerRef.current);
     return () => observer.disconnect();
-  }, [transcript, response, tasks.length, lines.length]);
+  }, [transcript, response, streamItems.length]);
 
   return (
     <div ref={containerRef} style={{
@@ -162,13 +158,35 @@ export default function HUD() {
       background: `linear-gradient(145deg, ${palette.bgLight}, ${palette.bg})`,
       boxShadow: `${clay.overlay}, 0 0 80px ${glow}`,
       border: '1px solid rgba(107,203,155,0.06)',
+      display: 'flex', flexDirection: 'column',
     }}>
       <TopBar />
       <WaveformBar />
 
-      {/* Text input */}
-      <div style={{ padding: '8px 20px' }} data-no-drag>
-        <div style={{
+      {/* Scrollable middle */}
+      <div style={{ flex: 1, overflowY: 'auto', maxHeight: 440 }}>
+        <ActivityStream />
+        {/* Response card */}
+        {(transcript || response) && (
+          <div style={{ padding: '6px 20px 10px' }}>
+            <div style={{
+              background: `linear-gradient(145deg, ${palette.bgLight}ee, ${palette.bg})`,
+              borderRadius: radius.card,
+              boxShadow: clay.raised,
+              border: `1px solid ${palette.white02}`,
+              padding: '14px 18px',
+            }}>
+              {transcript && <div style={{ fontSize: 11, color: palette.text, fontFamily: fonts.mono, lineHeight: 1.5 }}>"{transcript}"</div>}
+              {response && <div style={{ fontSize: 12, color: palette.textDim, marginTop: transcript ? 6 : 0, paddingTop: transcript ? 6 : 0, borderTop: transcript ? `1px solid ${palette.white02}` : 'none', lineHeight: 1.7, maxHeight: 200, overflowY: 'auto' as const }}>{response}</div>}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Bottom dock - always visible */}
+      <div style={{ borderTop: `1px solid ${palette.white04}`, padding: '10px 16px 12px' }}>
+        {/* Input pill */}
+        <div data-no-drag style={{
           background: 'linear-gradient(145deg, #122418, #0e2014)',
           borderRadius: radius.pill,
           boxShadow: clay.sunken,
@@ -213,7 +231,7 @@ export default function HUD() {
               cursor: 'pointer',
               lineHeight: 1,
             }}
-          >🎤</button>
+          >{'\u{1F3A4}'}</button>
           <button
             onClick={() => sendTextCommand(textInput)}
             style={{
@@ -232,26 +250,8 @@ export default function HUD() {
             Send
           </button>
         </div>
+        <BottomBar />
       </div>
-
-      {/* Transcript / Response */}
-      {(transcript || response) && (
-        <div style={{
-          background: `linear-gradient(145deg, ${palette.bgLight}ee, ${palette.bg})`,
-          borderRadius: radius.card,
-          boxShadow: clay.raised,
-          border: `1px solid ${palette.white02}`,
-          padding: '14px 18px',
-          margin: '0 20px 10px',
-        }}>
-          {transcript && <div style={{ fontSize: 11, color: palette.text, fontFamily: fonts.mono, lineHeight: 1.5 }}>"{transcript}"</div>}
-          {response && <div style={{ fontSize: 12, color: palette.textDim, marginTop: transcript ? 6 : 0, paddingTop: transcript ? 6 : 0, borderTop: transcript ? `1px solid ${palette.white02}` : 'none', lineHeight: 1.7, maxHeight: 200, overflowY: 'auto' as const }}>{response}</div>}
-        </div>
-      )}
-
-      <TasksPanel />
-      <TerminalOutput />
-      <BottomBar />
     </div>
   );
 }

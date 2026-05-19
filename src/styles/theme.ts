@@ -33,7 +33,7 @@ export const clay = {
 
 export const fonts = {
   mono: "'Geist Mono', 'JetBrains Mono', 'SF Mono', monospace",
-  sans: "'Outfit', 'Plus Jakarta Sans', -apple-system, sans-serif",
+  sans: "'Bricolage Grotesque', -apple-system, sans-serif",
 } as const;
 
 export const radius = {
