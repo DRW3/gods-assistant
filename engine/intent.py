@@ -65,6 +65,14 @@ async def route_intent(ws, text: str, config: dict) -> None:
     elif power in ("app_control", "system") and confidence >= 0.7:
         # Direct power execution
         response_text = await _handle_power(ws, power, action, args, response_hint, config)
+        # If power failed (unknown action), fall back to terminal
+        if response_text and ("Unknown" in response_text or "Error" in response_text):
+            await emit_terminal(ws, f"→ Power failed, falling back to terminal", "output", "error")
+            response_text = await _handle_terminal(ws, text, api_key, brain_model, config)
+
+    elif _looks_like_command(text):
+        # Heuristic: looks like the user wants to do something on their machine
+        response_text = await _handle_terminal(ws, text, api_key, brain_model, config)
 
     else:
         # Ask the brain for a conversational response
