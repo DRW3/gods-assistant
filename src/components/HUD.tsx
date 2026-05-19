@@ -61,11 +61,17 @@ export default function HUD() {
     setOrbState('processing');
   }, [stopRecording, setOrbState]);
 
+  // Blur input on mount so SPACE works immediately for push-to-talk
+  useEffect(() => {
+    if (inputRef.current) inputRef.current.blur();
+  }, []);
+
   // Spacebar push-to-talk — single registration, uses refs
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Don't capture SPACE when typing in the text input
-      if (document.activeElement === inputRef.current) return;
+      const active = document.activeElement;
+      if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA')) return;
 
       if (e.code === 'Space' && !isHoldingRef.current) {
         e.preventDefault();
