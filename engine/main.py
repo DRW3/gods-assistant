@@ -43,11 +43,31 @@ async def handle_message(ws: ServerConnection, raw: str) -> None:
 
     try:
         if msg_type == "audio_chunk":
-            # Will be handled by STT in Task 6
+            audio_b64 = payload.get("data", "")
+            if not audio_b64:
+                return
+
+            await ws.send(json.dumps({
+                "type": "state",
+                "payload": {"state": "processing"},
+            }))
+
+            from stt import transcribe_audio
+            text = transcribe_audio(audio_b64, config.get("stt_model", "large-v3-turbo"))
+
             await ws.send(json.dumps({
                 "type": "transcript",
-                "payload": {"text": "[STT not connected yet]", "final": True},
+                "payload": {"text": text, "final": True},
             }))
+
+            if text:
+                from intent import route_intent
+                await route_intent(ws, text, config)
+            else:
+                await ws.send(json.dumps({
+                    "type": "state",
+                    "payload": {"state": "idle"},
+                }))
 
         elif msg_type == "ping":
             await ws.send(json.dumps({"type": "pong"}))
