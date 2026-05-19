@@ -3,12 +3,11 @@ import TopBar from './TopBar';
 import WaveformBar from './WaveformBar';
 import TasksPanel from './TasksPanel';
 import TerminalOutput from './TerminalOutput';
-import ProcessesGrid from './ProcessesGrid';
 import BottomBar from './BottomBar';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useAudio } from '../hooks/useAudio';
 import { useAssistantStore } from '../stores/assistantStore';
-import { stateColors } from '../styles/theme';
+import { orbGlow } from '../styles/theme';
 
 export default function HUD() {
   const { send } = useWebSocket();
@@ -18,7 +17,7 @@ export default function HUD() {
   const response = useAssistantStore((s) => s.response);
   const setOrbState = useAssistantStore((s) => s.setOrbState);
   const reset = useAssistantStore((s) => s.reset);
-  const sc = stateColors(orbState);
+  const glow = orbGlow(orbState);
   const [textInput, setTextInput] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -128,7 +127,7 @@ export default function HUD() {
       width: '100%', minHeight: '100%', borderRadius: 18, overflow: 'hidden', position: 'relative',
       background: 'rgba(8, 10, 18, 0.94)', backdropFilter: 'blur(40px)', WebkitBackdropFilter: 'blur(40px)',
       border: '1px solid rgba(255,255,255,0.05)',
-      boxShadow: `0 4px 40px rgba(0,0,0,0.5), 0 0 80px ${sc.glow}15`,
+      boxShadow: `0 4px 40px rgba(0,0,0,0.5), 0 0 80px ${glow}`,
     }}>
       <TopBar />
       <WaveformBar />
@@ -179,7 +178,6 @@ export default function HUD() {
 
       <TasksPanel />
       <TerminalOutput />
-      <ProcessesGrid />
       <BottomBar />
     </div>
   );

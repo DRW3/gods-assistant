@@ -1,8 +1,13 @@
 import { useAssistantStore } from '../stores/assistantStore';
-import { fonts, colors } from '../styles/theme';
+import { palette, clay, fonts, radius } from '../styles/theme';
 
-const icons = { done: '\u2713', running: '\u27F3', pending: '\u25CB', error: '\u2717' };
-const iconColors = { done: colors.success, running: '#22d3ee', pending: 'rgba(255,255,255,0.12)', error: colors.danger };
+const icons: Record<string, string> = { done: '✓', running: '⟳', pending: '○', error: '✗' };
+const iconBg: Record<string, string> = {
+  done: `linear-gradient(135deg, ${palette.jade}, ${palette.jadeMuted})`,
+  running: `linear-gradient(135deg, ${palette.gold}, ${palette.goldMuted})`,
+  pending: `linear-gradient(135deg, #3a5040, #2a3a30)`,
+  error: `linear-gradient(135deg, ${palette.danger}, #c04040)`,
+};
 
 export default function TasksPanel() {
   const tasks = useAssistantStore((s) => s.tasks);
@@ -10,35 +15,39 @@ export default function TasksPanel() {
   const toggle = useAssistantStore((s) => s.toggleSection);
 
   if (tasks.length === 0) return null;
-
-  const doneCount = tasks.filter((t) => t.status === 'done').length;
+  const done = tasks.filter((t) => t.status === 'done').length;
 
   return (
-    <div style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }} data-no-drag>
+    <div style={{ borderBottom: `1px solid ${palette.white04}` }} data-no-drag>
       <div onClick={() => toggle('tasks')} style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '8px 16px', cursor: 'pointer',
+        padding: '8px 20px', cursor: 'pointer',
       }}>
-        <span style={{ fontFamily: fonts.mono, fontSize: 9, fontWeight: 500, color: 'rgba(255,255,255,0.2)', letterSpacing: 1.5, textTransform: 'uppercase' as const }}>
-          {expanded ? '\u25BE' : '\u25B8'} Tasks
+        <span style={{ fontFamily: fonts.mono, fontSize: 9, color: palette.textMuted, letterSpacing: 1.5, textTransform: 'uppercase' as const }}>
+          {expanded ? '▾' : '▸'} Agents
         </span>
-        <span style={{ fontFamily: fonts.mono, fontSize: 8, color: '#22d3ee', background: 'rgba(34,211,238,0.06)', border: '1px solid rgba(34,211,238,0.1)', borderRadius: 3, padding: '2px 6px' }}>
-          {doneCount}/{tasks.length} complete
-        </span>
+        <span style={{
+          fontFamily: fonts.mono, fontSize: 8, color: palette.jade,
+          background: palette.jadeDim, borderRadius: 8, padding: '3px 8px',
+        }}>{done}/{tasks.length}</span>
       </div>
       {expanded && (
-        <div style={{ padding: '0 16px 10px', display: 'flex', flexDirection: 'column', gap: 3 }}>
-          {tasks.map((task) => (
-            <div key={task.id} style={{
-              display: 'flex', alignItems: 'center', gap: 7, padding: '5px 9px',
-              background: task.status === 'running' ? 'rgba(34,211,238,0.02)' : 'rgba(255,255,255,0.015)',
-              border: `1px solid ${task.status === 'running' ? 'rgba(34,211,238,0.05)' : 'rgba(255,255,255,0.02)'}`,
-              borderRadius: 7, fontFamily: fonts.mono, fontSize: 10,
+        <div style={{ padding: '0 20px 10px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+          {tasks.map((t) => (
+            <div key={t.id} style={{
+              display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px',
+              background: `linear-gradient(145deg, ${palette.bgLight}, ${palette.bg})`,
+              borderRadius: radius.agent, fontFamily: fonts.mono, fontSize: 10,
+              boxShadow: clay.raisedSm, border: `1px solid ${palette.white02}`,
             }}>
-              <span style={{ width: 14, textAlign: 'center' as const, color: iconColors[task.status], fontSize: 10 }}>{icons[task.status]}</span>
-              <span style={{ flex: 1, color: task.status === 'running' ? '#f1f5f9' : 'rgba(255,255,255,0.5)' }}>{task.name}</span>
-              <span style={{ fontSize: 8, color: task.status === 'done' ? 'rgba(16,185,129,0.5)' : task.status === 'running' ? 'rgba(34,211,238,0.5)' : 'rgba(255,255,255,0.2)' }}>{task.detail}</span>
-              <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.12)', minWidth: 30, textAlign: 'right' as const }}>{task.time}</span>
+              <div style={{
+                width: 18, height: 18, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 9, color: 'white', background: iconBg[t.status],
+                boxShadow: '2px 2px 5px rgba(0,0,0,0.3), inset 0 1px 2px rgba(255,255,255,0.15)',
+              }}>{icons[t.status]}</div>
+              <span style={{ flex: 1, color: t.status === 'running' ? palette.text : palette.textDim }}>{t.name}</span>
+              <span style={{ fontSize: 8, color: palette.textMuted }}>{t.detail}</span>
+              <span style={{ fontSize: 8, color: palette.textMuted }}>{t.time}</span>
             </div>
           ))}
         </div>
