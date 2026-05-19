@@ -34,7 +34,7 @@ export default function HUD() {
       useAssistantStore.getState().setResponse('Loading context...');
       send('get_session_context', { pid: sysSession.pid, session_id: id });
       const api = (window as any).electronAPI;
-      api?.invoke('focus-terminal', { sessionId: id, windowName: sysSession.name });
+      api?.invoke('focus-terminal', { sessionId: id, windowName: sysSession.window_match || sysSession.name });
     } else {
       // Managed session
       const api = (window as any).electronAPI;

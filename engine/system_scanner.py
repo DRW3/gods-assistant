@@ -91,30 +91,32 @@ def scan_claude_sessions() -> List[Dict]:
         # Get Terminal window title for a better name
         term_title = _get_terminal_title(tty)
 
-        # Determine a meaningful name
+        # Determine names — display name (short) + window_match (for AppleScript)
         has_continue = "--continue" in command
+        window_match = ""  # unique string to find the Terminal window
         if term_title and "claude" in term_title.lower():
-            # Extract the meaningful part from terminal title
-            # e.g. "✳ Build WhatsApp health monitoring — claude" → "Build WhatsApp health..."
-            name = term_title.split("—")[0].strip().lstrip("✳ ").strip()
-            if len(name) > 25:
-                name = name[:25] + "..."
+            full_name = term_title.split("—")[0].strip().lstrip("\u2733 ").strip()
+            window_match = full_name[:40]  # enough to uniquely match
+            name = full_name[:22] + ("..." if len(full_name) > 22 else "")
         else:
             name = f"{project_name}"
+            window_match = project_name
         if has_continue and name == "home":
-            name += " (continued)"
+            name += " (cont.)"
+            window_match = "claude --continue"
 
         sessions.append({
             "id": f"system_{pid}",
             "pid": pid,
             "tty": tty,
             "name": name,
+            "window_match": window_match,  # used by AppleScript to find window
             "cwd": cwd,
             "status": status,
             "started": started,
             "session_id": session_id,
             "kind": kind,
-            "is_external": True,  # Not spawned by God's Assistant
+            "is_external": True,
             "command": command.strip()[:80],
         })
 

@@ -14,6 +14,7 @@ export interface SystemSession {
   pid: number;
   tty: string;
   name: string;
+  window_match: string;
   cwd: string;
   status: string;
   started: string;
