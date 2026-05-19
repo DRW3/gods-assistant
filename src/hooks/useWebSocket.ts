@@ -24,6 +24,7 @@ export function useWebSocket() {
 
     ws.onopen = () => {
       console.log('[ws] connected');
+      ws.send(JSON.stringify({ type: 'create_session', payload: { name: '' } }));
     };
 
     ws.onmessage = (event) => {
@@ -79,6 +80,16 @@ export function useWebSocket() {
 
         case 'stream_item':
           addStreamItem(msg.payload as any);
+          break;
+
+        case 'sessions_list': {
+          const p = msg.payload as any;
+          useAssistantStore.getState().setSessions(p.sessions || [], p.active_id);
+          break;
+        }
+        case 'session_switched':
+          useAssistantStore.getState().setActiveSession((msg.payload as any).active_id);
+          useAssistantStore.getState().clearStream();
           break;
 
         case 'effort_changed':

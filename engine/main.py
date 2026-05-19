@@ -7,6 +7,7 @@ from websockets.asyncio.server import serve, ServerConnection
 from config import load_config
 from system_monitor import start_system_monitor
 from process_monitor import get_processes_async
+from session_manager import manager
 
 # Load .env from project root
 env_file = Path(__file__).parent.parent / ".env"
@@ -63,8 +64,10 @@ async def handle_message(ws: ServerConnection, raw: str) -> None:
             }))
 
             if text:
+                if not manager.get_active():
+                    manager.create_session()
                 from intent import route_intent
-                await route_intent(ws, text, config, voice_input=True, effort=config.get("effort", "auto"))
+                await route_intent(ws, text, config, voice_input=True, effort=config.get("effort", "auto"), session=manager.get_active())
             else:
                 await ws.send(json.dumps({
                     "type": "state",
@@ -74,9 +77,11 @@ async def handle_message(ws: ServerConnection, raw: str) -> None:
         elif msg_type == "text_command":
             text = payload.get("text", "")
             if text:
+                if not manager.get_active():
+                    manager.create_session()
                 from intent import route_intent
                 effort = payload.get("effort", config.get("effort", "auto"))
-                await route_intent(ws, text, config, voice_input=False, effort=effort)
+                await route_intent(ws, text, config, voice_input=False, effort=effort, session=manager.get_active())
             else:
                 await ws.send(json.dumps({
                     "type": "state",
@@ -93,6 +98,24 @@ async def handle_message(ws: ServerConnection, raw: str) -> None:
         elif msg_type == "set_effort":
             config["effort"] = payload.get("level", "auto")
             await ws.send(json.dumps({"type": "effort_changed", "payload": {"level": config["effort"]}}))
+
+        elif msg_type == "create_session":
+            name = payload.get("name", "")
+            session = manager.create_session(name)
+            await ws.send(json.dumps({"type": "sessions_list", "payload": {"sessions": manager.list_sessions(), "active_id": manager.active_id}}))
+
+        elif msg_type == "switch_session":
+            sid = payload.get("session_id", "")
+            manager.switch(sid)
+            await ws.send(json.dumps({"type": "session_switched", "payload": {"active_id": sid}}))
+
+        elif msg_type == "close_session":
+            sid = payload.get("session_id", "")
+            new_active = manager.close_session(sid)
+            await ws.send(json.dumps({"type": "sessions_list", "payload": {"sessions": manager.list_sessions(), "active_id": new_active}}))
+
+        elif msg_type == "list_sessions":
+            await ws.send(json.dumps({"type": "sessions_list", "payload": {"sessions": manager.list_sessions(), "active_id": manager.active_id}}))
 
         elif msg_type == "ping":
             await ws.send(json.dumps({"type": "pong"}))

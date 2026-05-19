@@ -11,6 +11,7 @@ export interface StreamItemData {
   bash_output?: { command: string; stdout: string; stderr: string };
   skill_name?: string;
   agent_id?: string;
+  session_id?: string;
 }
 
 const ICONS: Record<string, { emoji: string; bg: string }> = {

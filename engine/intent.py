@@ -28,12 +28,18 @@ AFFIRMATIONS = ["On it.", "Got it.", "Working on that.", "Right away.", "Let me 
 _affirm_index = 0
 
 
-async def route_intent(ws, text: str, config: dict, voice_input: bool = False, effort: str = "auto") -> None:
+async def route_intent(ws, text: str, config: dict, voice_input: bool = False, effort: str = "auto", session=None) -> None:
     """Route command to Groq (fast chat) or Claude Code (tools needed).
     effort: "auto"|"balanced" → classify first, "fast" → always Groq, "max" → always Claude.
     voice_input: True if user spoke, False if user typed. Controls TTS behavior."""
     global _affirm_index
     t0 = time.time()
+
+    if session:
+        session.status = "running"
+        # Auto-rename generic sessions to match the command
+        if session.name.startswith("Session "):
+            session.name = text[:20].strip()
 
     # Determine routing based on effort level
     use_claude = False
@@ -54,7 +60,11 @@ async def route_intent(ws, text: str, config: dict, voice_input: bool = False, e
 
     # Emit which mode we're using
     mode_label = "Claude Code" if use_claude else "Groq (fast)"
+    stream_item_base = {}
+    if session:
+        stream_item_base["session_id"] = session.id
     await emit(ws, "stream_item", {
+        **stream_item_base,
         "id": "stream_0", "event": "thinking", "title": f"{mode_label}...",
         "detail": text[:80], "status": "running",
     })
@@ -74,6 +84,8 @@ async def route_intent(ws, text: str, config: dict, voice_input: bool = False, e
 
     if use_claude and is_claude_available():
         async def on_event(item):
+            if session:
+                item["session_id"] = session.id
             await emit(ws, "stream_item", item)
 
         response_text = await stream_claude(text, on_event=on_event, timeout=120)
@@ -97,6 +109,7 @@ async def route_intent(ws, text: str, config: dict, voice_input: bool = False, e
 
         elapsed = f"{time.time() - t0:.1f}s"
         await emit(ws, "stream_item", {
+            **stream_item_base,
             "id": "stream_done", "event": "done", "title": "Done",
             "detail": f"{elapsed} · Groq", "status": "done", "elapsed": elapsed,
         })
@@ -115,6 +128,10 @@ async def route_intent(ws, text: str, config: dict, voice_input: bool = False, e
                 await emit(ws, "audio", {"audio": audio_b64})
         except Exception as e:
             log.error(f"TTS failed: {e}")
+
+    if session:
+        session.status = "idle"
+        session.context_summary = (response_text or "")[:60]
 
     await emit(ws, "state", {"state": "idle"})
 

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
+import TabBar from './TabBar';
 import TopBar from './TopBar';
 import WaveformBar from './WaveformBar';
 import ActivityStream from './ActivityStream';
@@ -19,6 +20,9 @@ export default function HUD() {
   const effort = useAssistantStore((s) => s.effort);
   const reset = useAssistantStore((s) => s.reset);
   const glow = orbGlow(orbState);
+  const createSession = useCallback(() => send('create_session', { name: '' }), [send]);
+  const switchSession = useCallback((id: string) => send('switch_session', { session_id: id }), [send]);
+  const closeSession = useCallback((id: string) => send('close_session', { session_id: id }), [send]);
   const [textInput, setTextInput] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -174,6 +178,7 @@ export default function HUD() {
       border: '1px solid rgba(107,203,155,0.06)',
       display: 'flex', flexDirection: 'column',
     }}>
+      <TabBar onCreateSession={createSession} onSwitchSession={switchSession} onCloseSession={closeSession} />
       <TopBar />
       <WaveformBar />
 
