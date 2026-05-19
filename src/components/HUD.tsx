@@ -48,9 +48,9 @@ export default function HUD() {
   // Spacebar push-to-talk — single registration, uses refs
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.code === 'Space' && !isHoldingRef.current && orbStateRef.current === 'idle') {
+      if (e.code === 'Space' && !isHoldingRef.current) {
         e.preventDefault();
-        console.log('[HUD] SPACE down — start recording');
+        console.log('[HUD] SPACE down — start recording (was:', orbStateRef.current, ')');
         isHoldingRef.current = true;
         beginRecording();
       }
