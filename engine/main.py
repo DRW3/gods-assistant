@@ -5,6 +5,8 @@ import os
 from pathlib import Path
 from websockets.asyncio.server import serve, ServerConnection
 from config import load_config
+from system_monitor import start_system_monitor
+from process_monitor import get_processes_async
 
 # Load .env from project root
 env_file = Path(__file__).parent.parent / ".env"
@@ -69,6 +71,13 @@ async def handle_message(ws: ServerConnection, raw: str) -> None:
                     "payload": {"state": "idle"},
                 }))
 
+        elif msg_type == "get_processes":
+            procs = await get_processes_async()
+            await ws.send(json.dumps({
+                "type": "processes",
+                "payload": {"processes": procs},
+            }))
+
         elif msg_type == "ping":
             await ws.send(json.dumps({"type": "pong"}))
 
@@ -97,6 +106,10 @@ async def handler(ws: ServerConnection) -> None:
 async def main() -> None:
     port = config["ws_port"]
     log.info(f"Starting WebSocket server on port {port}")
+
+    # Start system monitor background task
+    asyncio.create_task(start_system_monitor(broadcast, interval=3.0))
+
     async with serve(handler, "localhost", port):
         await asyncio.Future()  # run forever
 
