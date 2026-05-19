@@ -10,7 +10,7 @@ export default function TabBar({ onCreateSession, onSwitchSession, onCloseSessio
   const activeSessionId = useAssistantStore((s) => s.activeSessionId);
   const systemSessions = useAssistantStore((s) => s.systemSessions);
 
-  if (sessions.length === 0) return null;
+  if (sessions.length === 0 && systemSessions.length === 0) return null;
 
   return (
     <div data-no-drag style={{

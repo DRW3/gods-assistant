@@ -24,7 +24,7 @@ export function useWebSocket() {
 
     ws.onopen = () => {
       console.log('[ws] connected');
-      ws.send(JSON.stringify({ type: 'create_session', payload: { name: '' } }));
+      // Only scan existing sessions — don't auto-create new ones
       ws.send(JSON.stringify({ type: 'scan_sessions' }));
     };
 
