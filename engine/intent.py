@@ -25,59 +25,28 @@ async def emit_terminal(ws, text: str, line_type: str = "cmd", status: str = "")
 
 
 async def route_intent(ws, text: str, config: dict) -> None:
-    """Simple architecture: pipe everything to Claude Code.
-    Claude is the brain, the terminal, the everything."""
+    """Seamless: pipe to Claude Code, stream output, done."""
     t0 = time.time()
 
-    # Show what the user said
-    await emit_task(ws, "claude", "Claude Code", "running", "thinking...")
-    await emit_terminal(ws, f"claude -p \"{text[:70]}{'...' if len(text) > 70 else ''}\"", "cmd")
+    await emit_task(ws, "claude", "Thinking...", "running", "")
 
     if not is_claude_available():
-        # Fallback to Groq if claude CLI not installed
-        await emit_terminal(ws, "Claude CLI not found, using Groq fallback", "output", "error")
-        await emit_task(ws, "claude", "Claude Code", "error", "not installed", "")
         response_text = await _groq_fallback(ws, text, config)
     else:
-        # Stream Claude output line by line to the overlay
-        line_count = [0]
-
         async def on_line(line: str):
-            line_count[0] += 1
             await emit_terminal(ws, line, "output", "ok")
-            # Update task with latest line
-            await emit_task(ws, "claude", "Claude Code", "running",
-                            f"line {line_count[0]}: {line[:40]}...",
-                            f"{time.time() - t0:.1f}s")
 
         response_text = await stream_claude(text, on_line=on_line, timeout=120)
 
         elapsed = f"{time.time() - t0:.1f}s"
         if response_text:
-            await emit_task(ws, "claude", "Claude Code", "done",
-                            f"{len(response_text)} chars, {line_count[0]} lines", elapsed)
+            await emit_task(ws, "claude", "Done", "done", elapsed, "")
         else:
-            await emit_task(ws, "claude", "Claude Code", "error", "no response", elapsed)
-            response_text = "Claude didn't return a response."
+            await emit_task(ws, "claude", "No response", "error", "", "")
+            response_text = "No response from Claude."
 
-    # Send text response immediately
+    # Send text response
     await emit(ws, "response", {"text": response_text, "audio": ""})
-
-    # TTS summary (speak first ~120 chars)
-    if config.get("voice_response", True) and response_text:
-        tts_text = _truncate_for_tts(response_text)
-        await emit_task(ws, "tts", "Voice summary", "running", "speaking...")
-        try:
-            loop = asyncio.get_event_loop()
-            voice = config.get("tts_voice", "af_heart")
-            audio_b64 = await loop.run_in_executor(None, synthesize, tts_text, voice)
-            await emit_task(ws, "tts", "Voice summary", "done", "", "")
-            if audio_b64:
-                await emit(ws, "audio", {"audio": audio_b64})
-        except Exception as e:
-            log.error(f"TTS failed: {e}")
-            await emit_task(ws, "tts", "Voice summary", "error", str(e), "")
-
     await emit(ws, "state", {"state": "idle"})
 
 
