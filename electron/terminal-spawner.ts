@@ -1,8 +1,58 @@
 import { execFile, exec } from 'child_process';
-import { screen } from 'electron';
+import { screen, BrowserWindow } from 'electron';
 import { writeFileSync, unlinkSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
+
+// Highlight border window — transparent, click-through, just a jade glow border
+let highlightWindow: BrowserWindow | null = null;
+
+function showHighlightBorder(x: number, y: number, w: number, h: number): void {
+  const borderSize = 3;
+  const padding = 2;
+
+  if (!highlightWindow) {
+    highlightWindow = new BrowserWindow({
+      x: x - borderSize - padding,
+      y: y - borderSize - padding,
+      width: w + (borderSize + padding) * 2,
+      height: h + (borderSize + padding) * 2,
+      frame: false,
+      transparent: true,
+      alwaysOnTop: true,
+      hasShadow: false,
+      skipTaskbar: true,
+      resizable: false,
+      focusable: false,
+      webPreferences: { nodeIntegration: false, contextIsolation: true },
+    });
+    highlightWindow.setIgnoreMouseEvents(true);
+    highlightWindow.loadURL(`data:text/html,
+      <html><body style="margin:0;background:transparent;overflow:hidden;">
+        <div style="
+          position:absolute;inset:0;
+          border:${borderSize}px solid rgba(107,203,155,0.6);
+          border-radius:12px;
+          box-shadow:0 0 15px rgba(107,203,155,0.3),inset 0 0 15px rgba(107,203,155,0.1);
+        "></div>
+      </body></html>
+    `);
+  } else {
+    highlightWindow.setBounds({
+      x: x - borderSize - padding,
+      y: y - borderSize - padding,
+      width: w + (borderSize + padding) * 2,
+      height: h + (borderSize + padding) * 2,
+    });
+  }
+  highlightWindow.show();
+}
+
+export function hideHighlightBorder(): void {
+  if (highlightWindow) {
+    highlightWindow.hide();
+  }
+}
 
 interface TerminalWindow {
   sessionId: string;
@@ -81,16 +131,12 @@ export function focusSystemTerminal(windowName: string): void {
 function focusAndPositionTerminal(searchTerm: string): void {
   const { width: sw, height: sh } = screen.getPrimaryDisplay().workAreaSize;
 
-  // Selected terminal: left half of screen, full height
   const termX = 0;
   const termY = 25;
   const termW = Math.round(sw / 2) - 10;
   const termH = sh - 35;
 
-  // Overlay will be on the right side
   const safeName = searchTerm.replace(/"/g, '\\"').replace(/\\/g, '\\\\');
-
-  // Use partial matching — try first few significant words
   const searchWords = safeName.split(/[\s—◂·]+/).filter(w => w.length > 2).slice(0, 3).join(' ');
   const searchShort = searchWords || safeName.slice(0, 20);
 
@@ -107,7 +153,6 @@ tell application "Terminal"
     end if
   end repeat
   if not found then
-    -- Fallback: just bring first window to front
     if (count of windows) > 0 then
       set bounds of window 1 to {${termX}, ${termY}, ${termX + termW}, ${termY + termH}}
     end if
@@ -120,6 +165,10 @@ tell application "System Events"
   set frontmost of process "Electron" to true
 end tell
 `;
+
+  // Show jade highlight border around the terminal position
+  showHighlightBorder(termX, termY, termW, termH);
+
   runAppleScript(script).catch((err) => {
     console.error(`[terminal-spawner] Focus failed: ${err.message}`);
   });
