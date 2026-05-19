@@ -165,6 +165,7 @@ async def stream_claude(prompt, on_event=None, timeout=120):
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
             cwd=home,  # Run from home dir so --continue finds previous sessions
+            limit=1024 * 1024,  # 1MB line buffer — stream-json lines can be huge
         )
 
         result_text = ""
