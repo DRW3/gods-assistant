@@ -158,10 +158,13 @@ async def stream_claude(prompt, on_event=None, timeout=120):
     cmd.append(prompt)
 
     try:
+        import os
+        home = os.path.expanduser("~")
         proc = await asyncio.create_subprocess_exec(
             *cmd,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
+            cwd=home,  # Run from home dir so --continue finds previous sessions
         )
 
         result_text = ""
