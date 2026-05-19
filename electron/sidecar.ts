@@ -13,6 +13,12 @@ function log(msg: string): void {
 }
 
 export function startSidecar(): void {
+  // In dev mode, skip sidecar — engine is started manually via scripts/dev.sh
+  if (process.env.NODE_ENV === 'development') {
+    log('Dev mode — skipping sidecar (start engine manually: cd engine && python main.py)');
+    return;
+  }
+
   shouldRestart = true;
 
   const spawnProcess = () => {
