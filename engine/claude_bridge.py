@@ -9,11 +9,15 @@ def is_claude_available() -> bool:
     return shutil.which("claude") is not None
 
 
-async def ask_claude(prompt: str, timeout: int = 120) -> str:
+async def stream_claude(prompt: str, on_line=None, timeout: int = 120) -> str:
+    """Run claude -p and stream output line by line.
+    on_line(line) is called for each stdout line as it arrives.
+    Returns the full response."""
     if not is_claude_available():
+        log.error("Claude CLI not found")
         return ""
 
-    log.info(f"Claude bridge: {prompt[:80]}...")
+    log.info(f"Claude: {prompt[:80]}...")
 
     try:
         proc = await asyncio.create_subprocess_exec(
@@ -22,33 +26,37 @@ async def ask_claude(prompt: str, timeout: int = 120) -> str:
             stderr=asyncio.subprocess.PIPE,
         )
 
+        lines = []
+
+        async def read_stream():
+            while True:
+                line = await proc.stdout.readline()
+                if not line:
+                    break
+                text = line.decode().rstrip()
+                lines.append(text)
+                if on_line and text:
+                    await on_line(text)
+
         try:
-            stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=timeout)
+            await asyncio.wait_for(read_stream(), timeout=timeout)
+            await proc.wait()
         except asyncio.TimeoutError:
             proc.kill()
-            return "Claude timed out."
+            if on_line:
+                await on_line("[timed out after {}s]".format(timeout))
+            return "\n".join(lines) + "\n[timed out]"
 
-        response = stdout.decode().strip()
         if proc.returncode != 0:
-            log.error(f"Claude error: {stderr.decode()}")
-            return ""
+            stderr = (await proc.stderr.read()).decode().strip()
+            log.error(f"Claude error (exit {proc.returncode}): {stderr}")
+            if on_line and stderr:
+                await on_line(f"[error] {stderr[:200]}")
 
-        log.info(f"Claude response: {response[:100]}...")
-        return response
+        full = "\n".join(lines)
+        log.info(f"Claude done: {len(full)} chars, {len(lines)} lines")
+        return full
 
     except Exception as e:
         log.error(f"Claude bridge error: {e}")
-        return ""
-
-
-async def handle(action: str, args: dict, config: dict) -> str:
-    prompt = args.get("query", args.get("command", ""))
-    if not prompt:
-        return "No prompt provided."
-
-    response = await ask_claude(prompt)
-    if response:
-        return response
-
-    from llm import ask_brain
-    return ask_brain(prompt, config.get("groq_api_key", ""), config.get("groq_brain_model", "llama-3.3-70b-versatile"))
+        return f"Error: {e}"
