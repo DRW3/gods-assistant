@@ -1,0 +1,16 @@
+appId: com.godsassistant.app
+productName: God's Assistant
+directories:
+  output: release
+mac:
+  category: public.app-category.productivity
+  target: dmg
+  icon: assets/icon.png
+dmg:
+  title: God's Assistant
+files:
+  - dist/**/*
+  - dist-electron/**/*
+  - engine/**/*
+  - "!engine/__pycache__"
+  - "!engine/.venv"
