@@ -15,6 +15,7 @@ interface AssistantState {
   response: string;
   streamItems: StreamItemData[];
   systemStats: SystemStats;
+  effort: 'auto' | 'fast' | 'balanced' | 'max';
   inputMode: 'push-to-talk' | 'always-on';
   isMuted: boolean;
   waveformData: Float32Array;
@@ -27,6 +28,7 @@ interface AssistantState {
   updateStreamItem: (id: string, updates: Partial<StreamItemData>) => void;
   clearStream: () => void;
   setSystemStats: (s: SystemStats) => void;
+  setEffort: (e: 'auto' | 'fast' | 'balanced' | 'max') => void;
   setInputMode: (m: 'push-to-talk' | 'always-on') => void;
   toggleMute: () => void;
   setWaveformData: (d: Float32Array) => void;
@@ -40,6 +42,7 @@ export const useAssistantStore = create<AssistantState>((set) => ({
   response: '',
   streamItems: [],
   systemStats: { cpu_percent: 0, ram_gb: 0, battery_percent: -1, network: { in_mb: 0, out_mb: 0 } },
+  effort: 'auto',
   inputMode: 'push-to-talk',
   isMuted: false,
   waveformData: new Float32Array(128),
@@ -54,6 +57,7 @@ export const useAssistantStore = create<AssistantState>((set) => ({
   })),
   clearStream: () => set({ streamItems: [] }),
   setSystemStats: (systemStats) => set({ systemStats }),
+  setEffort: (effort) => set({ effort }),
   setInputMode: (inputMode) => set({ inputMode }),
   toggleMute: () => set((s) => ({ isMuted: !s.isMuted })),
   setWaveformData: (waveformData) => set({ waveformData }),

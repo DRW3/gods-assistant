@@ -16,6 +16,7 @@ export default function HUD() {
   const response = useAssistantStore((s) => s.response);
   const streamItems = useAssistantStore((s) => s.streamItems);
   const setOrbState = useAssistantStore((s) => s.setOrbState);
+  const effort = useAssistantStore((s) => s.effort);
   const reset = useAssistantStore((s) => s.reset);
   const glow = orbGlow(orbState);
   const [textInput, setTextInput] = useState('');
@@ -29,7 +30,7 @@ export default function HUD() {
     useAssistantStore.getState().setTranscript(text);
     useAssistantStore.getState().setResponse('');
     setOrbState('processing');
-    send('text_command', { text: text.trim() });
+    send('text_command', { text: text.trim(), effort: useAssistantStore.getState().effort });
     setTextInput('');
   }, [send, setOrbState]);
 
@@ -262,6 +263,43 @@ export default function HUD() {
           >
             Send
           </button>
+        </div>
+        {/* Effort selector */}
+        <div data-no-drag style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 0' }}>
+          <span style={{ fontFamily: fonts.mono, fontSize: 7, color: palette.textMuted, letterSpacing: 1 }}>EFFORT</span>
+          {(['auto', 'fast', 'balanced', 'max'] as const).map((level) => {
+            const active = effort === level;
+            const labels: Record<string, string> = { auto: '\u26A1 Auto', fast: '\uD83C\uDFCE Fast', balanced: '\u2696 Balanced', max: '\uD83E\uDDE0 Max' };
+            const hints: Record<string, string> = { auto: 'Smart routing', fast: 'Groq only ~200ms', balanced: 'Groq + Claude', max: 'Claude Code always' };
+            return (
+              <button
+                key={level}
+                title={hints[level]}
+                onClick={() => {
+                  useAssistantStore.getState().setEffort(level);
+                  send('set_effort', { level });
+                }}
+                style={{
+                  fontFamily: fonts.mono, fontSize: 7, borderRadius: 8, padding: '3px 8px',
+                  cursor: 'pointer', border: 'none', outline: 'none',
+                  background: active
+                    ? level === 'fast' ? `linear-gradient(135deg, ${palette.jade}, ${palette.jadeMuted})`
+                    : level === 'max' ? `linear-gradient(135deg, #b49cdb, #7e5fad)`
+                    : `linear-gradient(135deg, ${palette.gold}, ${palette.goldMuted})`
+                    : `linear-gradient(145deg, ${palette.bgLight}, ${palette.bg})`,
+                  color: active
+                    ? level === 'max' ? 'white' : palette.bgDark
+                    : palette.textMuted,
+                  fontWeight: active ? 700 : 400,
+                  boxShadow: active ? clay.button : '2px 2px 5px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.02)',
+                  borderWidth: 1, borderStyle: 'solid' as const,
+                  borderColor: active ? 'transparent' : palette.white04,
+                }}
+              >
+                {labels[level]}
+              </button>
+            );
+          })}
         </div>
         <BottomBar />
       </div>

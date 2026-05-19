@@ -81,6 +81,10 @@ export function useWebSocket() {
           addStreamItem(msg.payload as any);
           break;
 
+        case 'effort_changed':
+          useAssistantStore.getState().setEffort(msg.payload.level as any);
+          break;
+
         case 'pong':
           break;
 
