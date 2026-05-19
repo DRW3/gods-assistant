@@ -131,9 +131,10 @@ export function focusSystemTerminal(windowName: string): void {
 function focusAndPositionTerminal(searchTerm: string): void {
   const { width: sw, height: sh } = screen.getPrimaryDisplay().workAreaSize;
 
+  const overlayW = 420;
   const termX = 0;
   const termY = 25;
-  const termW = Math.round(sw / 2) - 10;
+  const termW = sw - overlayW - 20;
   const termH = sh - 35;
 
   const safeName = searchTerm.replace(/"/g, '\\"').replace(/\\/g, '\\\\');
@@ -201,35 +202,44 @@ export function getActiveTerminalCount(): number {
 export function layoutAllTerminals(): void {
   /**
    * When God's Assistant is invoked, organize ALL open Terminal windows:
-   * - Overlay: right half of screen
-   * - Terminals: stacked on the left half, evenly divided vertically
+   * - Overlay: right side (narrower ~420px)
+   * - Terminals: left ~2/3 of screen, stacked max 3 visible, rest minimized
    */
   const { width: sw, height: sh } = screen.getPrimaryDisplay().workAreaSize;
 
+  const overlayW = 420;
   const termX = 0;
-  const termW = Math.round(sw / 2) - 10;
+  const termW = sw - overlayW - 20;  // give terminals most of the width
   const topY = 25;
   const totalH = sh - 35;
+  const maxVisible = 3;  // only show 3 terminals, minimize the rest
 
   const script = `
 tell application "Terminal"
   set winCount to count of windows
   if winCount is 0 then return
 
-  -- Calculate height per terminal
-  set termHeight to ${totalH}
-  if winCount > 1 then
-    set termHeight to (${totalH} / winCount) as integer
+  -- Only show up to ${maxVisible} terminals, minimize the rest
+  set visCount to winCount
+  if visCount > ${maxVisible} then
+    set visCount to ${maxVisible}
   end if
-  if termHeight < 150 then
-    set termHeight to 150
+
+  set termHeight to (${totalH} / visCount) as integer
+  if termHeight < 200 then
+    set termHeight to 200
   end if
 
   set yPos to ${topY}
   repeat with i from 1 to winCount
     try
-      set bounds of window i to {${termX}, yPos, ${termX + termW}, yPos + termHeight}
-      set yPos to yPos + termHeight + 2
+      if i <= ${maxVisible} then
+        set miniaturized of window i to false
+        set bounds of window i to {${termX}, yPos, ${termX + termW}, yPos + termHeight}
+        set yPos to yPos + termHeight + 2
+      else
+        set miniaturized of window i to true
+      end if
     end try
   end repeat
 end tell

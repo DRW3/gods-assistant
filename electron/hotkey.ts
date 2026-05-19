@@ -19,12 +19,12 @@ function toggleOverlay(mainWindow: BrowserWindow): void {
   } else {
     // Show: position overlay on right half, arrange terminals on left
     const { width: sw, height: sh } = screen.getPrimaryDisplay().workAreaSize;
-    const overlayW = Math.round(sw / 2) - 10;
+    const overlayW = 420;
     mainWindow.setBounds({
-      x: Math.round(sw / 2),
+      x: sw - overlayW - 5,
       y: 25,
       width: overlayW,
-      height: mainWindow.getBounds().height,
+      height: Math.min(mainWindow.getBounds().height, sh - 40),
     });
     mainWindow.show();
     mainWindow.focus();
