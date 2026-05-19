@@ -29,47 +29,27 @@ _affirm_index = 0
 
 
 async def route_intent(ws, text: str, config: dict, voice_input: bool = False, effort: str = "auto", session=None) -> None:
-    """Route command to Groq (fast chat) or Claude Code (tools needed).
-    effort: "auto"|"balanced" → classify first, "fast" → always Groq, "max" → always Claude.
-    voice_input: True if user spoke, False if user typed. Controls TTS behavior."""
+    """ALL work goes to Claude terminal. Groq only used for voice TTS.
+    voice_input: True if user spoke (gets TTS affirmation + response). False = text only."""
     global _affirm_index
     t0 = time.time()
 
     if session:
         session.status = "running"
-        # Auto-rename generic sessions to match the command
         if session.name.startswith("Session "):
             session.name = text[:20].strip()
 
-    # Determine routing based on effort level
-    use_claude = False
-
-    if effort == "max":
-        use_claude = True
-    elif effort == "fast":
-        use_claude = False
-    else:
-        # Auto/balanced: classify with Groq 8B
-        try:
-            from llm import classify_needs_tools
-            api_key = config.get("groq_api_key", "")
-            use_claude = classify_needs_tools(text, api_key)
-        except Exception as e:
-            log.error(f"Classification failed, falling back to Claude: {e}")
-            use_claude = True  # fallback to claude if classification fails
-
-    # Emit which mode we're using
-    mode_label = "Claude Code" if use_claude else "Groq (fast)"
     stream_item_base = {}
     if session:
         stream_item_base["session_id"] = session.id
+
     await emit(ws, "stream_item", {
         **stream_item_base,
-        "id": "stream_0", "event": "thinking", "title": f"{mode_label}...",
+        "id": "stream_0", "event": "thinking", "title": "Claude Code...",
         "detail": text[:80], "status": "running",
     })
 
-    # Voice affirmation ONLY when user spoke (not typed)
+    # Voice affirmation ONLY when user spoke
     if voice_input and config.get("voice_response", True):
         affirm = AFFIRMATIONS[_affirm_index % len(AFFIRMATIONS)]
         _affirm_index += 1
@@ -82,7 +62,8 @@ async def route_intent(ws, text: str, config: dict, voice_input: bool = False, e
         except Exception as e:
             log.error(f"Affirmation TTS failed: {e}")
 
-    if use_claude and is_claude_available():
+    # ALL work goes to Claude terminal
+    if is_claude_available():
         async def on_event(item):
             if session:
                 item["session_id"] = session.id
@@ -93,13 +74,14 @@ async def route_intent(ws, text: str, config: dict, voice_input: bool = False, e
         elapsed = f"{time.time() - t0:.1f}s"
         if not response_text:
             await emit(ws, "stream_item", {
+                **stream_item_base,
                 "id": "no_response", "event": "error",
                 "title": "No response", "detail": "Claude returned empty",
                 "status": "error",
             })
             response_text = "No response from Claude."
     else:
-        # Fast Groq response
+        # Fallback: Groq only if Claude CLI not installed
         from llm import ask_brain
         api_key = config.get("groq_api_key", "")
         model = config.get("groq_brain_model", "llama-3.3-70b-versatile")
