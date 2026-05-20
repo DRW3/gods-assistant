@@ -100,6 +100,11 @@ async def route_intent(ws, text: str, config: dict, voice_input: bool = False, e
             "detail": f"{elapsed} · Groq", "status": "done", "elapsed": elapsed,
         })
 
+    # Save exchange to session history
+    if session:
+        session.add_exchange(text, response_text or "")
+        session.status = "idle"
+
     # Send text response immediately
     await emit(ws, "response", {"text": response_text, "audio": ""})
 

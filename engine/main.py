@@ -121,8 +121,21 @@ async def handle_message(ws: ServerConnection, raw: str) -> None:
 
         elif msg_type == "switch_session":
             sid = payload.get("session_id", "")
-            manager.switch(sid)
+            session = manager.switch(sid)
             await ws.send(json.dumps({"type": "session_switched", "payload": {"active_id": sid}}))
+            # Send managed session's own history as context
+            if session and session.last_prompt:
+                await ws.send(json.dumps({
+                    "type": "session_context",
+                    "payload": {
+                        "pid": 0,
+                        "session_id": sid,
+                        "last_prompt": session.last_prompt,
+                        "last_response": session.last_response,
+                        "summary": session.context_summary,
+                        "suggestion": "",
+                    },
+                }))
 
         elif msg_type == "close_session":
             sid = payload.get("session_id", "")
@@ -142,6 +155,24 @@ async def handle_message(ws: ServerConnection, raw: str) -> None:
         elif msg_type == "get_session_context":
             pid = payload.get("pid", 0)
             if pid:
+                # Check if PID is still alive
+                import os
+                try:
+                    os.kill(pid, 0)
+                except OSError:
+                    await ws.send(json.dumps({
+                        "type": "session_context",
+                        "payload": {
+                            "pid": pid,
+                            "session_id": payload.get("session_id", ""),
+                            "last_prompt": "",
+                            "last_response": "This session has ended.",
+                            "summary": "Session is no longer running.",
+                            "suggestion": "Create a new session with + to continue.",
+                        },
+                    }))
+                    return
+
                 from system_scanner import read_last_exchange, read_session_context
 
                 # Step 1: Send last prompt + response IMMEDIATELY (no delay)

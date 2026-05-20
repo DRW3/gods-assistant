@@ -239,7 +239,7 @@ def read_last_exchange(pid: int) -> dict:
     # Read ONLY last 30 lines — don't load the entire 40MB file
     try:
         result = subprocess.run(
-            ["tail", "-30", str(transcript_path)],
+            ["tail", "-200", str(transcript_path)],
             capture_output=True, text=True, timeout=3
         )
         lines = result.stdout.strip().split("\n")

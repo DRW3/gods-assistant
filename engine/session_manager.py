@@ -14,11 +14,27 @@ class Session:
         self.status = "idle"
         self.cwd = tempfile.mkdtemp(prefix=f"gods-session-{session_id}-")
         self.has_continuation = False
+        self.last_prompt = ""
         self.last_response = ""
         self.context_summary = ""
+        self.history = []  # list of {"role": "user"|"assistant", "text": "..."}
+
+    def add_exchange(self, prompt: str, response: str):
+        self.last_prompt = prompt
+        self.last_response = response
+        self.context_summary = response[:60]
+        self.history.append({"role": "user", "text": prompt[:200]})
+        self.history.append({"role": "assistant", "text": response[:200]})
+        # Keep last 20 entries
+        if len(self.history) > 20:
+            self.history = self.history[-20:]
 
     def to_dict(self):
-        return {"id": self.id, "name": self.name, "status": self.status, "context_summary": self.context_summary}
+        return {
+            "id": self.id, "name": self.name, "status": self.status,
+            "context_summary": self.context_summary,
+            "last_prompt": self.last_prompt, "last_response": self.last_response,
+        }
 
 
 class SessionManager:
