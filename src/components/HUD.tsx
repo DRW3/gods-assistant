@@ -199,7 +199,7 @@ export default function HUD() {
 
   return (
     <div ref={containerRef} style={{
-      width: '100%', borderRadius: radius.overlay, overflow: 'auto', position: 'relative',
+      width: '100%', minHeight: '100vh', borderRadius: radius.overlay, overflow: 'auto', position: 'relative',
       background: `linear-gradient(145deg, ${palette.bgLight}, ${palette.bg})`,
       boxShadow: `${clay.overlay}, 0 0 80px ${glow}`,
       border: '1px solid rgba(107,203,155,0.06)',
