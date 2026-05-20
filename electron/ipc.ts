@@ -28,6 +28,7 @@ export function setupIPC(mainWindow: BrowserWindow): void {
   });
 
   ipcMain.handle('focus-terminal', async (_event, { sessionId, windowName }: { sessionId: string; windowName?: string }) => {
+    console.log(`[ipc] focus-terminal: sessionId=${sessionId}, windowName=${windowName}`);
     if (windowName) {
       const { width: sw } = require('electron').screen.getPrimaryDisplay().workAreaSize;
       const overlayW = 400;

@@ -138,16 +138,16 @@ function focusAndPositionTerminal(searchTerm: string): void {
   const termW = sw - overlayW - gap;
   const termH = sh;
 
-  const safeName = searchTerm.replace(/"/g, '\\"').replace(/\\/g, '\\\\');
-  const searchWords = safeName.split(/[\s—◂·]+/).filter(w => w.length > 2).slice(0, 3).join(' ');
-  const searchShort = searchWords || safeName.slice(0, 20);
+  // Use raw search term — no mangling
+  const safeName = searchTerm.replace(/"/g, '').replace(/\\/g, '');
+  console.log(`[terminal-spawner] Searching for window containing: "${safeName}"`);
 
   const script = `
 tell application "Terminal"
   set found to false
   repeat with w in windows
     set wName to name of w
-    if wName contains "${searchShort}" then
+    if wName contains "${safeName}" then
       set bounds of w to {${termX}, ${termY}, ${termX + termW}, ${termY + termH}}
       set index of w to 1
       set found to true

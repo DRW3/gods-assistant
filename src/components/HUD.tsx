@@ -29,12 +29,14 @@ export default function HUD() {
     const sysSessions = useAssistantStore.getState().systemSessions;
     const sysSession = sysSessions.find((s: any) => s.id === id);
     if (sysSession) {
-      // System session: load context + bring terminal to front just below overlay
       useAssistantStore.getState().clearStream();
       useAssistantStore.getState().setResponse('Loading context...');
+      useAssistantStore.getState().setActiveSession(id);
       send('get_session_context', { pid: sysSession.pid, session_id: id });
+      const matchName = sysSession.window_match || sysSession.name;
+      console.log('[HUD] focusing system terminal:', matchName, sysSession);
       const api = (window as any).electronAPI;
-      api?.invoke('focus-terminal', { sessionId: id, windowName: sysSession.window_match || sysSession.name });
+      api?.invoke('focus-terminal', { sessionId: id, windowName: matchName });
     } else {
       // Managed session
       const api = (window as any).electronAPI;
