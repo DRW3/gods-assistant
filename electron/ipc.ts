@@ -29,9 +29,10 @@ export function setupIPC(mainWindow: BrowserWindow): void {
 
   ipcMain.handle('focus-terminal', async (_event, { sessionId, windowName }: { sessionId: string; windowName?: string }) => {
     if (windowName) {
-      const { width: sw, height: sh } = require('electron').screen.getPrimaryDisplay().workAreaSize;
+      const { width: sw } = require('electron').screen.getPrimaryDisplay().workAreaSize;
       const overlayW = 400;
-      mainWindow.setBounds({ x: sw - overlayW, y: 0, width: overlayW, height: sh });
+      const currentH = mainWindow.getBounds().height;
+      mainWindow.setBounds({ x: sw - overlayW, y: 0, width: overlayW, height: Math.max(currentH, 200) });
       focusSystemTerminal(windowName);
     } else {
       focusTerminal(sessionId);

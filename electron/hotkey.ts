@@ -18,13 +18,15 @@ function toggleOverlay(mainWindow: BrowserWindow): void {
     hideHighlightBorder();
   } else {
     // Show: position overlay on right half, arrange terminals on left
-    const { width: sw, height: sh } = screen.getPrimaryDisplay().workAreaSize;
+    const { width: sw } = screen.getPrimaryDisplay().workAreaSize;
     const overlayW = 400;
+    // Position right side, keep current content height (auto-resize handles it)
+    const currentH = mainWindow.getBounds().height;
     mainWindow.setBounds({
       x: sw - overlayW,
       y: 0,
       width: overlayW,
-      height: sh,
+      height: Math.max(currentH, 200),
     });
     mainWindow.show();
     mainWindow.focus();
