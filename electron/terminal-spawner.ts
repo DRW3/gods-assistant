@@ -4,55 +4,7 @@ import { writeFileSync, unlinkSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 
-// Highlight border window — transparent, click-through, just a jade glow border
-let highlightWindow: BrowserWindow | null = null;
-
-function showHighlightBorder(x: number, y: number, w: number, h: number): void {
-  const borderSize = 3;
-  const padding = 2;
-
-  if (!highlightWindow) {
-    highlightWindow = new BrowserWindow({
-      x: x - borderSize - padding,
-      y: y - borderSize - padding,
-      width: w + (borderSize + padding) * 2,
-      height: h + (borderSize + padding) * 2,
-      frame: false,
-      transparent: true,
-      alwaysOnTop: true,
-      hasShadow: false,
-      skipTaskbar: true,
-      resizable: false,
-      focusable: false,
-      webPreferences: { nodeIntegration: false, contextIsolation: true },
-    });
-    highlightWindow.setIgnoreMouseEvents(true);
-    highlightWindow.loadURL(`data:text/html,
-      <html><body style="margin:0;background:transparent;overflow:hidden;">
-        <div style="
-          position:absolute;inset:0;
-          border:${borderSize}px solid rgba(107,203,155,0.6);
-          border-radius:12px;
-          box-shadow:0 0 15px rgba(107,203,155,0.3),inset 0 0 15px rgba(107,203,155,0.1);
-        "></div>
-      </body></html>
-    `);
-  } else {
-    highlightWindow.setBounds({
-      x: x - borderSize - padding,
-      y: y - borderSize - padding,
-      width: w + (borderSize + padding) * 2,
-      height: h + (borderSize + padding) * 2,
-    });
-  }
-  highlightWindow.show();
-}
-
-export function hideHighlightBorder(): void {
-  if (highlightWindow) {
-    highlightWindow.hide();
-  }
-}
+// Highlight border removed — was causing transparent ghost windows
 
 interface TerminalWindow {
   sessionId: string;
