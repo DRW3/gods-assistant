@@ -162,10 +162,13 @@ def read_session_context(pid: int, max_messages: int = 10) -> str:
     if not transcript_path:
         return "No conversation transcript found."
 
-    # Read last N human/assistant exchanges
+    # Read ONLY the last 50 lines (not the entire file — can be 40MB+)
     try:
-        with open(transcript_path) as f:
-            lines = f.readlines()
+        result = subprocess.run(
+            ["tail", "-50", str(transcript_path)],
+            capture_output=True, text=True, timeout=3
+        )
+        lines = result.stdout.strip().split("\n")
     except Exception:
         return "Could not read transcript."
 
@@ -233,9 +236,13 @@ def read_last_exchange(pid: int) -> dict:
     if not transcript_path:
         return {"last_prompt": "", "last_response": ""}
 
+    # Read ONLY last 30 lines — don't load the entire 40MB file
     try:
-        with open(transcript_path) as f:
-            lines = f.readlines()
+        result = subprocess.run(
+            ["tail", "-30", str(transcript_path)],
+            capture_output=True, text=True, timeout=3
+        )
+        lines = result.stdout.strip().split("\n")
     except Exception:
         return {"last_prompt": "", "last_response": ""}
 
