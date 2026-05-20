@@ -1,5 +1,6 @@
 import { ipcMain, BrowserWindow } from 'electron';
 import { spawnTerminal, focusTerminal, focusSystemTerminal, closeTerminal } from './terminal-spawner';
+import { typeIntoTerminal } from './terminal-typer';
 
 export function setupIPC(mainWindow: BrowserWindow): void {
   // Hide overlay window
@@ -44,5 +45,11 @@ export function setupIPC(mainWindow: BrowserWindow): void {
   ipcMain.handle('close-terminal', async (_event, { sessionId }: { sessionId: string }) => {
     closeTerminal(sessionId);
     return { success: true };
+  });
+
+  // Type text into a terminal window (sends keystrokes to visible claude session)
+  ipcMain.handle('type-in-terminal', async (_event, { windowName, text }: { windowName: string; text: string }) => {
+    const success = await typeIntoTerminal(windowName, text);
+    return { success };
   });
 }

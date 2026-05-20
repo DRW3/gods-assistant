@@ -59,11 +59,28 @@ export default function HUD() {
     useAssistantStore.getState().setTranscript(text);
     useAssistantStore.getState().setResponse('');
     setOrbState('processing');
-    send('text_command', {
-      text: text.trim(),
-      effort: useAssistantStore.getState().effort,
-      active_session_id: useAssistantStore.getState().activeSessionId || '',
-    });
+
+    // Check if active tab is a system session — if so, TYPE into that terminal
+    const activeId = useAssistantStore.getState().activeSessionId || '';
+    const sysSessions = useAssistantStore.getState().systemSessions;
+    const sysSession = sysSessions.find((s: any) => s.id === activeId);
+
+    if (sysSession) {
+      // Type directly into the visible terminal window
+      const api = (window as any).electronAPI;
+      const matchName = sysSession.window_match || sysSession.name;
+      api?.invoke('type-in-terminal', { windowName: matchName, text: text.trim() }).then(() => {
+        useAssistantStore.getState().setResponse('Command sent to terminal. Watching for output...');
+        setOrbState('idle');
+      });
+    } else {
+      // Managed session — use claude -p subprocess
+      send('text_command', {
+        text: text.trim(),
+        effort: useAssistantStore.getState().effort,
+        active_session_id: activeId,
+      });
+    }
     setTextInput('');
   }, [send, setOrbState]);
 

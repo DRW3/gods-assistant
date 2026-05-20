@@ -98,14 +98,15 @@ export function spawnTerminal(sessionId: string, name: string): Promise<void> {
 
   const displayName = name || `Session ${q + 1}`;
 
-  // Launch claude in the new terminal so it's a real Claude session
+  // Force a NEW window (not tab) and run claude in it
   const script = `
 tell application "Terminal"
-  activate
   do script "clear && claude"
-  delay 0.5
-  set bounds of front window to {${x}, ${y}, ${x + w}, ${y + h}}
-  set custom title of front tab of front window to "${displayName}"
+  delay 0.3
+  set newWin to front window
+  set bounds of newWin to {${x}, ${y}, ${x + w}, ${y + h}}
+  set custom title of front tab of newWin to "${displayName}"
+  activate
 end tell
 `;
 
@@ -138,25 +139,38 @@ function focusAndPositionTerminal(searchTerm: string): void {
   const termW = sw - overlayW - gap;
   const termH = sh;
 
-  // Use raw search term — no mangling
-  const safeName = searchTerm.replace(/"/g, '').replace(/\\/g, '');
-  console.log(`[terminal-spawner] Searching for window containing: "${safeName}"`);
+  // Strip special chars for AppleScript matching
+  const safeName = searchTerm
+    .replace(/[✳◂⠐⠂""\\]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 40);
+  console.log(`[terminal-spawner] Searching for: "${safeName}"`);
+
+  // Use keystroke matching: try first 15 chars (unique enough, avoids special char issues)
+  const shortMatch = safeName.slice(0, 15).trim();
 
   const script = `
 tell application "Terminal"
-  set found to false
+  set targetWin to missing value
+
+  -- Try matching with short unique prefix
   repeat with w in windows
     set wName to name of w
-    if wName contains "${safeName}" then
-      set bounds of w to {${termX}, ${termY}, ${termX + termW}, ${termY + termH}}
-      set index of w to 1
-      set found to true
+    if wName contains "${shortMatch}" then
+      set targetWin to w
       exit repeat
     end if
   end repeat
-  if not found then
+
+  if targetWin is not missing value then
+    set bounds of targetWin to {${termX}, ${termY}, ${termX + termW}, ${termY + termH}}
+    set index of targetWin to 1
+  else
+    -- Fallback: just use window 1
     if (count of windows) > 0 then
       set bounds of window 1 to {${termX}, ${termY}, ${termX + termW}, ${termY + termH}}
+      set index of window 1 to 1
     end if
   end if
   activate
