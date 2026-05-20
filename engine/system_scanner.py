@@ -91,19 +91,27 @@ def scan_claude_sessions() -> List[Dict]:
         # Get Terminal window title for a better name
         term_title = _get_terminal_title(tty)
 
-        # Determine names — display name (short) + window_match (for AppleScript)
         has_continue = "--continue" in command
-        window_match = ""  # unique string to find the Terminal window
-        if term_title and "claude" in term_title.lower():
-            full_name = term_title.split("—")[0].strip().lstrip("\u2733 ").strip()
-            window_match = full_name[:40]  # enough to uniquely match
-            name = full_name[:22] + ("..." if len(full_name) > 22 else "")
+
+        # Window match: use the FIRST unique part of the full terminal title
+        # Terminal titles look like: "✳ Research Zenalyst business — mirroir-mcp ◂ claude — 153x16"
+        # We want a substring unique enough to find THIS window only
+        if term_title:
+            # Use everything before the dimension suffix (e.g. "— 153x16")
+            parts = term_title.rsplit("—", 1)
+            window_match = parts[0].strip()[:60]
+            # Display name: first meaningful segment
+            display_part = term_title.split("—")[0].strip().lstrip("\u2733 ").strip()
+            name = display_part[:22] + ("..." if len(display_part) > 22 else "")
         else:
-            name = f"{project_name}"
-            window_match = project_name
-        if has_continue and name == "home":
-            name += " (cont.)"
-            window_match = "claude --continue"
+            window_match = f"claude" if not has_continue else "claude --continue"
+            name = project_name
+
+        if not name or name == "home":
+            if has_continue:
+                name = "Main (cont.)"
+            else:
+                name = project_name or "Session"
 
         sessions.append({
             "id": f"system_{pid}",
