@@ -164,7 +164,7 @@ async def stream_claude(prompt, on_event=None, timeout=120):
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
             cwd=home,
-            limit=1024 * 1024,
+            limit=10 * 1024 * 1024,  # 10MB — Claude can output very long stream-json lines
         )
 
         result_text = ""
