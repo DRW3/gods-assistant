@@ -1,5 +1,4 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
-import TabBar from './TabBar';
 import TopBar from './TopBar';
 import WaveformBar from './WaveformBar';
 import ActivityStream from './ActivityStream';
@@ -20,59 +19,17 @@ export default function HUD() {
   const effort = useAssistantStore((s) => s.effort);
   const reset = useAssistantStore((s) => s.reset);
   const glow = orbGlow(orbState);
-  const createSession = useCallback(() => {
-    send('create_session', { name: '' });
-    // Terminal will be spawned when session_created comes back via sessions_list
-  }, [send]);
-  const switchSession = useCallback((id: string) => {
-    send('switch_session', { session_id: id });
-    useAssistantStore.getState().clearStream();
-    useAssistantStore.getState().setActiveSession(id);
-
-    // Load context for system sessions
-    const sysSessions = useAssistantStore.getState().systemSessions;
-    const sysSession = sysSessions.find((s: any) => s.id === id);
-    if (sysSession) {
-      useAssistantStore.getState().setResponse('Loading context...');
-      send('get_session_context', { pid: sysSession.pid, session_id: id });
-    }
-  }, [send]);
-  const closeSession = useCallback((id: string) => {
-    send('close_session', { session_id: id });
-  }, [send]);
   const [textInput, setTextInput] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const sendTextCommand = useCallback((text: string) => {
     if (!text.trim()) return;
-    console.log('[HUD] text command:', text);
     useAssistantStore.getState().clearStream();
     useAssistantStore.getState().setTranscript(text);
     useAssistantStore.getState().setResponse('');
     setOrbState('processing');
-
-    // Check if active tab is a system session — if so, TYPE into that terminal
-    const activeId = useAssistantStore.getState().activeSessionId || '';
-    const sysSessions = useAssistantStore.getState().systemSessions;
-    const sysSession = sysSessions.find((s: any) => s.id === activeId);
-
-    if (sysSession) {
-      // Type directly into the visible terminal window
-      const api = (window as any).electronAPI;
-      const matchName = sysSession.window_match || sysSession.name;
-      api?.invoke('type-in-terminal', { windowName: matchName, text: text.trim() }).then(() => {
-        useAssistantStore.getState().setResponse('Command sent to terminal. Watching for output...');
-        setOrbState('idle');
-      });
-    } else {
-      // Managed session — use claude -p subprocess
-      send('text_command', {
-        text: text.trim(),
-        effort: useAssistantStore.getState().effort,
-        active_session_id: activeId,
-      });
-    }
+    send('text_command', { text: text.trim(), effort: useAssistantStore.getState().effort });
     setTextInput('');
   }, [send, setOrbState]);
 
@@ -216,7 +173,6 @@ export default function HUD() {
       border: '1px solid rgba(107,203,155,0.06)',
       display: 'flex', flexDirection: 'column',
     }}>
-      <TabBar onCreateSession={createSession} onSwitchSession={switchSession} onCloseSession={closeSession} />
       <TopBar />
       <WaveformBar />
 

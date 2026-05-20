@@ -1,6 +1,7 @@
 import asyncio
 import json
 import logging
+import os
 import shutil
 
 log = logging.getLogger(__name__)
@@ -140,32 +141,29 @@ def _parse_event(line_data):
 _has_session = False  # Track if we've had at least one call (for --continue)
 
 
-async def stream_claude(prompt, on_event=None, timeout=120, cwd=None, use_continue=None):
+async def stream_claude(prompt, on_event=None, timeout=120):
     """Run claude -p with stream-json and emit parsed events.
-    cwd: working directory (determines which Claude session to continue)
-    use_continue: force --continue flag (True/False/None=auto)
+    Always uses --continue after first call. Always runs from home dir.
     Returns the final result text."""
     global _has_session
     if not is_claude_available():
         log.error("Claude CLI not found")
         return ""
 
-    should_continue = use_continue if use_continue is not None else _has_session
-    log.info(f"Claude stream (continue={should_continue}, cwd={cwd or '~'}): {prompt[:80]}...")
+    log.info(f"Claude stream (continue={_has_session}): {prompt[:80]}...")
 
     cmd = ["claude", "-p", "--output-format", "stream-json", "--verbose"]
-    if should_continue:
+    if _has_session:
         cmd.append("--continue")
     cmd.append(prompt)
 
     try:
-        import os
         home = os.path.expanduser("~")
         proc = await asyncio.create_subprocess_exec(
             *cmd,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
-            cwd=cwd or home,  # Use provided cwd or default to home
+            cwd=home,
             limit=1024 * 1024,
         )
 

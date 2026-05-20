@@ -7,9 +7,6 @@ from websockets.asyncio.server import serve, ServerConnection
 from config import load_config
 from system_monitor import start_system_monitor
 from process_monitor import get_processes_async
-from session_manager import manager
-from session_watcher import start_session_watcher
-from system_scanner import get_system_sessions_async
 
 # Load .env from project root
 env_file = Path(__file__).parent.parent / ".env"
@@ -66,10 +63,8 @@ async def handle_message(ws: ServerConnection, raw: str) -> None:
             }))
 
             if text:
-                if not manager.get_active():
-                    manager.create_session()
                 from intent import route_intent
-                await route_intent(ws, text, config, voice_input=True, effort=config.get("effort", "auto"), session=manager.get_active())
+                await route_intent(ws, text, config, voice_input=True, effort=config.get("effort", "auto"))
             else:
                 await ws.send(json.dumps({
                     "type": "state",
@@ -81,22 +76,7 @@ async def handle_message(ws: ServerConnection, raw: str) -> None:
             if text:
                 from intent import route_intent
                 effort = payload.get("effort", config.get("effort", "auto"))
-
-                # Check if active tab is a system session
-                active_sid = payload.get("active_session_id", manager.active_id or "")
-                system_cwd = None
-                if active_sid and active_sid.startswith("system_"):
-                    # Find the system session's cwd
-                    system_sessions = await get_system_sessions_async()
-                    for ss in system_sessions:
-                        if ss["id"] == active_sid:
-                            system_cwd = ss.get("cwd", None)
-                            break
-
-                if not manager.get_active():
-                    manager.create_session()
-
-                await route_intent(ws, text, config, voice_input=False, effort=effort, session=manager.get_active(), system_cwd=system_cwd)
+                await route_intent(ws, text, config, voice_input=False, effort=effort)
             else:
                 await ws.send(json.dumps({
                     "type": "state",
@@ -113,113 +93,6 @@ async def handle_message(ws: ServerConnection, raw: str) -> None:
         elif msg_type == "set_effort":
             config["effort"] = payload.get("level", "auto")
             await ws.send(json.dumps({"type": "effort_changed", "payload": {"level": config["effort"]}}))
-
-        elif msg_type == "create_session":
-            name = payload.get("name", "")
-            session = manager.create_session(name)
-            await ws.send(json.dumps({"type": "sessions_list", "payload": {"sessions": manager.list_sessions(), "active_id": manager.active_id}}))
-
-        elif msg_type == "switch_session":
-            sid = payload.get("session_id", "")
-            session = manager.switch(sid)
-            await ws.send(json.dumps({"type": "session_switched", "payload": {"active_id": sid}}))
-            # Send managed session's own history as context
-            if session and session.last_prompt:
-                await ws.send(json.dumps({
-                    "type": "session_context",
-                    "payload": {
-                        "pid": 0,
-                        "session_id": sid,
-                        "last_prompt": session.last_prompt,
-                        "last_response": session.last_response,
-                        "summary": session.context_summary,
-                        "suggestion": "",
-                    },
-                }))
-
-        elif msg_type == "close_session":
-            sid = payload.get("session_id", "")
-            new_active = manager.close_session(sid)
-            await ws.send(json.dumps({"type": "sessions_list", "payload": {"sessions": manager.list_sessions(), "active_id": new_active}}))
-
-        elif msg_type == "list_sessions":
-            await ws.send(json.dumps({"type": "sessions_list", "payload": {"sessions": manager.list_sessions(), "active_id": manager.active_id}}))
-
-        elif msg_type == "scan_sessions":
-            system_sessions = await get_system_sessions_async()
-            await ws.send(json.dumps({
-                "type": "system_sessions",
-                "payload": {"sessions": system_sessions},
-            }))
-
-        elif msg_type == "get_session_context":
-            pid = payload.get("pid", 0)
-            if pid:
-                # Check if PID is still alive
-                import os
-                try:
-                    os.kill(pid, 0)
-                except OSError:
-                    await ws.send(json.dumps({
-                        "type": "session_context",
-                        "payload": {
-                            "pid": pid,
-                            "session_id": payload.get("session_id", ""),
-                            "last_prompt": "",
-                            "last_response": "This session has ended.",
-                            "summary": "Session is no longer running.",
-                            "suggestion": "Create a new session with + to continue.",
-                        },
-                    }))
-                    return
-
-                from system_scanner import read_last_exchange, read_session_context
-
-                # Step 1: Send last prompt + response IMMEDIATELY (no delay)
-                exchange = await asyncio.get_event_loop().run_in_executor(None, read_last_exchange, pid)
-                await ws.send(json.dumps({
-                    "type": "session_context",
-                    "payload": {
-                        "pid": pid,
-                        "session_id": payload.get("session_id", ""),
-                        "last_prompt": exchange.get("last_prompt", ""),
-                        "last_response": exchange.get("last_response", ""),
-                        "summary": "",
-                        "suggestion": "",
-                    },
-                }))
-
-                # Step 2: Then summarize with Groq in background (arrives as update)
-                context_text = await asyncio.get_event_loop().run_in_executor(None, read_session_context, pid, 8)
-                api_key = config.get("groq_api_key", "")
-                if api_key and not context_text.startswith("No ") and not context_text.startswith("Could not"):
-                    try:
-                        from llm import get_client
-                        client = get_client(api_key)
-                        resp = client.chat.completions.create(
-                            model="llama-3.1-8b-instant",
-                            messages=[
-                                {"role": "system", "content": "Summarize this Claude Code terminal session in 2-3 sentences. Then suggest what the user might want to do next. Format as JSON: {\"summary\": \"...\", \"last_topic\": \"...\", \"suggestion\": \"...\"}"},
-                                {"role": "user", "content": context_text},
-                            ],
-                            temperature=0.3,
-                            max_tokens=200,
-                            response_format={"type": "json_object"},
-                        )
-                        import json as json_mod
-                        summary_result = json_mod.loads(resp.choices[0].message.content.strip())
-                        await ws.send(json.dumps({
-                            "type": "session_context",
-                            "payload": {
-                                "pid": pid,
-                                "session_id": payload.get("session_id", ""),
-                                "last_prompt": exchange.get("last_prompt", ""),
-                                "last_response": exchange.get("last_response", ""),
-                                **summary_result,
-                            },
-                        }))
-                    except Exception as e:
-                        log.error(f"Context summarization failed: {e}")
 
         elif msg_type == "ping":
             await ws.send(json.dumps({"type": "pong"}))
@@ -238,15 +111,6 @@ async def handle_message(ws: ServerConnection, raw: str) -> None:
 async def handler(ws: ServerConnection) -> None:
     clients.add(ws)
     log.info(f"Client connected ({len(clients)} total)")
-    # Auto-scan system sessions on connect
-    try:
-        system_sessions = await get_system_sessions_async()
-        await ws.send(json.dumps({
-            "type": "system_sessions",
-            "payload": {"sessions": system_sessions},
-        }))
-    except Exception:
-        pass
     try:
         async for raw in ws:
             await handle_message(ws, raw)
@@ -261,7 +125,6 @@ async def main() -> None:
 
     # Start background watchers
     asyncio.create_task(start_system_monitor(broadcast, interval=5.0))
-    asyncio.create_task(start_session_watcher(broadcast, interval=3.0))
 
     async with serve(handler, "localhost", port):
         await asyncio.Future()  # run forever

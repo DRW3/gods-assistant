@@ -24,8 +24,6 @@ export function useWebSocket() {
 
     ws.onopen = () => {
       console.log('[ws] connected');
-      // Only scan existing sessions — don't auto-create new ones
-      ws.send(JSON.stringify({ type: 'scan_sessions' }));
     };
 
     ws.onmessage = (event) => {
@@ -82,56 +80,6 @@ export function useWebSocket() {
         case 'stream_item':
           addStreamItem(msg.payload as any);
           break;
-
-        case 'sessions_list': {
-          const p = msg.payload as any;
-          useAssistantStore.getState().setSessions(p.sessions || [], p.active_id);
-          break;
-        }
-        case 'session_switched':
-          useAssistantStore.getState().setActiveSession((msg.payload as any).active_id);
-          useAssistantStore.getState().clearStream();
-          break;
-
-        case 'system_sessions':
-          useAssistantStore.getState().setSystemSessions((msg.payload as any).sessions || []);
-          break;
-
-        case 'session_activity': {
-          // A terminal session changed — auto-refresh context if it's the active tab
-          const actPid = (msg.payload as any).pid;
-          const actSid = (msg.payload as any).session_id;
-          const activeSysId = useAssistantStore.getState().activeSessionId;
-          const sysSessions = useAssistantStore.getState().systemSessions;
-          const activeSession = sysSessions.find((s: any) => s.id === activeSysId);
-          if (activeSession && activeSession.pid === actPid) {
-            // Active tab changed — auto-refresh context
-            send('get_session_context', { pid: actPid, session_id: activeSysId });
-          }
-          break;
-        }
-
-        case 'session_context': {
-          const ctx = msg.payload as any;
-          // Show last prompt + last response immediately
-          const prompt = ctx.last_prompt || ctx.last_topic || '';
-          const resp = ctx.last_response || '';
-          const summary = ctx.summary || '';
-          const suggestion = ctx.suggestion || '';
-
-          useAssistantStore.getState().setTranscript(prompt);
-
-          // Build response: last response first, then summary + suggestion below
-          let fullResponse = resp;
-          if (summary && summary !== resp) {
-            fullResponse += (fullResponse ? '\n\n---\n' : '') + summary;
-          }
-          if (suggestion) {
-            fullResponse += '\n\nNext: ' + suggestion;
-          }
-          useAssistantStore.getState().setResponse(fullResponse);
-          break;
-        }
 
         case 'effort_changed':
           useAssistantStore.getState().setEffort(msg.payload.level as any);

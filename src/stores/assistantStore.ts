@@ -2,26 +2,6 @@ import { create } from 'zustand';
 import type { OrbState } from '../styles/theme';
 import type { StreamItemData } from '../components/StreamItem';
 
-export interface SessionInfo {
-  id: string;
-  name: string;
-  status: 'idle' | 'running' | 'error';
-  context_summary: string;
-}
-
-export interface SystemSession {
-  id: string;
-  pid: number;
-  tty: string;
-  name: string;
-  window_match: string;
-  cwd: string;
-  status: string;
-  started: string;
-  is_external: boolean;
-  command: string;
-}
-
 export interface SystemStats {
   cpu_percent: number;
   ram_gb: number;
@@ -39,9 +19,6 @@ interface AssistantState {
   inputMode: 'push-to-talk' | 'always-on';
   isMuted: boolean;
   waveformData: Float32Array;
-  sessions: SessionInfo[];
-  activeSessionId: string | null;
-  systemSessions: SystemSession[];
   expandedSections: { activity: boolean };
 
   setOrbState: (s: OrbState) => void;
@@ -55,9 +32,6 @@ interface AssistantState {
   setInputMode: (m: 'push-to-talk' | 'always-on') => void;
   toggleMute: () => void;
   setWaveformData: (d: Float32Array) => void;
-  setSessions: (sessions: SessionInfo[], activeId: string | null) => void;
-  setActiveSession: (id: string | null) => void;
-  setSystemSessions: (s: SystemSession[]) => void;
   toggleSection: (s: 'activity') => void;
   reset: () => void;
 }
@@ -72,9 +46,6 @@ export const useAssistantStore = create<AssistantState>((set) => ({
   inputMode: 'push-to-talk',
   isMuted: false,
   waveformData: new Float32Array(128),
-  sessions: [],
-  activeSessionId: null,
-  systemSessions: [],
   expandedSections: { activity: true },
 
   setOrbState: (orbState) => set({ orbState }),
@@ -90,9 +61,6 @@ export const useAssistantStore = create<AssistantState>((set) => ({
   setInputMode: (inputMode) => set({ inputMode }),
   toggleMute: () => set((s) => ({ isMuted: !s.isMuted })),
   setWaveformData: (waveformData) => set({ waveformData }),
-  setSessions: (sessions, activeId) => set({ sessions, activeSessionId: activeId }),
-  setActiveSession: (activeSessionId) => set({ activeSessionId }),
-  setSystemSessions: (systemSessions) => set({ systemSessions }),
   toggleSection: (section) => set((s) => ({
     expandedSections: { ...s.expandedSections, [section]: !s.expandedSections[section] },
   })),

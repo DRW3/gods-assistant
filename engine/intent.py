@@ -14,37 +14,16 @@ async def emit(ws, msg_type: str, payload: dict) -> None:
     await ws.send(json.dumps({"type": msg_type, "payload": payload}))
 
 
-async def emit_task(ws, task_id: str, name: str, status: str, detail: str = "", elapsed: str = "") -> None:
-    await emit(ws, "task_update", {
-        "id": task_id, "name": name, "status": status, "detail": detail, "time": elapsed,
-    })
-
-
-async def emit_terminal(ws, text: str, line_type: str = "cmd", status: str = "") -> None:
-    await emit(ws, "terminal_line", {"type": line_type, "text": text, "status": status})
-
-
 AFFIRMATIONS = ["On it.", "Got it.", "Working on that.", "Right away.", "Let me check.", "Looking into it."]
 _affirm_index = 0
 
 
-async def route_intent(ws, text: str, config: dict, voice_input: bool = False, effort: str = "auto", session=None, system_cwd: str = None) -> None:
-    """ALL work goes to Claude terminal. Groq only used for voice TTS.
-    system_cwd: if set, run claude -p in this directory (for system session tabs)."""
+async def route_intent(ws, text: str, config: dict, voice_input: bool = False, effort: str = "auto") -> None:
+    """ALL work goes to Claude terminal. Groq only used for voice TTS."""
     global _affirm_index
     t0 = time.time()
 
-    if session:
-        session.status = "running"
-        if session.name.startswith("Session "):
-            session.name = text[:20].strip()
-
-    stream_item_base = {}
-    if session:
-        stream_item_base["session_id"] = session.id
-
     await emit(ws, "stream_item", {
-        **stream_item_base,
         "id": "stream_0", "event": "thinking", "title": "Claude Code...",
         "detail": text[:80], "status": "running",
     })
@@ -65,20 +44,13 @@ async def route_intent(ws, text: str, config: dict, voice_input: bool = False, e
     # ALL work goes to Claude terminal
     if is_claude_available():
         async def on_event(item):
-            if session:
-                item["session_id"] = session.id
             await emit(ws, "stream_item", item)
 
-        response_text = await stream_claude(
-            text, on_event=on_event, timeout=120,
-            cwd=system_cwd,
-            use_continue=True if system_cwd else None,
-        )
+        response_text = await stream_claude(prompt=text, on_event=on_event, timeout=120)
 
         elapsed = f"{time.time() - t0:.1f}s"
         if not response_text:
             await emit(ws, "stream_item", {
-                **stream_item_base,
                 "id": "no_response", "event": "error",
                 "title": "No response", "detail": "Claude returned empty",
                 "status": "error",
@@ -95,15 +67,9 @@ async def route_intent(ws, text: str, config: dict, voice_input: bool = False, e
 
         elapsed = f"{time.time() - t0:.1f}s"
         await emit(ws, "stream_item", {
-            **stream_item_base,
             "id": "stream_done", "event": "done", "title": "Done",
             "detail": f"{elapsed} · Groq", "status": "done", "elapsed": elapsed,
         })
-
-    # Save exchange to session history
-    if session:
-        session.add_exchange(text, response_text or "")
-        session.status = "idle"
 
     # Send text response immediately
     await emit(ws, "response", {"text": response_text, "audio": ""})
@@ -120,27 +86,7 @@ async def route_intent(ws, text: str, config: dict, voice_input: bool = False, e
         except Exception as e:
             log.error(f"TTS failed: {e}")
 
-    if session:
-        session.status = "idle"
-        session.context_summary = (response_text or "")[:60]
-
     await emit(ws, "state", {"state": "idle"})
-
-
-async def _groq_fallback(ws, text: str, config: dict) -> str:
-    """Fallback when Claude CLI is not available."""
-    from llm import ask_brain
-    api_key = config.get("groq_api_key", "")
-    model = config.get("groq_brain_model", "llama-3.3-70b-versatile")
-
-    await emit_task(ws, "groq", "Groq 70B (fallback)", "running", "thinking...")
-    await emit_terminal(ws, f"groq-70b \"{text[:50]}...\"", "cmd")
-
-    response = ask_brain(text, api_key, model)
-
-    await emit_task(ws, "groq", "Groq 70B (fallback)", "done", f"{len(response)} chars", "")
-    await emit_terminal(ws, f"→ {response[:80]}{'...' if len(response) > 80 else ''}", "output", "ok")
-    return response
 
 
 def _truncate_for_tts(text: str) -> str:
