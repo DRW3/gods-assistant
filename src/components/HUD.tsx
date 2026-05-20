@@ -26,27 +26,19 @@ export default function HUD() {
   }, [send]);
   const switchSession = useCallback((id: string) => {
     send('switch_session', { session_id: id });
+    useAssistantStore.getState().clearStream();
+    useAssistantStore.getState().setActiveSession(id);
+
+    // Load context for system sessions
     const sysSessions = useAssistantStore.getState().systemSessions;
     const sysSession = sysSessions.find((s: any) => s.id === id);
     if (sysSession) {
-      useAssistantStore.getState().clearStream();
       useAssistantStore.getState().setResponse('Loading context...');
-      useAssistantStore.getState().setActiveSession(id);
       send('get_session_context', { pid: sysSession.pid, session_id: id });
-      const matchName = sysSession.window_match || sysSession.name;
-      console.log('[HUD] focusing system terminal:', matchName, sysSession);
-      const api = (window as any).electronAPI;
-      api?.invoke('focus-terminal', { sessionId: id, windowName: matchName });
-    } else {
-      // Managed session
-      const api = (window as any).electronAPI;
-      api?.invoke('focus-terminal', { sessionId: id });
     }
   }, [send]);
   const closeSession = useCallback((id: string) => {
     send('close_session', { session_id: id });
-    const api = (window as any).electronAPI;
-    api?.invoke('close-terminal', { sessionId: id });
   }, [send]);
   const [textInput, setTextInput] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);

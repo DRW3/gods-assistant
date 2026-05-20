@@ -1,5 +1,4 @@
-import { globalShortcut, BrowserWindow, app, screen } from 'electron';
-import { layoutAllTerminals } from './terminal-spawner';
+import { globalShortcut, BrowserWindow, screen } from 'electron';
 
 export function registerHotkeys(mainWindow: BrowserWindow): void {
   globalShortcut.register('CommandOrControl+Shift+G', () => {
@@ -13,19 +12,16 @@ export function registerHotkeys(mainWindow: BrowserWindow): void {
 
 function toggleOverlay(mainWindow: BrowserWindow): void {
   if (mainWindow.isVisible()) {
-    // Hide: move overlay back to center, hide highlight
     mainWindow.hide();
   } else {
-    // Show: position overlay on right half, arrange terminals on left
-    const { width: sw } = screen.getPrimaryDisplay().workAreaSize;
-    const overlayW = 400;
-    // Position right side, keep current content height (auto-resize handles it)
-    const currentH = mainWindow.getBounds().height;
+    // Show centered on screen
+    const { width: sw, height: sh } = screen.getPrimaryDisplay().workAreaSize;
+    const overlayW = 540;
     mainWindow.setBounds({
-      x: sw - overlayW,
-      y: 0,
+      x: Math.round((sw - overlayW) / 2),
+      y: Math.round(sh * 0.1),
       width: overlayW,
-      height: Math.max(currentH, 200),
+      height: Math.max(mainWindow.getBounds().height, 200),
     });
     mainWindow.show();
     mainWindow.focus();
@@ -37,5 +33,4 @@ export function unregisterHotkeys(): void {
   globalShortcut.unregisterAll();
 }
 
-// Export for use in renderer via IPC
 export { toggleOverlay };

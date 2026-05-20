@@ -85,16 +85,7 @@ export function useWebSocket() {
 
         case 'sessions_list': {
           const p = msg.payload as any;
-          const oldSessions = useAssistantStore.getState().sessions;
           useAssistantStore.getState().setSessions(p.sessions || [], p.active_id);
-          // Spawn terminal for any new session
-          const oldIds = new Set(oldSessions.map((s: any) => s.id));
-          for (const s of (p.sessions || [])) {
-            if (!oldIds.has(s.id)) {
-              const api = (window as any).electronAPI;
-              api?.invoke('spawn-terminal', { sessionId: s.id, name: s.name });
-            }
-          }
           break;
         }
         case 'session_switched':
