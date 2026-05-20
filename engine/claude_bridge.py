@@ -141,7 +141,7 @@ def _parse_event(line_data):
 _has_session = False  # Track if we've had at least one call (for --continue)
 
 
-async def stream_claude(prompt, on_event=None, timeout=120):
+async def stream_claude(prompt, on_event=None, timeout=300):
     """Run claude -p with stream-json and emit parsed events.
     Always uses --continue after first call. Always runs from home dir.
     Returns the final result text."""

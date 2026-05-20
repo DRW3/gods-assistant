@@ -46,7 +46,7 @@ async def route_intent(ws, text: str, config: dict, voice_input: bool = False, e
         async def on_event(item):
             await emit(ws, "stream_item", item)
 
-        response_text = await stream_claude(prompt=text, on_event=on_event, timeout=120)
+        response_text = await stream_claude(prompt=text, on_event=on_event, timeout=300)
 
         elapsed = f"{time.time() - t0:.1f}s"
         if not response_text:
