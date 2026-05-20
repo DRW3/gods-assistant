@@ -30,11 +30,11 @@ export default function ResponseCard({ transcript, response }: { transcript: str
   return (
     <div style={{ padding: '6px 20px 10px' }}>
       <div style={{
-        background: `linear-gradient(145deg, ${palette.bgLight}ee, ${palette.bg})`,
+        background: `linear-gradient(145deg, ${palette.bgLight}, ${palette.bg})`,
         borderRadius: radius.card,
-        boxShadow: clay.raised,
-        border: `1px solid ${palette.white02}`,
-        padding: '14px 18px',
+        boxShadow: `${clay.raised}, 0 0 20px rgba(107,203,155,0.06)`,
+        border: `1px solid rgba(107,203,155,0.1)`,
+        padding: '16px 20px',
       }}>
         {/* User's question */}
         {transcript && (

@@ -51,7 +51,13 @@ export const useAssistantStore = create<AssistantState>((set) => ({
   setOrbState: (orbState) => set({ orbState }),
   setTranscript: (transcript) => set({ transcript }),
   setResponse: (response) => set({ response }),
-  addStreamItem: (item) => set((s) => ({ streamItems: [...s.streamItems.slice(-50), item] })),
+  addStreamItem: (item) => set((s) => ({
+    // Auto-mark all previous "running" items as "done" — only latest should blink
+    streamItems: [
+      ...s.streamItems.slice(-50).map((i) => i.status === 'running' ? { ...i, status: 'done' as const } : i),
+      item,
+    ],
+  })),
   updateStreamItem: (id, updates) => set((s) => ({
     streamItems: s.streamItems.map((i) => (i.id === id ? { ...i, ...updates } : i)),
   })),

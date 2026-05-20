@@ -38,10 +38,12 @@ export default function StreamItem({ item }: { item: StreamItemData }) {
   const isRunning = item.status === 'running';
   const isDone = item.status === 'done';
   const isError = item.status === 'error';
+  const isThinking = item.event === 'thinking';
+  const isImportant = isRunning || isThinking;
 
   return (
     <div style={{
-      display: 'flex', gap: 8, padding: isRunning ? '6px 10px' : '3px 10px',
+      display: 'flex', gap: 8, padding: isImportant ? '6px 10px' : '2px 10px',
       background: isRunning
         ? `linear-gradient(145deg, ${palette.bgLight}, ${palette.bg})`
         : 'transparent',
@@ -49,15 +51,16 @@ export default function StreamItem({ item }: { item: StreamItemData }) {
       boxShadow: isRunning ? clay.raisedSm : 'none',
       border: `1px solid ${isRunning ? 'rgba(107,203,155,0.12)' : 'transparent'}`,
       fontFamily: fonts.mono, fontSize: 9,
-      opacity: isDone ? 0.45 : isError ? 0.7 : 1,
+      opacity: isDone && !isThinking ? 0.35 : isError ? 0.6 : 1,
       animation: isRunning ? 'pulse 2s ease-in-out infinite' : 'none',
       transition: 'all 0.3s ease',
     }}>
       {/* Icon badge */}
       <div style={{
-        width: isRunning ? 22 : 16, height: isRunning ? 22 : 16, borderRadius: isRunning ? 8 : 6,
+        width: isImportant ? 22 : 14, height: isImportant ? 22 : 14,
+        borderRadius: isImportant ? 8 : 5,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: isRunning ? (item.event === 'bash' ? 9 : 10) : 8,
+        fontSize: isImportant ? (item.event === 'bash' ? 9 : 10) : 7,
         flexShrink: 0, background: icon.bg,
         color: item.event === 'bash' ? palette.jade : 'white',
         boxShadow: isRunning ? '2px 2px 4px rgba(0,0,0,0.3), inset 0 1px 2px rgba(255,255,255,0.12)' : 'none',
