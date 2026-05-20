@@ -1,5 +1,5 @@
 import { globalShortcut, BrowserWindow, app, screen } from 'electron';
-import { layoutAllTerminals, hideHighlightBorder } from './terminal-spawner';
+import { layoutAllTerminals } from './terminal-spawner';
 
 export function registerHotkeys(mainWindow: BrowserWindow): void {
   globalShortcut.register('CommandOrControl+Shift+G', () => {
@@ -15,7 +15,6 @@ function toggleOverlay(mainWindow: BrowserWindow): void {
   if (mainWindow.isVisible()) {
     // Hide: move overlay back to center, hide highlight
     mainWindow.hide();
-    hideHighlightBorder();
   } else {
     // Show: position overlay on right half, arrange terminals on left
     const { width: sw } = screen.getPrimaryDisplay().workAreaSize;
@@ -31,9 +30,6 @@ function toggleOverlay(mainWindow: BrowserWindow): void {
     mainWindow.show();
     mainWindow.focus();
     mainWindow.webContents.send('toggle-overlay');
-
-    // Auto-layout all Terminal windows on the left half
-    layoutAllTerminals();
   }
 }
 

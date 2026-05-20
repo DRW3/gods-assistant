@@ -150,40 +150,27 @@ function focusAndPositionTerminal(searchTerm: string): void {
   // Use keystroke matching: try first 15 chars (unique enough, avoids special char issues)
   const shortMatch = safeName.slice(0, 15).trim();
 
+  // Just bring the matching window to front — don't resize or reposition
   const script = `
 tell application "Terminal"
-  set targetWin to missing value
-
-  -- Try matching with short unique prefix
   repeat with w in windows
     set wName to name of w
     if wName contains "${shortMatch}" then
-      set targetWin to w
+      set index of w to 1
       exit repeat
     end if
   end repeat
-
-  if targetWin is not missing value then
-    set bounds of targetWin to {${termX}, ${termY}, ${termX + termW}, ${termY + termH}}
-    set index of targetWin to 1
-  else
-    -- Fallback: just use window 1
-    if (count of windows) > 0 then
-      set bounds of window 1 to {${termX}, ${termY}, ${termX + termW}, ${termY + termH}}
-      set index of window 1 to 1
-    end if
-  end if
   activate
 end tell
 
-delay 0.2
+delay 0.3
 tell application "System Events"
   set frontmost of process "Electron" to true
 end tell
 `;
 
-  // Show jade highlight border around the terminal position
-  showHighlightBorder(termX, termY, termW, termH);
+  // Disabled: highlight border was causing visual glitches
+  // showHighlightBorder(termX, termY, termW, termH);
 
   runAppleScript(script).catch((err) => {
     console.error(`[terminal-spawner] Focus failed: ${err.message}`);
