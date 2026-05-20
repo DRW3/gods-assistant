@@ -79,11 +79,24 @@ async def handle_message(ws: ServerConnection, raw: str) -> None:
         elif msg_type == "text_command":
             text = payload.get("text", "")
             if text:
-                if not manager.get_active():
-                    manager.create_session()
                 from intent import route_intent
                 effort = payload.get("effort", config.get("effort", "auto"))
-                await route_intent(ws, text, config, voice_input=False, effort=effort, session=manager.get_active())
+
+                # Check if active tab is a system session
+                active_sid = payload.get("active_session_id", manager.active_id or "")
+                system_cwd = None
+                if active_sid and active_sid.startswith("system_"):
+                    # Find the system session's cwd
+                    system_sessions = await get_system_sessions_async()
+                    for ss in system_sessions:
+                        if ss["id"] == active_sid:
+                            system_cwd = ss.get("cwd", None)
+                            break
+
+                if not manager.get_active():
+                    manager.create_session()
+
+                await route_intent(ws, text, config, voice_input=False, effort=effort, session=manager.get_active(), system_cwd=system_cwd)
             else:
                 await ws.send(json.dumps({
                     "type": "state",

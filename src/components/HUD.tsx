@@ -57,7 +57,11 @@ export default function HUD() {
     useAssistantStore.getState().setTranscript(text);
     useAssistantStore.getState().setResponse('');
     setOrbState('processing');
-    send('text_command', { text: text.trim(), effort: useAssistantStore.getState().effort });
+    send('text_command', {
+      text: text.trim(),
+      effort: useAssistantStore.getState().effort,
+      active_session_id: useAssistantStore.getState().activeSessionId || '',
+    });
     setTextInput('');
   }, [send, setOrbState]);
 

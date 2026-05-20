@@ -140,20 +140,21 @@ def _parse_event(line_data):
 _has_session = False  # Track if we've had at least one call (for --continue)
 
 
-async def stream_claude(prompt, on_event=None, timeout=120):
+async def stream_claude(prompt, on_event=None, timeout=120, cwd=None, use_continue=None):
     """Run claude -p with stream-json and emit parsed events.
-    Uses --continue after first call to maintain conversation context.
-    on_event(item_dict) is called for each parsed event.
+    cwd: working directory (determines which Claude session to continue)
+    use_continue: force --continue flag (True/False/None=auto)
     Returns the final result text."""
     global _has_session
     if not is_claude_available():
         log.error("Claude CLI not found")
         return ""
 
-    log.info(f"Claude stream (continue={_has_session}): {prompt[:80]}...")
+    should_continue = use_continue if use_continue is not None else _has_session
+    log.info(f"Claude stream (continue={should_continue}, cwd={cwd or '~'}): {prompt[:80]}...")
 
     cmd = ["claude", "-p", "--output-format", "stream-json", "--verbose"]
-    if _has_session:
+    if should_continue:
         cmd.append("--continue")
     cmd.append(prompt)
 
@@ -164,8 +165,8 @@ async def stream_claude(prompt, on_event=None, timeout=120):
             *cmd,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
-            cwd=home,  # Run from home dir so --continue finds previous sessions
-            limit=1024 * 1024,  # 1MB line buffer — stream-json lines can be huge
+            cwd=cwd or home,  # Use provided cwd or default to home
+            limit=1024 * 1024,
         )
 
         result_text = ""

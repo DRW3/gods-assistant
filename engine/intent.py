@@ -28,9 +28,9 @@ AFFIRMATIONS = ["On it.", "Got it.", "Working on that.", "Right away.", "Let me 
 _affirm_index = 0
 
 
-async def route_intent(ws, text: str, config: dict, voice_input: bool = False, effort: str = "auto", session=None) -> None:
+async def route_intent(ws, text: str, config: dict, voice_input: bool = False, effort: str = "auto", session=None, system_cwd: str = None) -> None:
     """ALL work goes to Claude terminal. Groq only used for voice TTS.
-    voice_input: True if user spoke (gets TTS affirmation + response). False = text only."""
+    system_cwd: if set, run claude -p in this directory (for system session tabs)."""
     global _affirm_index
     t0 = time.time()
 
@@ -69,7 +69,11 @@ async def route_intent(ws, text: str, config: dict, voice_input: bool = False, e
                 item["session_id"] = session.id
             await emit(ws, "stream_item", item)
 
-        response_text = await stream_claude(text, on_event=on_event, timeout=120)
+        response_text = await stream_claude(
+            text, on_event=on_event, timeout=120,
+            cwd=system_cwd,
+            use_continue=True if system_cwd else None,
+        )
 
         elapsed = f"{time.time() - t0:.1f}s"
         if not response_text:
