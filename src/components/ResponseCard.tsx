@@ -1,4 +1,5 @@
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { palette, clay, fonts, radius } from '../styles/theme';
 
 const codeStyle: React.CSSProperties = {
@@ -53,6 +54,7 @@ export default function ResponseCard({ transcript, response }: { transcript: str
         {response && (
           <div data-no-drag style={{ fontSize: 12.5, color: palette.text, lineHeight: 1.75 }}>
             <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
               components={{
                 // Headers
                 h1: ({ children }) => (
