@@ -2,6 +2,7 @@ import { useEffect, useRef, useCallback, useState } from 'react';
 import TopBar from './TopBar';
 import WaveformBar from './WaveformBar';
 import ActivityStream from './ActivityStream';
+import ResponseCard from './ResponseCard';
 import BottomBar from './BottomBar';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useAudio } from '../hooks/useAudio';
@@ -179,21 +180,8 @@ export default function HUD() {
       {/* Scrollable middle */}
       <div data-no-drag style={{ overflowY: 'auto' as const, maxHeight: 600, flex: 1 }}>
         <ActivityStream />
-        {/* Response card */}
-        {(transcript || response) && (
-          <div style={{ padding: '6px 20px 10px' }}>
-            <div style={{
-              background: `linear-gradient(145deg, ${palette.bgLight}ee, ${palette.bg})`,
-              borderRadius: radius.card,
-              boxShadow: clay.raised,
-              border: `1px solid ${palette.white02}`,
-              padding: '14px 18px',
-            }}>
-              {transcript && <div style={{ fontSize: 11, color: palette.text, fontFamily: fonts.mono, lineHeight: 1.5 }}>"{transcript}"</div>}
-              {response && <div style={{ fontSize: 12, color: palette.textDim, marginTop: transcript ? 6 : 0, paddingTop: transcript ? 6 : 0, borderTop: transcript ? `1px solid ${palette.white02}` : 'none', lineHeight: 1.7, whiteSpace: 'pre-wrap' as const }}>{response}</div>}
-            </div>
-          </div>
-        )}
+        {/* Response card — renders markdown beautifully */}
+        <ResponseCard transcript={transcript} response={response} />
       </div>
 
       {/* Bottom dock - always visible */}
